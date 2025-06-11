@@ -32,17 +32,17 @@ undefine(`rTOC')
 
 
 ifdef(`DARWIN',`define(`SYSstabs',`NOstabs')
-		define(`DarwinAssembler',`')
-                define(`CNamesNeedUnderscores',`')
-	        define(`LocalLabelPrefix',`L')
-                define(`MacroLabelPrefix',`L__')
-	        define(`StartTextLabel',`Ltext0')
-	        define(`EndTextLabel',`Letext')
-                ifdef(`PPC',`
-		define(`POWEROPENABI',`')')
-                ifdef(`X86',`
-                define(`SYSCALL_SETS_CARRY_ON_ERROR',`')
-		define(`SSE2_MATH_LIB',`')')
+        define(`DarwinAssembler',`')
+        define(`CNamesNeedUnderscores',`')
+        define(`LocalLabelPrefix',`L')
+        define(`MacroLabelPrefix',`L__')
+        define(`StartTextLabel',`Ltext0')
+        define(`EndTextLabel',`Letext')
+        ifdef(`PPC',`
+            define(`POWEROPENABI',`')')
+        ifdef(`X86',`
+            define(`SYSCALL_SETS_CARRY_ON_ERROR',`')
+		    define(`SSE2_MATH_LIB',`')')
 ')
 
 ifdef(`LINUX',`define(`SYSstabs',`ELFstabs')

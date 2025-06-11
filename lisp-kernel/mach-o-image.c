@@ -17,6 +17,7 @@
 #include <mach-o/loader.h>
 #include <mach-o/nlist.h>
 #include <mach-o/stab.h>
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -301,7 +302,7 @@ add_lisp_function_stab(LispObj f, natural size_in_bytes, macho_string_table *str
   
 }
 
-#ifdef X86
+#if defined(X86) || defined(ARM64)
 void
 add_lisp_function_stabs(macho_symbol_table *symbols, macho_string_table *strings, int section_ordinal)
 {
@@ -344,6 +345,9 @@ add_lisp_function_stabs(macho_symbol_table *symbols, macho_string_table *strings
       f = ((LispObj)start)+fulltag_function;
       code_words = (int)deref(f,1);
       size_in_bytes = (code_words<<node_shift)-tag_function;
+#endif
+#ifdef ARM64
+      assert(0); // Not implemented yet
 #endif
 
       add_lisp_function_stab(f,size_in_bytes,strings,symbols,section_ordinal);
@@ -465,6 +469,10 @@ save_native_library(int fd, Boolean egc_was_enabled)
 #endif
 #ifdef ARM
                                       CPU_TYPE_ARM,
+                                      CPU_SUBTYPE_ARM_ALL,
+#endif
+#ifdef ARM64
+                                      CPU_TYPE_ARM64,
                                       CPU_SUBTYPE_ARM_ALL,
 #endif
                                       MH_DYLIB,
@@ -733,6 +741,9 @@ load_native_library(char *path)
 #endif
 #ifdef X8664
              CPU_TYPE_X86_64
+#endif
+#ifdef ARM64
+                  CPU_TYPE_ARM64
 #endif
              )) {
           struct load_command *lc;

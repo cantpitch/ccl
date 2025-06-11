@@ -83,7 +83,11 @@ print_foreign_frame(void *frame)
   natural pc = (natural) (((eabi_c_frame *)frame)->savelr);
 #endif
 #ifdef DARWIN
+#ifdef ARM64
+  natural pc = (natural) (((aarch64_c_frame *)frame)->savelr);
+#else
   natural pc = (natural) (((c_frame *)frame)->savelr);
+#endif
 #endif
   Dl_info foreign_info;
 
@@ -127,7 +131,11 @@ walk_stack_frames(lisp_frame *start, lisp_frame *end)
       print_lisp_frame(start);
     } else {
 #ifdef DARWIN
+#ifdef ARM64
+      print_foreign_frame((aarch64_c_frame *)start);
+#else
       print_foreign_frame((c_frame *)start);
+#endif
 #else
       print_foreign_frame((eabi_c_frame *)start);
 #endif
@@ -199,6 +207,10 @@ plbt_sp(LispObj currentSP)
 void
 plbt(ExceptionInformation *xp)
 {
+#if defined(ARM64) && defined(DARWIN)
+  plbt_sp(xpSP(xp));
+#else
   plbt_sp(xpGPR(xp, sp));
+#endif
 }
     

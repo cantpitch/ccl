@@ -58,19 +58,19 @@ print_lisp_object(LispObj);
 
 #include "kernel-globals.h"
 
-#define PLATFORM_WORD_SIZE_32 0
-#define PLATFORM_WORD_SIZE_64 64
-#define PLATFORM_CPU_PPC (0<<3)
-#define PLATFORM_CPU_SPARC (1<<3)
-#define PLATFORM_CPU_X86 (2<<3)
-#define PLATFORM_CPU_ARM (3<<3)
-#define PLATFORM_OS_VXWORKS 0
-#define PLATFORM_OS_LINUX 1
-#define PLATFORM_OS_SOLARIS 2
-#define PLATFORM_OS_DARWIN 3
-#define PLATFORM_OS_FREEBSD 4
-#define PLATFORM_OS_WINDOWS 5
-#define PLATFORM_OS_ANDROID 6
+#define PLATFORM_WORD_SIZE_32 0    // 0b00xxxxxx
+#define PLATFORM_WORD_SIZE_64 64   // 0b01xxxxxx
+#define PLATFORM_CPU_PPC (0<<3)    // 0bxx000xxx
+#define PLATFORM_CPU_SPARC (1<<3)  // 0bxxx01xxx
+#define PLATFORM_CPU_X86 (2<<3)    // 0bxxx10xxx
+#define PLATFORM_CPU_ARM (3<<3)    // 0bxxx11xxx
+#define PLATFORM_OS_VXWORKS 0      // 0bxxxxx000
+#define PLATFORM_OS_LINUX 1        // 0bxxxxx001
+#define PLATFORM_OS_SOLARIS 2      // 0bxxxxx010
+#define PLATFORM_OS_DARWIN 3       // 0bxxxxx011
+#define PLATFORM_OS_FREEBSD 4      // 0bxxxxx100
+#define PLATFORM_OS_WINDOWS 5      // 0bxxxxx101
+#define PLATFORM_OS_ANDROID 6      // 0bxxxxx110
 
 
 

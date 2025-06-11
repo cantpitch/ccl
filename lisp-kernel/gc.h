@@ -59,6 +59,11 @@
 #define is_node_fulltag(f)  ((1<<(f))&((1<<fulltag_cons)|(1<<fulltag_misc)))
 #endif
 
+#ifdef ARM64
+// NOTE: Copied from PPC, not tested
+#define is_node_fulltag(f)  ((1<<(f))&((1<<fulltag_cons)|(1<<fulltag_misc)))
+#endif
+
 extern LispObj GCarealow, GCareadynamiclow;
 extern natural GCndnodes_in_area, GCndynamic_dnodes_in_area;
 extern bitvector GCmarkbits, GCdynamic_markbits,managed_static_refbits,global_refidx,dynamic_refidx,managed_static_refidx;
@@ -103,7 +108,7 @@ typedef unsigned char qnode;
 #define gc_area_dnode(w)  area_dnode(w,GCarealow)
 #define gc_dynamic_area_dnode(w) area_dnode(w,GCareadynamiclow)
 
-#if defined(PPC64) || defined(X8632)
+#if defined(PPC64) || defined(X8632) || defined(ARM64)
 #define forward_marker subtag_forward_marker
 #else
 #ifdef ARM

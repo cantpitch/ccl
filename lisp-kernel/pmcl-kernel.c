@@ -18,6 +18,7 @@
 #include "lisp_globals.h"
 #include "gc.h"
 #include "area.h"
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "lisp-exceptions.h"
@@ -2105,6 +2106,8 @@ main
 #ifdef ARM
   lisp_global(SUBPRIMS_BASE) = (LispObj)(9<<12);
 #endif
+
+  assert(0); // ARM64 needs to be implemented
 
   lisp_global(RET1VALN) = (LispObj)&ret1valn;
   lisp_global(LEXPR_RETURN) = (LispObj)&nvalret;

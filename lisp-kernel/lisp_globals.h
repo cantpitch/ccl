@@ -133,6 +133,12 @@ extern LispObj lisp_nil;
 #define nrs_symbol(s) (((lispsymbol *) (nil_value-fulltag_nil+dnode_size))[(s)]) 
 #endif
 
+#ifdef ARM64
+// NOTE: Copied from PPC64 not tested
+#define lisp_global(g) (((LispObj *) (0x3000+(LOWMEM_BIAS)))[(g)])
+#define nrs_symbol(s) (((lispsymbol *) (0x3000+(LOWMEM_BIAS)))[(s)])
+#endif
+
 #define nrs_T 				(nrs_symbol(0))		/* t */
 #define nrs_NILSYM			(nrs_symbol(1))		/* nil */
 #define nrs_ERRDISP			(nrs_symbol(2))		/* %err-disp */

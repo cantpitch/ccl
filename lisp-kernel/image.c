@@ -29,7 +29,7 @@
 #include <time.h>
 
 
-#if defined(PPC64) || defined(X8632)
+#if defined(PPC64) || defined(X8632) || defined(ARM64)
 #define RELOCATABLE_FULLTAG_MASK \
   ((1<<fulltag_cons)|(1<<fulltag_misc))
 #else
@@ -392,6 +392,9 @@ load_openmcl_image(int fd, openmcl_image_file_header *h)
 #endif
 #ifdef ARM
 	image_nil = (LispObj)(a->low) + (1024*4) + fulltag_nil;
+#endif
+#ifdef ARM64
+  image_nil = ptr_to_lispobj(a->low + (1024*4) + sizeof(lispsymbol) + fulltag_misc);
 #endif
 	set_nil(image_nil);
 	if (bias) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+#include <assert.h>
 #include "threads.h"
 
 
@@ -1896,6 +1896,10 @@ get_tcr(Boolean create)
 #ifdef ARM
 #define NSAVEREGS 0
 #endif
+#ifdef ARM64
+#define NSAVEREGS 0
+#endif
+
     for (i = 0; i < NSAVEREGS; i++) {
       *(--current->save_vsp) = 0;
       current->vs_area->active -= node_size;
@@ -2239,10 +2243,14 @@ Boolean mach_resume_tcr(TCR *tcr)
   mcontext_t mc = UC_MCONTEXT(xp);
 #endif
 
+#ifdef ARM64
+  assert(0); // Not sure what to do here
+#else
   thread_set_state(thread,
                    NATIVE_FLOAT_STATE_FLAVOR,
                    (thread_state_t)&(mc->__fs),
                    NATIVE_FLOAT_STATE_COUNT);
+#endif 
 
   thread_set_state(thread,
                    NATIVE_THREAD_STATE_FLAVOR,

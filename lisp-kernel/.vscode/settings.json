@@ -1,0 +1,19 @@
+{
+    "makefile.makeDirectory": "${workspaceFolder}/darwinarm64",
+    "files.associations": {
+        "*.sql": "sql",
+        "lisp_globals.h": "c",
+        "lisp.h": "c",
+        "lisp-exceptions.h": "c",
+        "threads.h": "c",
+        "x86-utils.h": "c",
+        "ctype.h": "c",
+        "stdio.h": "c",
+        "arm64-constants.h": "c",
+        "constants.h": "c",
+        "ucontext.h": "c",
+        "loader.h": "c",
+        "nlist.h": "c"
+    },
+    "editor.formatOnSave": false
+}
