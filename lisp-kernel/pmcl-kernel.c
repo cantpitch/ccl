@@ -19,6 +19,7 @@
 #include "gc.h"
 #include "area.h"
 #include <assert.h>
+#include <crt_externs.h>
 #include <stdlib.h>
 #include <string.h>
 #include "lisp-exceptions.h"
@@ -1264,7 +1265,8 @@ process_options(int argc, char *argv[], wchar_t *shadow[])
   char *arg, *val;
   wchar_t *warg, *wval;
 #ifdef DARWIN
-  extern int NXArgc;
+  const int* argcp = _NSGetArgc();
+  argc = *argcp;
 #endif
   dbgin = stdin;
   for (i = 1; i < argc;) {
@@ -1424,9 +1426,6 @@ process_options(int argc, char *argv[], wchar_t *shadow[])
           }
 	}
 	argc -= num_elide;
-#ifdef DARWIN
-	NXArgc -= num_elide;
-#endif
 	argv[argc] = NULL;
         if (shadow) {
           shadow[argc] = NULL;
@@ -1461,7 +1460,7 @@ terminate_lisp()
 #endif
 
 #ifdef DARWIN
-#define min_os_version "13.0"    /* Mavericks */
+#define min_os_version "13.0"    /* Ventura */
 #endif
 #ifdef LINUX
 #ifdef PPC

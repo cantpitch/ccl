@@ -13,7 +13,9 @@
         "constants.h": "c",
         "ucontext.h": "c",
         "loader.h": "c",
-        "nlist.h": "c"
+        "nlist.h": "c",
+        "fcntl.h": "c",
+        "vm_types.h": "c"
     },
     "editor.formatOnSave": false
 }

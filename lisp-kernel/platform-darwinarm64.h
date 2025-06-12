@@ -54,6 +54,8 @@ extern natural os_major_version;
 #define xpGPRvector(x) ((natural *)&((x)->uc_mcontext->__ss.__x[0]))
 #define xpGPR(x, gprno) (xpGPRvector(x))[gprno]
 #define xpPC(x) ((pc)__darwin_arm_thread_state64_get_pc((x)->uc_mcontext->__ss))
+#define xpSetPC(x, v) \
+  __darwin_arm_thread_state64_set_pc_fptr((x)->uc_mcontext->__ss, (v))
 #define xpLR(x) (__darwin_arm_thread_state64_get_lr((x)->uc_mcontext->__ss))
 #define xpFP(x) (__darwin_arm_thread_state64_get_fp((x)->uc_mcontext->__ss))
 #define xpSP(x) (__darwin_arm_thread_state64_get_sp((x)->uc_mcontext->__ss))

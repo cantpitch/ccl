@@ -1,6 +1,4 @@
 /*
- * Copyright 2024 Clozure Associates
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +13,11 @@
  */
 
 // ARM64 (AArch64) subprims/spentry for CCL
-// This is a first draft, based on arm-spentry.s, ppc-spentry.s, and x86-spentry64.s
 
 	include(lisp.s)
 	_beginfile
 	.p2align 2
 
+	
+
+	_endfile
