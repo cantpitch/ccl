@@ -32,6 +32,7 @@ WFORMAT = -Wno-format
 PLATFORM_H = platform-darwinarm64.h
 
 
+
 .s.o:
 	$(M4) $(M4FLAGS) -I../ $< | $(AS) -x assembler -c $(ASFLAGS) -o $@ -
 .c.o:
@@ -41,7 +42,7 @@ PLATFORM_H = platform-darwinarm64.h
 SPOBJ = pad.o arm64-spentry.o
 ASMOBJ = arm64-asmutils.o imports.o
 
-COBJ  = pmcl-kernel.o gc-common.o arm64-gc.o bits.o arm64-exceptions.o arm64-subprims.o \
+COBJ  = pmcl-kernel.o gc-common.o arm64-gc.o bits.o arm64-exceptions.o  \
 	image.o thread_manager.o lisp-debug.o memory.o unix-calls.o mach-o-image.o
 
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o plbt.o arm64_print.o
@@ -54,10 +55,11 @@ CHEADERS = area.h bits.h arm64-constants.h lisp-errors.h gc.h lisp.h \
 	threads.h arm64-exceptions.h $(PLATFORM_H) \
 	constants.h os-linux.h
 
-all:	../../darmcl64
+all:	darmcl64
 
-../../darmcl64:	$(SPOBJ) $(KERNELOBJ) $(DEBUGOBJ) Makefile
-	$(LD) -pagezero_size 0x8000 -sectalign __TEXT __text 0x1000 \
+# -pagezero_size 0x8000  
+darmcl64:	$(SPOBJ) $(KERNELOBJ) $(DEBUGOBJ) Makefile
+	$(LD)  -arch arm64 -sectalign __TEXT __text 0x1000  \
 	-L$(MACOSX_SDK)/usr/lib -lsystem -o $@ $(SPOBJ) $(KERNELOBJ) $(DEBUGOBJ)
 
 
@@ -68,10 +70,13 @@ $(DEBUGOBJ): $(CHEADERS) ../lispdcmd.h
 
 
 cclean:
-	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ../../darmcl64
+	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) darmcl64
 
 clean:	cclean
 	$(RM) -f $(SPOBJ)
 
-strip:	../../darmcl64
-	strip -g ../../darmcl64
+dump:
+	otool -tvv darmcl64
+
+strip:	darmcl64
+	strip -g darmcl64

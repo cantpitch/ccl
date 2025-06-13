@@ -6,8 +6,8 @@
 #include <mach/mach.h>
 #endif
 
-int page_size = 4096;
-int log2_page_size = 12; // Assuming a page size of 4096 bytes (2^12).
+int page_size = 0x8000;
+int log2_page_size = 13; // log2(0x8000) = 13
 
 void enable_fp_exceptions()
 {

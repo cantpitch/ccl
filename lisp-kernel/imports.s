@@ -41,6 +41,7 @@ define(`defimport',`
 ')
 
 	.data
+        .align 4
 import_ptrs_start:
 
 	defimport(fd_setsize_bytes)
