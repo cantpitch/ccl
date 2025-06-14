@@ -25,6 +25,7 @@ tags
 /*headers/
 /*headers64/
 darmcl64
+dx86cl64.image
 
 /*bundle*.app/
 /Clozure\ CL*.app/

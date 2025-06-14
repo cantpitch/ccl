@@ -46,7 +46,7 @@
 #endif
 #endif
 
-#define DEBUG_MEMORY 0
+#define DEBUG_MEMORY 1
 
 void
 allocation_failure(Boolean pointerp, natural size)
