@@ -1937,7 +1937,7 @@ main
   }
 #else
   real_executable_name = determine_executable_name(argv[0]);
-  page_size = sysconf(_SC_PAGESIZE);
+  page_size = sysconf(_SC_PAGESIZE); // 16384 (0x4000) on Darwin by default
 #endif
 
 
@@ -2105,8 +2105,9 @@ main
 #ifdef ARM
   lisp_global(SUBPRIMS_BASE) = (LispObj)(9<<12);
 #endif
-
+#ifdef ARM64
   assert(0); // ARM64 needs to be implemented
+#endif 
 
   lisp_global(RET1VALN) = (LispObj)&ret1valn;
   lisp_global(LEXPR_RETURN) = (LispObj)&nvalret;

@@ -4,6 +4,10 @@
 
     _beginfile
 
+_exportfn(C(current_stack_pointer))
+	__(mov x0, sp)
+	__(ret)
+_endfn
 
 /* Logior the value in *r0 with the value in r1 (presumably a bitmask with exactly 1 */
 /* bit set.)  Return non-zero if any of the bits in that bitmask were already set. */
@@ -19,12 +23,7 @@ _endfn
 _exportfn(C(atomic_swap))
     __(nop)
     __(ret)
-_endfn
-
-_exportfn(C(current_stack_pointer))
-    __(nop)
-    __(ret)
-_endfn
+_endfn 
 
 _exportfn(C(darwin_sigreturn))
 	__(nop)         // should be a syscall
