@@ -1,4 +1,4 @@
-// PPC64: r0 = rzero (zero register), ARM64: has rzr (zero register) so this is not needed
+// PPC64: r0 = rzero (zero register), ARM64: has xzr (zero register) so this is not needed
 define(`save2',`x0')  
 // PPC64: r1 = sp (stack pointer), ARM64: temp2 can't be at x18, so stick it here for now
 define(`temp2',`x1')
