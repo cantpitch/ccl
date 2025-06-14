@@ -2377,7 +2377,7 @@ load_image(
     err = errno;
   }
 #ifdef DARWIN
-#ifdef X86
+#if defined(X86) || defined(ARM64)
   if (image_nil == 0) {
     extern LispObj load_native_library(char *);
     image_nil = load_native_library(path);
