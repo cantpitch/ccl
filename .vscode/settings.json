@@ -1,5 +1,5 @@
 {
-    "makefile.makeDirectory": "${workspaceFolder}/darwinarm64",
+    "makefile.makeDirectory": "${workspaceFolder}/lisp-kernel/darwinarm64",
     "files.associations": {
         "*.sql": "sql",
         "lisp_globals.h": "c",

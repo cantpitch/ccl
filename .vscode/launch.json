@@ -5,7 +5,7 @@
             "name": "Launch",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/darwinarm64/darmcl64",
+            "program": "${workspaceFolder}/darmcl64",
         }
     ]
 }

@@ -30,6 +30,7 @@ COPT = #-O2
 # than elsewhere, but most gcc format warnings are still nonsense.
 WFORMAT = -Wno-format
 PLATFORM_H = platform-darwinarm64.h
+LISP_KERNEL = ../../darmcl64
 
 
 
@@ -55,10 +56,10 @@ CHEADERS = area.h bits.h arm64-constants.h lisp-errors.h gc.h lisp.h \
 	threads.h arm64-exceptions.h $(PLATFORM_H) \
 	constants.h os-linux.h
 
-all:	darmcl64
+all:	$(LISP_KERNEL)
 
 # -pagezero_size 0x8000  
-darmcl64:	$(SPOBJ) $(KERNELOBJ) $(DEBUGOBJ) Makefile
+${LISP_KERNEL}:	$(SPOBJ) $(KERNELOBJ) $(DEBUGOBJ) Makefile
 	$(LD)  -arch arm64 -sectalign __TEXT __text 0x1000  \
 	-L$(MACOSX_SDK)/usr/lib -lsystem -o $@ $(SPOBJ) $(KERNELOBJ) $(DEBUGOBJ)
 
@@ -70,13 +71,13 @@ $(DEBUGOBJ): $(CHEADERS) ../lispdcmd.h
 
 
 cclean:
-	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) darmcl64
+	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ${LISP_KERNEL}
 
 clean:	cclean
 	$(RM) -f $(SPOBJ)
 
 dump:
-	otool -tvv darmcl64
+	otool -tvv ${LISP_KERNEL}
 
-strip:	darmcl64
-	strip -g darmcl64
+strip:	${LISP_KERNEL}
+	strip -g ${LISP_KERNEL}

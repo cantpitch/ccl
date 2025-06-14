@@ -24,8 +24,8 @@ tags
 /wx86cl64.exe
 /*headers/
 /*headers64/
-darmcl64
-dx86cl64.image
+/darmcl64
+/dx86cl64
 
 /*bundle*.app/
 /Clozure\ CL*.app/
