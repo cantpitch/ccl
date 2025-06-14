@@ -1459,8 +1459,11 @@ terminate_lisp()
 }
 #endif
 
-#ifdef DARWIN
-#define min_os_version "13.0"    /* Ventura */
+/* This version is the Darwin kernel NOT MacOS */
+#if defined(DARWIN) && defined(X86)
+#define min_os_version "13.0" /* Mavericks */
+#elif defined(DARWIN) && defined(ARM64)
+#define min_os_version "20.0" /* Big Sur */
 #endif
 #ifdef LINUX
 #ifdef PPC
