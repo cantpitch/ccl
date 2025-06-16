@@ -49,10 +49,15 @@ _spentry(fix_nfn_entrypoint)
         __(nop)
         __(ret)
         
+/* Construct a lisp integer out of the 32-bit signed value in imm0 */
+/* arg_z should be of type (SIGNED-BYTE 32); return unboxed result in imm0 */
 _spentry(gets32)
         __(nop)
         __(ret)
 
+/*  */
+/* arg_z should be of type (UNSIGNED-BYTE 32); return unboxed result in imm0 */
+/*  */
 _spentry(getu32)
         __(nop)
         __(ret)
