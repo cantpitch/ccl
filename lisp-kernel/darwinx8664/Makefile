@@ -35,6 +35,8 @@ COPT = -O
 WFORMAT = -Wno-format
 PLATFORM_H = platform-darwinx8664.h
 
+.PHONY: all clean run_tests
+
 .s.o:
 	$(M4) $(M4FLAGS) -I../ $< | $(AS) $(ASFLAGS) -mmacosx-version-min=$(OSVERSION) -o $@ -
 .c.o:
@@ -107,6 +109,9 @@ clean:	cclean
 strip:	../../dx86cl64
 	strip -s retain ../../dx86cl64
 
-run_tests: $(SPOBJ) $(TESTOBJ) $(DEBUGOBJ) Makefile probes.h
+testrunner: $(SPOBJ) $(TESTOBJ) $(DEBUGOBJ) Makefile probes.h
 	${CC} -mmacosx-version-min=$(OSVERSION) -arch x86_64 -Wl,-no_pie,-pagezero_size,0x10000,-seg1addr,0x10000 \
 	-L$(MACOSX_SDK)/usr/lib -o $@ $(SPOBJ) $(TESTOBJ) $(DEBUGOBJ)
+
+run_tests: testrunner
+	./testrunner

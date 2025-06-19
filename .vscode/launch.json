@@ -2,10 +2,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch",
+            "name": "Launch darmcl64",
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/darmcl64",
+        },
+        {
+            "name": "Launch x86-64 testrunner",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/lisp-kernel/darwinx8664/testrunner",
         }
     ]
 }

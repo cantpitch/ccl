@@ -42,4 +42,5 @@ lisp-kernel/darwinx8664/probes.h
 lisp-kernel/static-linuxppc/external-functions.h
 
 a.out
+testrunner
 run_tests

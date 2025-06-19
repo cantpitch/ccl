@@ -5,6 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/**"
             ],
+            "forcedInclude": [
+                "${workspaceFolder}/lisp-kernel/platform-darwinx8664.h"
+            ],
             "defines": [
                 "ARM64",
                 "DARWIN"

@@ -19,7 +19,8 @@
         "platform-darwinx8664.h": "c",
         "x86-constants64.h": "c",
         "x86-constants.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "lisptypes.h": "c"
     },
     "editor.formatOnSave": false
 }
