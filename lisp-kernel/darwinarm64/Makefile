@@ -14,14 +14,13 @@
 # limitations under the License.
 
 MACOSX_SDK := $(shell xcrun --sdk macosx --show-sdk-path)
-OSVERSION=13.0
-VPATH = ../
+OSVERSION = 13.0
+VPATH = ../ ../test
 RM = /bin/rm
 AS = clang
 M4 = m4
 CC = clang
-#ASFLAGS = -mregnames -mppc64 -a64 -maltivec
-ASFLAGS = -arch arm64 -g
+ASFLAGS = -arch arm64 -g -mmacosx-version-min=$(OSVERSION)
 M4FLAGS = -DDARWIN -DARM64
 CDEFINES = -isysroot $(MACOSX_SDK) -DARM64 -DDARWIN -D_REENTRANT -D_XOPEN_SOURCE -DDISABLE_EGC -DGC_INTEGRITY_CHECKING -Wp,-dM
 CDEBUG = -g -O0
@@ -32,6 +31,7 @@ WFORMAT = -Wno-format
 PLATFORM_H = platform-darwinarm64.h
 LISP_KERNEL = ../../darmcl64
 
+SRCDIRS = 
 
 
 .s.o:
@@ -40,21 +40,23 @@ LISP_KERNEL = ../../darmcl64
 	$(CC) -include ../$(PLATFORM_H) -c $< $(CDEFINES) $(CDEBUG) $(COPT) \
 	$(WFORMAT) -mmacosx-version-min=$(OSVERSION) -o $@ 
 
-SPOBJ = pad.o arm64-spentry.o
-ASMOBJ = arm64-asmutils.o imports.o
+ARM64_ASM_OBJ = arm64-asmutils.o 
+ARM64_ASM_INC = arm64-constants.s arm64-macros.s arm64-uuo.s
+ARM64_C_OBJ = arm64-gc.o arm64-exceptions.o 
+ARM64_C_INC = arm64-constants.h arm64-exceptions.h $(PLATFORM_H)
 
-COBJ  = pmcl-kernel.o gc-common.o arm64-gc.o bits.o arm64-exceptions.o  \
-	image.o thread_manager.o lisp-debug.o memory.o unix-calls.o mach-o-image.o
+SPOBJ = pad.o arm64-spentry.o
+COBJ  = gc-common.o bits.o image.o thread_manager.o lisp-debug.o memory.o unix-calls.o mach-o-image.o \
+	$(ARM64_C_OBJ) 
+ASMOBJ = imports.o $(ARM64_ASM_OBJ) 
 
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o plbt.o arm64_print.o
-KERNELOBJ= $(COBJ) arm64-asmutils.o  imports.o
+KERNELOBJ= pmcl-kernel.o $(COBJ) $(ASMOBJ)
+TESTOBJ = testrunner.o unity.o $(ARM64_C_OBJ) $(ARM64_ASM_OBJ)
 
-SPINC =	lisp.s m4macros.m4 arm64-constants.s arm64-macros.s errors.s arm64-uuo.s lisp_globals.s
-
-CHEADERS = area.h bits.h arm64-constants.h lisp-errors.h gc.h lisp.h \
-	lisp-exceptions.h lisp_globals.h macros.h memprotect.h image.h \
-	threads.h arm64-exceptions.h $(PLATFORM_H) \
-	constants.h os-linux.h
+SPINC =	lisp.s m4macros.m4 errors.s lisp_globals.s $(ARM64_ASM_INC) 
+CHEADERS = area.h bits.h lisp-errors.h gc.h lisp.h lisp-exceptions.h lisp_globals.h macros.h memprotect.h image.h \
+	threads.h constants.h os-linux.h $(PLATFORM_H) $(ARM64_C_INC)
 
 all:	$(LISP_KERNEL)
 
@@ -69,6 +71,8 @@ $(ASMOBJ): $(SPINC)
 $(COBJ): $(CHEADERS)
 $(DEBUGOBJ): $(CHEADERS) ../lispdcmd.h
 
+run_tests: $(TESTOBJ) $(SPOBJ)
+	$(LD) -arch arm64 -L$(MACOSX_SDK)/usr/lib -lsystem -o $@ $(TESTOBJ) 
 
 cclean:
 	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ${LISP_KERNEL}

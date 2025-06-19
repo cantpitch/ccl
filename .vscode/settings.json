@@ -15,7 +15,11 @@
         "loader.h": "c",
         "nlist.h": "c",
         "fcntl.h": "c",
-        "vm_types.h": "c"
+        "vm_types.h": "c",
+        "platform-darwinx8664.h": "c",
+        "x86-constants64.h": "c",
+        "x86-constants.h": "c",
+        "string.h": "c"
     },
     "editor.formatOnSave": false
 }

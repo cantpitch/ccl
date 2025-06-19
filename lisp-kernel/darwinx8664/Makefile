@@ -17,7 +17,7 @@ VC_REVISION := "$(shell git describe --dirty 2>/dev/null || echo unknown)"
 
 OSVERSION=10.13
 
-VPATH = ..
+VPATH = .. ../test
 RM = /bin/rm
 CC=cc
 AS = as
@@ -43,15 +43,18 @@ PLATFORM_H = platform-darwinx8664.h
 	 -I. -mmacosx-version-min=$(OSVERSION) -o $@
 
 SPOBJ = x86-spjump64.o x86-spentry64.o x86-subprims64.o 
-ASMOBJ = x86-asmutils64.o imports.o
+X8664_ASM_OBJ = x86-asmutils64.o 
+ASMOBJ = imports.o ${X8664_ASM_OBJ}
 
-COBJ  = pmcl-kernel.o gc-common.o x86-gc.o bits.o  x86-exceptions.o \
-	x86-utils.o \
+
+COBJ = gc-common.o x86-gc.o bits.o  x86-exceptions.o \
+    x86-utils.o \
 	thread_manager.o lisp-debug.o image.o memory.o unix-calls.o \
 	mach-o-image.o
 
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o xlbt.o x86_print.o
-KERNELOBJ= imports.o $(COBJ) x86-asmutils64.o mach_exc_server.o
+KERNELOBJ= imports.o pmcl-kernel.o $(COBJ) ${X8664_ASM_OBJ} mach_exc_server.o
+TESTOBJ = testrunner.o pmcl-kernel-mock.o unity.o ${COBJ} ${X8664_ASM_OBJ} mach_exc_server.o
 
 SPINC =	lisp.s m4macros.m4 x86-constants.s x86-macros.s errors.s x86-uuo.s \
 	x86-constants64.s lisp_globals.s
@@ -94,13 +97,16 @@ mach_exc_server.c: mach_exc.defs
 mach_exc.h: mach_exc_server.c
 
 cclean:
-	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ../../dx86cl64 \
+	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ../../dx86cl64 run_tests \
 	  probes.h \
 	  mach_exc.h mach_exc_server.c
 
 clean:	cclean
-	$(RM) -f $(SPOBJ) $(KSPOBJ)
+	$(RM) -f $(SPOBJ) $(KSPOBJ) $(TESTOBJ)
 
 strip:	../../dx86cl64
 	strip -s retain ../../dx86cl64
 
+run_tests: $(SPOBJ) $(TESTOBJ) $(DEBUGOBJ) Makefile probes.h
+	${CC} -mmacosx-version-min=$(OSVERSION) -arch x86_64 -Wl,-no_pie,-pagezero_size,0x10000,-seg1addr,0x10000 \
+	-L$(MACOSX_SDK)/usr/lib -o $@ $(SPOBJ) $(TESTOBJ) $(DEBUGOBJ)

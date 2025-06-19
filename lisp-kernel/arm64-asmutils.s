@@ -13,7 +13,12 @@ _endfn
 /* bit set.)  Return non-zero if any of the bits in that bitmask were already set. */
         
 _exportfn(C(atomic_ior))
-    __(nop)
+    // spinlock
+1:    __(ldxr x2, [x0])
+    __(orr x3, x2, x1)
+    __(stxr w4, x3, [x0])
+    __(cbnz w4, 1b)          // if store failed, retry
+    __(and x0, x2, x1)      // return the bits that were already set
     __(ret)
 _endfn
 
