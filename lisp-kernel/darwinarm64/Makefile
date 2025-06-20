@@ -52,7 +52,7 @@ ASMOBJ = imports.o $(ARM64_ASM_OBJ)
 
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o plbt.o arm64_print.o
 KERNELOBJ= pmcl-kernel.o $(COBJ) $(ASMOBJ)
-TESTOBJ = testrunner.o unity.o $(ARM64_C_OBJ) $(ARM64_ASM_OBJ)
+TESTOBJ = testrunner.o pmcl-kernel-mock.o unity.o $(COBJ) $(ASMOBJ)
 
 SPINC =	lisp.s m4macros.m4 errors.s lisp_globals.s $(ARM64_ASM_INC) 
 CHEADERS = area.h bits.h lisp-errors.h gc.h lisp.h lisp-exceptions.h lisp_globals.h macros.h memprotect.h image.h \
@@ -71,9 +71,6 @@ $(ASMOBJ): $(SPINC)
 $(COBJ): $(CHEADERS)
 $(DEBUGOBJ): $(CHEADERS) ../lispdcmd.h
 
-run_tests: $(TESTOBJ) $(SPOBJ)
-	$(LD) -arch arm64 -L$(MACOSX_SDK)/usr/lib -lsystem -o $@ $(TESTOBJ) 
-
 cclean:
 	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ${LISP_KERNEL}
 
@@ -85,3 +82,10 @@ dump:
 
 strip:	${LISP_KERNEL}
 	strip -g ${LISP_KERNEL}
+
+testrunner: $(SPOBJ) $(TESTOBJ) $(DEBUGOBJ) Makefile
+	${CC} -mmacosx-version-min=$(OSVERSION) -arch arm64 -lSystem \
+	-L$(MACOSX_SDK)/usr/lib -o $@ $(SPOBJ) $(TESTOBJ) $(DEBUGOBJ)
+
+run_tests: testrunner
+	./testrunner

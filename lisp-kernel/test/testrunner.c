@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include "unity.h"
+#include "../bits.h"
 #include "../lisptypes.h"
 
 #ifdef X86 
@@ -11,6 +12,10 @@ int cpuid(natural, natural*, natural*, natural*);
 void flush_cache_lines(void *, natural, natural);
 natural get_mxcsr();
 void set_mxcsr(natural);
+#endif
+
+#ifdef ARM64
+void flush_cache_lines(void *, natural);
 #endif
 
 
@@ -33,8 +38,13 @@ void tearDown(void) {
 }
 
 void test_FlushCacheLines(void) {
+
     void *mem = malloc(0x4000);
+    #if defined(X8664)
     flush_cache_lines(mem, 1, 8);
+    #elif defined(ARM64)
+    flush_cache_lines(mem, 0x4000);
+    #endif
     free(mem);
 }
 

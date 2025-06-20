@@ -1,6 +1,8 @@
 
 
 #include <assert.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "../lisp.h"
 #include "../lisp_globals.h"
 #include "../gc.h"
@@ -202,6 +204,86 @@ void fatal_oserr(StringPtr param, OSErr err)
 }
 
 void *allocate_from_reserved_area(natural size)
+{
+    assert(0);
+    return NULL;
+}
+
+
+#ifndef DARWIN
+#ifdef WINDOWS
+extern void *windows_open_shared_library(char *);
+
+void *xGetSharedLibrary(char *path, int mode)
+{
+    assert(0);
+}
+#else
+void *xGetSharedLibrary(char *path, int mode)
+{
+    assert(0);
+}
+#endif
+#else
+void *xGetSharedLibrary(char *path, int *resultType)
+{
+    assert(0);
+}
+#endif
+
+int fd_setsize_bytes()
+{
+    assert(0);
+    return 0;
+}
+
+void do_fd_set(int fd, fd_set *fdsetp)
+{
+    assert(0);
+}
+
+void do_fd_clr(int fd, fd_set *fdsetp)
+{
+    assert(0);
+}
+
+int do_fd_is_set(int fd, fd_set *fdsetp)
+{
+    assert(0);
+    return 0;
+}
+
+void do_fd_zero(fd_set *fdsetp)
+{   
+    assert(0);
+}
+
+void * xFindSymbol(void* handle, char *name)
+{
+    assert(0);
+    return NULL;
+}
+
+int wait_for_signal(int signo, int seconds, int milliseconds)
+{
+    assert(0);
+    return 0;
+}
+
+void usage_exit(char *herald, int exit_status, char* other_args)
+{
+    assert(0);
+}
+
+typedef int (*jvm_initfunc)(void*,void*,void*);
+
+int jvm_init(jvm_initfunc f,void*arg0,void*arg1,void*arg2)
+{
+    assert(0);
+    return 0;
+}
+
+void * get_r_debug()
 {
     assert(0);
     return NULL;

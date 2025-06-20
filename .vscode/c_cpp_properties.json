@@ -9,7 +9,7 @@
                 "${workspaceFolder}/lisp-kernel/platform-darwinx8664.h"
             ],
             "defines": [
-                "X8664",
+                "ARM64",
                 "DARWIN"
             ],
             "compilerPath": "/usr/bin/clang",
