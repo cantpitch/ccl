@@ -1,7 +1,7 @@
-#ifndef __arm64_exceptions_h__
-#define __arm64_exceptions_h__
+#ifndef __arm_exceptions64_h__
+#define __arm_exceptions64_h__
 
-#include "arm64-constants.h"
+#include "arm-constants64.h"
 
 #ifdef DARWIN
 
@@ -19,6 +19,6 @@ void enable_fp_exceptions(void);
 void disable_fp_exceptions(void);
 void associate_tcr_with_exception_port(mach_port_t, TCR *);
 
-#endif
+#endif /* DARWIN */
 
-#endif
+#endif /* __arm_exceptions64_h__ */

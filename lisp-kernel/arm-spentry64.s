@@ -20,22 +20,16 @@
 	_beginfile
 	.p2align 2
 
-
-local_label(start):
 define(`_spentry',`ifdef(`__func_name',`_endfn',`')
-	_startfn(_SP$1)
-L__SP$1:                        
+        .p2align 3
+	_startfn(_SP$1)         
 	.line  __line__
 ')
-
 
 define(`_endsubp',`
 	_endfn(_SP$1)
 # __line__
 ')
-
-
-	
 
 define(`jump_builtin',`
         __(ref_nrs_value(fname,builtin_functions))
@@ -48,12 +42,14 @@ define(`jump_builtin',`
 _spentry(fix_nfn_entrypoint)
         __(nop)
         __(ret)
+_endsubp(fix_nfn_entrypoint)
         
 /* Construct a lisp integer out of the 32-bit signed value in imm0 */
 /* arg_z should be of type (SIGNED-BYTE 32); return unboxed result in imm0 */
 _spentry(gets32)
         __(nop)
         __(ret)
+_endsubp(gets32)
 
 /*  */
 /* arg_z should be of type (UNSIGNED-BYTE 32); return unboxed result in imm0 */
@@ -61,118 +57,144 @@ _spentry(gets32)
 _spentry(getu32)
         __(nop)
         __(ret)
+_endsubp(getu32)
 
 _spentry(sdiv32)
         __(nop)
         __(ret)
+_endsubp(sdiv32)
 
 _spentry(udiv32)
         __(nop)
         __(ret)
+_endsubp(udiv32)
 
 _spentry(udiv64by32)
         __(nop)
         __(ret)
+_endsubp(udiv64by32)
 
 _spentry(builtin_plus)
-		__(nop)
+	__(nop)
         __(ret)
+_endsubp(builtin_plus)
         
 _spentry(builtin_minus)
         __(nop)
         __(ret)
+_endsubp(builtin_minus)
 
 _spentry(builtin_times)
         __(nop)
         __(ret)
+_endsubp(builtin_times)
 
 _spentry(builtin_div)
         __(nop)
         __(ret)
+_endsubp(builtin_div)
 
 _spentry(builtin_eq)
         __(nop)
         __(ret)
+_endsubp(builtin_eq)
                      
 _spentry(builtin_ne)
         __(nop)
         __(ret)
-
+_endsubp(builtin_ne)
 
 _spentry(builtin_gt)
         __(nop)
         __(ret)
-
+_endsubp(builtin_gt)
 
 _spentry(builtin_ge)
         __(nop)
         __(ret)
+_endsubp(builtin_ge)
 
 _spentry(builtin_lt)
         __(nop)
         __(ret)
+_endsubp(builtin_lt)
 
 _spentry(builtin_le)
         __(nop)
         __(ret)
+_endsubp(builtin_le)
 
 _spentry(builtin_eql)
         __(nop)
         __(ret)
+_endsubp(builtin_eql)
         
 _spentry(builtin_length)
         __(nop)
-        __(ret)     
+        __(ret)  
+_endsubp(builtin_length)   
 
 _spentry(builtin_seqtype)
         __(nop)
         __(ret)
+_endsubp(builtin_seqtype)
 
 /* This is usually inlined these days */
 _spentry(builtin_assq)
         __(nop)
         __(ret)
+_endsubp(builtin_assq)
  
 _spentry(builtin_memq)
         __(nop)
         __(ret)
+_endsubp(builtin_memq)
 
 _spentry(builtin_logbitp)
         __(nop)
         __(ret)
+_endsubp(builtin_logbitp)
 
 _spentry(builtin_logior)
         __(nop)
         __(ret)
+_endsubp(builtin_logior)
 
 _spentry(builtin_logand)
         __(nop)
         __(ret)
+_endsubp(builtin_logand)
 
 _spentry(builtin_ash)
         __(nop)
         __(ret)
+_endsubp(builtin_ash)
                   	
 _spentry(builtin_negate)
         __(nop)
         __(ret)
+_endsubp(builtin_negate)
 
 _spentry(builtin_logxor)
         __(nop)
         __(ret)
+_endsubp(builtin_logxor)
 
 _spentry(builtin_aref1)
         __(nop)
         __(ret)
+_endsubp(builtin_aref1)
 
 _spentry(builtin_aset1)
         __(nop)
         __(ret)
+_endsubp(builtin_aset1)
 
 	/*  Call nfn if it's either a symbol or function */
 _spentry(funcall)
         __(nop)
         __(ret)
+_endsubp(funcall)
 
 /* Subprims for catch, throw, unwind_protect.  */
 
@@ -180,38 +202,47 @@ _spentry(funcall)
 _spentry(mkcatch1v)
         __(nop)
         __(ret)
+_endsubp(mkcatch1v)
 
 _spentry(mkcatchmv)
         __(nop)
         __(ret)
+_endsubp(mkcatchmv)
 
 _spentry(mkunwind)
         __(nop)
         __(ret)
+_endsubp(mkunwind)
 
 _spentry(bind)
         __(nop)
         __(ret)
+_endsubp(bind)
 
 _spentry(conslist)
         __(nop)
         __(ret)
+_endsubp(conslist)
 
 _spentry(conslist_star)
         __(nop)
         __(ret)
+_endsubp(conslist_star)
 
 _spentry(makes64)
         __(nop)
         __(ret)
+_endsubp(makes64)
 
 _spentry(makeu64)
         __(nop)
         __(ret)
+_endsubp(makeu64)
 
 _spentry(fix_overflow)
         __(nop)
         __(ret)
+_endsubp(fix_overflow)
 
 _spentry(makeu128)
         __(nop)
@@ -503,6 +534,7 @@ _spentry(save_values)
 _spentry(add_values)
         __(nop)
         __(ret)
+_endsubp(add_values)
 
 _spentry(misc_alloc_init)
         __(nop)

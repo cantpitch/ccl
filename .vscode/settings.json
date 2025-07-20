@@ -20,7 +20,9 @@
         "x86-constants64.h": "c",
         "x86-constants.h": "c",
         "string.h": "c",
-        "lisptypes.h": "c"
+        "lisptypes.h": "c",
+        "gc.h": "c",
+        "__locale": "c"
     },
     "editor.formatOnSave": false
 }

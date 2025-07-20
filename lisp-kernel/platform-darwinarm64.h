@@ -1,3 +1,6 @@
+#ifndef __PLATFORM_DARWINARM64_H__
+#define __PLATFORM_DARWINARM64_H__
+
 /*
  * Copyright 2024 Clozure Associates
  *
@@ -33,7 +36,7 @@ typedef ucontext_t ExceptionInformation;
 #define IMAGE_BASE_ADDRESS 0x300000000000L
 
 #include "lisptypes.h"
-#include "arm64-constants.h"
+#include "arm-constants64.h"
 
 #define UC_MCONTEXT(UC) UC->uc_mcontext
 
@@ -53,12 +56,10 @@ extern natural os_major_version;
 // xp accessors for Darwin ARM64 (Apple Silicon)
 #define xpGPRvector(x) ((natural *)&((x)->uc_mcontext->__ss.__x[0]))
 #define xpGPR(x, gprno) (xpGPRvector(x))[gprno]
-#define xpPC(x) ((pc)__darwin_arm_thread_state64_get_pc((x)->uc_mcontext->__ss))
-#define xpSetPC(x, v) \
-  __darwin_arm_thread_state64_set_pc_fptr((x)->uc_mcontext->__ss, (v))
-#define xpLR(x) (__darwin_arm_thread_state64_get_lr((x)->uc_mcontext->__ss))
-#define xpFP(x) (__darwin_arm_thread_state64_get_fp((x)->uc_mcontext->__ss))
-#define xpSP(x) (__darwin_arm_thread_state64_get_sp((x)->uc_mcontext->__ss))
+#define xpPC(x) ((pc)(&((x)->uc_mcontext->__ss.__pc)))
+#define xpLR(x) ((pc)(&((x)->uc_mcontext->__ss.__lr)))
+#define xpFP(x) ((pc)(&((x)->uc_mcontext->__ss.__fp)))
+#define xpSP(x) ((pc)(&((x)->uc_mcontext->__ss.__sp)))
 #define xpPSR(x) ((x)->uc_mcontext->__ss.__cpsr)
 #define xpFaultAddress(x) ((x)->uc_mcontext->__es.__far)
 #define xpFaultStatus(x) ((x)->uc_mcontext->__es.__esr)
@@ -70,3 +71,5 @@ extern natural os_major_version;
 #include <mach/machine/thread_status.h>
 
 #include "os-darwin.h"
+
+#endif /* __PLATFORM_DARWINARM64_H__ */

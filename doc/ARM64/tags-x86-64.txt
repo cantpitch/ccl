@@ -1,0 +1,82 @@
+TAGS (FROM x86-constants64.s)
+                                                                                                      TAG     FULLTAG
+IMMEDIATES
+
+Even Fixnum                 |                                                            0000|  0x0  fixnum   even_fixnum
+Odd Fixnum                  |                                                            1000|  0x8  fixnum   odd_fixnum
+Single Float                |XXXXXXXXXXXXXXXXXXXXXXXX                                00000001| 0x01  imm_0    imm_0
+Character                   |                                                        00000010| 0x02  imm_1    imm_1
+Unbound                     |                                                        00010010| 0x12  imm_1    imm_1
+Slot Unbound                |                                                        00100010| 0x22  imm_1    imm_1
+Illegal                     |                                                        00110010| 0x32  imm_1    imm_1
+No Thread Local Binding     |                                                        01000010| 0x42  imm_1    imm_1
+Reserved Frame              |                                                        01010010| 0x52  imm_1    imm_1
+Function Boundary Marker    |                                                        11110010| 0xF2  imm_1    imm_1
+   
+NON-IMMEDIATES   
+   
+CONS                        |                                                            0011|  0x3  list     cons
+NIL                         |                                                            1011|  0xB  list     nil
+Tagged Return Address 0     |                                                            0100|  0x4  tra      tra_0
+Tagged Return Address 1     |                                                            1100|  0xC  tra      tra_1
+Miscellaneous               |                                                            1101|  0xD  misc     misc
+Symbol                      |                                                            1110|  0xE  symbol   symbol
+Function                    |                                                            1111|  0xF  function function
+
+arrayH                      |                                                        10100101| 0xA5  misc     nodeheader_0
+vectorH                     |                                                        10100110| 0xA6  symbol   nodeheader_1
+Simple Vector               |                                                        10110110| 0xB6  symbol   nodeheader_1
+
+IMMEDIATE VECTORS
+
+Complex Single Float Vector |                                                        10111010| 0xBA  imm_1    immheader_2
+Fixnum Vector               |                                                        11001010| 0xCA  imm_1    immheader_2
+Signed 64 Vector            |                                                        11011010| 0xDA  imm_1    immheader_2
+Unsigned 64 Vector          |                                                        11101010| 0xEA  imm_1    immheader_2
+Double Float Vector         |                                                        11111010| 0xFA  imm_1    immheader_2
+
+Simple Base String          |                                                        11001001| 0xC9  imm_0    immheader_1
+Signed 32 Vector            |                                                        11011001| 0xD9  imm_0    immheader_1
+Unsigned 32 Vector          |                                                        11101001| 0xE9  imm_0    immheader_1
+Single Float Vector         |                                                        11111001| 0xF9  imm_0    immheader_1
+
+Complex Double Float Vector |                                                        10010111| 0x97  function immheader_0
+Signed 16 Vector            |                                                        10100111| 0xA7  function immheader_0
+Unsigned 16 Vector          |                                                        10110111| 0xB7  function immheader_0
+Signed 8 Vector             |                                                        11010111| 0xD7  function immheader_0
+Unsigned 8 Vector           |                                                        11100111| 0xE7  function immheader_0
+Bit Vector                  |                                                        11110111| 0xF7  function immheader_0
+
+MISCELLANEOUS
+
+Macptr                      |                                                        00011010| 0x1A  imm_1    immheader_2
+Dead Macptr                 |                                                        00101010| 0x2A  imm_1    immheader_2
+Bignum                      |                                                        00011001| 0x19  imm_0    immheader_1
+Double Float                |                                                        00101001| 0x29  imm_0    immheader_1
+Xcode Vector                |                                                        00111001| 0x39  imm_0    immheader_1
+Complex Single Float        |                                                        01001001| 0x49  imm_0    immheader_1
+Complex Double Float        |                                                        01011001| 0x59  imm_0    immheader_1
+
+NODE HEADER 0
+
+Symbol                      |                                                        00010101| 0x15  misc     nodeheader_0
+Catch Frame                 |                                                        00100101| 0x25  misc     nodeheader_0
+Hash Vector                 |                                                        00110101| 0x35  misc     nodeheader_0
+Pool                        |                                                        01000101| 0x45  misc     nodeheader_0
+Weak                        |                                                        01010101| 0x55  misc     nodeheader_0
+Package                     |                                                        01100101| 0x65  misc     nodeheader_0
+Slot Vector                 |                                                        01110101| 0x75  misc     nodeheader_0
+Basic Stream                |                                                        10000101| 0x85  misc     nodeheader_0
+Function                    |                                                        10010101| 0x95  misc     nodeheader_0
+
+NODE HEADER 1
+
+Ratio                       |                                                        00010110| 0x16  symbol   nodeheader_1
+Complex                     |                                                        00100110| 0x26  symbol   nodeheader_1
+Struct                      |                                                        00110110| 0x36  symbol   nodeheader_1
+Istruct                     |                                                        01000110| 0x46  symbol   nodeheader_1
+Value Cell                  |                                                        01010110| 0x56  symbol   nodeheader_1
+Xfunction                   |                                                        01100110| 0x66  symbol   nodeheader_1
+Lock                        |                                                        01110110| 0x76  symbol   nodeheader_1
+Instance                    |                                                        10000110| 0x86  symbol   nodeheader_1
+

@@ -118,7 +118,7 @@ define_subtag(complex_double_float,ivector_class_32_bit,5)
 
 
 
-        
+
 /* Size doesn't matter for non-CL-array gvectors; I can't think of a good */
 /* reason to classify them in any particular way.  Let's put funcallable */
 /* things in the first slice by themselves, though it's not clear that */

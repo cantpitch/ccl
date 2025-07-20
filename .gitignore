@@ -44,3 +44,4 @@ lisp-kernel/static-linuxppc/external-functions.h
 a.out
 testrunner
 run_tests
+scratch/

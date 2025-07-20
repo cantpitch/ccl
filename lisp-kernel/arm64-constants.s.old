@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+include(m4macros.m4)
 define(`imm0',`x0')  
 define(`imm1',`x1')
 define(`imm2',`x2')

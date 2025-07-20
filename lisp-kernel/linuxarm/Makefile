@@ -64,21 +64,21 @@ A32 = $(shell ($(AS) --help -v 2>&1 | grep -q -e "-a32") && /bin/echo "-a32")
 .c.o:
 	$(CC) -include ../$(PLATFORM_H) -c $< $(CDEFINES) $(CDEBUG) $(COPT) -marm -march=armv7-a -mfpu=vfp $(FLOAT_ABI_OPTION) $(WFORMAT)  -o $@
 
-SPOBJ = pad.o  arm-spentry.o
-ASMOBJ = arm-asmutils.o imports.o
+SPOBJ = pad.o  arm-spentry32.o
+ASMOBJ = arm-asmutils32.o imports.o
 
-COBJ  = pmcl-kernel.o gc-common.o arm-gc.o bits.o  arm-exceptions.o \
+COBJ  = pmcl-kernel.o gc-common.o arm-gc32.o bits.o  arm-exceptions32.o \
 	image.o thread_manager.o lisp-debug.o memory.o unix-calls.o
 
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o albt.o arm_print.o
-KERNELOBJ= $(COBJ) arm-asmutils.o  imports.o
+KERNELOBJ= $(COBJ) arm-asmutils32.o  imports.o
 
-SPINC =	lisp.s m4macros.m4 arm-constants.s arm-macros.s errors.s arm-uuo.s \
+SPINC =	lisp.s m4macros.m4 arm-constants32.s arm-macros32.s errors.s arm-uuo32.s \
 	lisp_globals.s
 
-CHEADERS = area.h bits.h arm-constants.h lisp-errors.h gc.h lisp.h \
+CHEADERS = area.h bits.h arm-constants32.h lisp-errors.h gc.h lisp.h \
 	lisp-exceptions.h lisp_globals.h macros.h memprotect.h image.h \
-	threads.h arm-exceptions.h $(PLATFORM_H)
+	threads.h arm-exceptions32.h $(PLATFORM_H)
 
 # Subprims linked into the kernel ?
 # Yes:

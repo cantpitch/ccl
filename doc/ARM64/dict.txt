@@ -1,0 +1,49 @@
+
+acode     - An intermediate representation of Lisp code produced by the compiler 
+            front-end. Short for “alphatized code,” meaning “has undergone alpha 
+            reduction,” which in turn means “all lambda-bound variables have been 
+            consistently renamed.”
+command stack (cstack)
+          - 
+dnode     - Two native words. Lisp heap memory is allocated in units of dnodes.
+gvector   - A uvector whose elements are nodes.
+immediate - A value in memory or a register that is a raw, untagged value.
+ivector   - A uvector whose elements are immediates.
+LAP       - An old acronym for Lisp Assembly Program. A notation for writing assembly 
+            language in Lisp-like syntax. Not surprisingly, the exact LAP syntax varies, 
+            depending on processor architecture.
+nfn       - new function
+node      - A value in memory or a register that is a tagged lisp datum.
+nrs       - nil-relative symbol
+NVR       - A non-volatile register
+punt, puntable
+          - If a variable is bound to a simple expression and is never setq’d, then all 
+            references to the variable can be replaced by references to the simple 
+            expression in question. This process is called “punting.”
+tagged return address
+          - On x86, the call instruction unconditionally pushes a return address onto 
+            the stack. The compiler aligns the call instruction (via insertion of nop 
+            instructions) such that the pushed return address will have a special tag 
+            that the GC can recognize.
+TCR       - Thread context record
+TSP       - Temp stack pointer
+uuo       - An “unimplemented user operation.” Sometimes called a trap (after the 
+            PowerPC instructions). An illegal instruction used as a way for lisp code to 
+            request service from the lisp kernel (such as allocate more memory, initiate 
+            a GC, and so forth).
+uvector   - A memory-allocated object with a header word that describes the object’s type 
+            and the number of elements it contains. (The name comes from Spice Lisp.)
+value stack (vstack)
+          - A stack that contains tagged lisp objects (nodes) such as function arguments, 
+            local variables, and other stack-allocated lisp objects. The contents of the 
+            value stack between its bottom and top are always unambiguously nodes.
+vinsn     - Virtual Instruction. A pre-assembled fragment of code used as a code 
+            generation template by the compiler backend.
+            Vinsns are written in a LAP-like notation, but a key difference is that 
+            vinsns are expanded/assembled as much as possible at vinsn definition time. 
+            When a vinsn is emitted at compile time, the operands in the vinsn template 
+            are then filled in.
+
+
+
+    

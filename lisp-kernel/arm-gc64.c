@@ -1,5 +1,4 @@
 /*
- * Copyright 1994-2009 Clozure Associates
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include "platform-darwinarm64.h"
 
 /* Heap sanity checking. */
 
@@ -37,44 +37,20 @@ check_node(LispObj n)
   switch (tag) {
   case fulltag_even_fixnum:
   case fulltag_odd_fixnum:
-
-
-#ifdef PPC64
   case fulltag_imm_0:
   case fulltag_imm_1:
   case fulltag_imm_2:
   case fulltag_imm_3:
-#else
-  case fulltag_imm:
-#endif
-
-
     return;
 
-#ifndef PPC64
-  case fulltag_nil:
-    if (n != lisp_nil) {
-      Bug(NULL,"Object tagged as nil, not nil : 0x%08x", n);
-    }
-    return;
-#endif
-
-
-#ifdef PPC64
-  case fulltag_nodeheader_0: 
-  case fulltag_nodeheader_1: 
-  case fulltag_nodeheader_2: 
-  case fulltag_nodeheader_3: 
-  case fulltag_immheader_0: 
+  case fulltag_nodeheader_0:
+  case fulltag_nodeheader_1:
+  case fulltag_nodeheader_2:
+  case fulltag_nodeheader_3:
+  case fulltag_immheader_0:
   case fulltag_immheader_1: 
   case fulltag_immheader_2: 
   case fulltag_immheader_3: 
-#else
-  case fulltag_nodeheader:
-  case fulltag_immheader:
-#endif
-
-
     Bug(NULL, "Header not expected : 0x%lx", n);
     return;
 
@@ -242,8 +218,6 @@ mark_root(LispObj n)
       suffix_dnodes;
     tag_n = fulltag_of(header);
 
-
-#ifdef PPC64
     if ((nodeheader_tag_p(tag_n)) ||
         (tag_n == ivector_class_64_bit)) {
       total_size_in_bytes = 8 + (element_count<<3);
@@ -259,24 +233,6 @@ mark_root(LispObj n)
         total_size_in_bytes = 8 + (element_count<<1);
       }
     }
-#else
-    if ((tag_n == fulltag_nodeheader) ||
-        (subtag <= max_32_bit_ivector_subtag)) {
-      total_size_in_bytes = 4 + (element_count<<2);
-    } else if (subtag <= max_8_bit_ivector_subtag) {
-      total_size_in_bytes = 4 + element_count;
-    } else if (subtag <= max_16_bit_ivector_subtag) {
-      total_size_in_bytes = 4 + (element_count<<1);
-    } else if (subtag == subtag_complex_double_float_vector) {
-            total_size_in_bytes = 8 + (element_count<<4);
-    } else if (subtag ==subtag_bit_vector) {
-      total_size_in_bytes = 4 + ((element_count+7)>>3);
-    } else {
-      total_size_in_bytes = 8 + (element_count<<3);
-    }
-#endif
-
-
 
     suffix_dnodes = ((total_size_in_bytes+(dnode_size-1))>>dnode_shift) -1;
 
@@ -357,7 +313,6 @@ mark_ephemeral_root(LispObj n)
 }
   
 
-#ifdef PPC64
 /* Any register (srr0, the lr or ctr) or stack location that
    we're calling this on should have its low 2 bits clear; it'll
    be tagged as a "primary" object, but the pc/lr/ctr should
@@ -386,7 +341,7 @@ mark_pc_root(LispObj xpc)
       for(program_counter=(opcode *)ptr_from_lispobj(xpc & ~7);
 	  (LispObj)program_counter >= GCarealow;
           program_counter-=2) {
-        if (*program_counter == PPC64_CODE_VECTOR_PREFIX) {
+        if (*program_counter == ARM64_CODE_VECTOR_PREFIX) {
           headerP = ((LispObj *)program_counter)-1;
           header = *headerP;
 	  dnode = gc_area_dnode(headerP);
@@ -402,60 +357,11 @@ mark_pc_root(LispObj xpc)
     }
   }
 }
-#else /* PPC64 */
-/*
-  Some objects (saved LRs on the control stack, the LR, PC, and CTR
-  in exception frames) may be tagged as fixnums but are really
-  locatives into code_vectors.
-
-  If "pc" is not tagged as a fixnum, mark it as a "normal" root.
-  If "pc" doesn't point at an unmarked doubleword in the area
-  being GCed, return.
-  Else back up until the code_vector's header is found and mark
-  all doublewords in the code_vector.
-*/
-void
-mark_pc_root(LispObj pc)
-{
-  if (tag_of(pc) != tag_fixnum) {
-    mark_root(pc);
-  } else {
-    natural dnode = gc_area_dnode(pc);
-    if ((dnode < GCndnodes_in_area) &&
-        !ref_bit(GCmarkbits,dnode)) {
-      LispObj
-        *headerP,
-        header;
-
-      for(headerP = (LispObj*)ptr_from_lispobj(untag(pc));
-          dnode < GCndnodes_in_area;
-          headerP-=2, --dnode) {
-        header = *headerP;
-
-        if ((header & code_header_mask) == subtag_code_vector) {
-          set_n_bits(GCmarkbits, dnode, (2+header_element_count(header))>>1);
-          return;
-        }
-      }
-      /*
-        Expected to have found a header by now, but didn't.
-        That's a bug.
-        */
-      Bug(NULL, "code_vector header not found!");
-    }
-  }
-}
-#endif /* PPC64 */
 
 
 
-#ifdef PPC64
 #define RMARK_PREV_ROOT fulltag_imm_3
 #define RMARK_PREV_CAR fulltag_misc
-#else
-#define RMARK_PREV_ROOT fulltag_imm
-#define RMARK_PREV_CAR fulltag_nil
-#endif
 
 
 
@@ -500,7 +406,6 @@ rmark(LispObj n)
         total_size_in_bytes,
         suffix_dnodes;
       tag_n = fulltag_of(header);
-#ifdef PPC64
       if ((nodeheader_tag_p(tag_n)) ||
           (tag_n == ivector_class_64_bit)) {
         total_size_in_bytes = 8 + (element_count<<3);
@@ -516,23 +421,6 @@ rmark(LispObj n)
           total_size_in_bytes = 8 + (element_count<<1);
         }
       }
-#else
-      if ((tag_n == fulltag_nodeheader) ||
-          (subtag <= max_32_bit_ivector_subtag)) {
-        total_size_in_bytes = 4 + (element_count<<2);
-      } else if (subtag <= max_8_bit_ivector_subtag) {
-        total_size_in_bytes = 4 + element_count;
-      } else if (subtag <= max_16_bit_ivector_subtag) {
-        total_size_in_bytes = 4 + (element_count<<1);
-      } else if (subtag == subtag_complex_double_float_vector) {
-        total_size_in_bytes = 8 + (element_count<<4);
-      } else if (subtag == subtag_bit_vector) {
-        total_size_in_bytes = 4 + ((element_count+7)>>3);
-      } else {
-        total_size_in_bytes = 8 + (element_count<<3);
-      }
-#endif
-
 
       suffix_dnodes = ((total_size_in_bytes+(dnode_size-1))>>dnode_shift)-1;
 
@@ -677,7 +565,6 @@ rmark(LispObj n)
 
       tag_n = fulltag_of(header);
 
-#ifdef PPC64
       if ((nodeheader_tag_p(tag_n)) ||
           (tag_n == ivector_class_64_bit)) {
         total_size_in_bytes = 8 + (element_count<<3);
@@ -693,23 +580,6 @@ rmark(LispObj n)
           total_size_in_bytes = 8 + (element_count<<1);
         }
       }
-#else
-      if ((tag_n == fulltag_nodeheader) ||
-          (subtag <= max_32_bit_ivector_subtag)) {
-        total_size_in_bytes = 4 + (element_count<<2);
-      } else if (subtag <= max_8_bit_ivector_subtag) {
-        total_size_in_bytes = 4 + element_count;
-      } else if (subtag <= max_16_bit_ivector_subtag) {
-        total_size_in_bytes = 4 + (element_count<<1);
-      } else if (subtag == subtag_complex_double_float_vector) {
-        total_size_in_bytes = 8 + (element_count<<3);
-      } else if (subtag == subtag_bit_vector) {
-        total_size_in_bytes = 4 + ((element_count+7)>>3);
-      } else {
-        total_size_in_bytes = 8 + (element_count<<3);
-      }
-#endif
-
 
       suffix_dnodes = ((total_size_in_bytes+(dnode_size-1))>>dnode_shift)-1;
 
@@ -787,7 +657,6 @@ skip_over_ivector(natural start, LispObj header)
     subtag = header_subtag(header),
     nbytes;
 
-#ifdef PPC64
   switch (fulltag_of(header)) {
   case ivector_class_64_bit:
     nbytes = element_count << 3;
@@ -809,23 +678,6 @@ skip_over_ivector(natural start, LispObj header)
     }
   }
   return ptr_from_lispobj(start+(~15 & (nbytes + 8 + 15)));
-#else
-  if (subtag <= max_32_bit_ivector_subtag) {
-    nbytes = element_count << 2;
-  } else if (subtag <= max_8_bit_ivector_subtag) {
-    nbytes = element_count;
-  } else if (subtag <= max_16_bit_ivector_subtag) {
-    nbytes = element_count << 1;
-  } else if (subtag == subtag_double_float_vector) {
-    nbytes = 4 + (element_count << 3);
-  } else {
-    nbytes = (element_count+7) >> 3;
-  }
-  return ptr_from_lispobj(start+(~7 & (nbytes + 4 + 7)));
-#endif
-
-
-
 }
 
 
@@ -1120,7 +972,6 @@ calculate_relocation()
   return first ? first : current;
 }
 
-#ifdef PPC64
 LispObj
 dnode_forwarding_address(natural dnode, int tag_n)
 {
@@ -1165,79 +1016,19 @@ dnode_forwarding_address(natural dnode, int tag_n)
     }
   }
 }
-#else
-LispObj
-dnode_forwarding_address(natural dnode, int tag_n)
-{
-  natural pagelet, nbits;
-  unsigned short near_bits;
-  LispObj new;
-
-  if (GCDebug) {
-    if (! ref_bit(GCdynamic_markbits, dnode)) {
-      Bug(NULL, "unmarked object being forwarded!\n");
-    }
-  }
-
-  pagelet = dnode >> 5;
-  nbits = dnode & 0x1f;
-  near_bits = ((unsigned short *)GCdynamic_markbits)[dnode>>4];
-
-  if (nbits < 16) {
-    new = GCrelocptr[pagelet] + tag_n;;
-    /* Increment "new" by the count of 1 bits which precede the dnode */
-    if (near_bits == 0xffff) {
-      return (new + (nbits << 3));
-    } else {
-      near_bits &= (0xffff0000 >> nbits);
-      if (nbits > 7) {
-        new += one_bits(near_bits & 0xff);
-      }
-      return (new + (one_bits(near_bits >> 8))); 
-    }
-  } else {
-    new = GCrelocptr[pagelet+1] + tag_n;
-    nbits = 32-nbits;
-
-    if (near_bits == 0xffff) {
-      return (new - (nbits << 3));
-    } else {
-      near_bits &= (1<<nbits)-1;
-      if (nbits > 7) {
-        new -= one_bits(near_bits >> 8);
-      }
-      return (new -  one_bits(near_bits & 0xff));
-    }
-  }
-}
-#endif
-
 
 LispObj
 locative_forwarding_address(LispObj obj)
 {
   int tag_n = fulltag_of(obj);
   natural dnode;
-
-
-#ifdef PPC
   /* Locatives can be tagged as conses, "fulltag_misc"
      objects, or as fixnums.  Immediates, headers, and nil
      shouldn't be "forwarded".  Nil never will be, but it
      doesn't hurt to check ... */
-#ifdef PPC64
   if ((tag_n & lowtag_mask) != lowtag_primary) {
     return obj;
   }
-#else
-  if ((1<<tag_n) & ((1<<fulltag_immheader) |
-                    (1<<fulltag_nodeheader) |
-                    (1<<fulltag_imm) |
-                    (1<<fulltag_nil))) {
-    return obj;
-  }
-#endif
-#endif
 
   dnode = gc_dynamic_area_dnode(obj);
 
@@ -1385,19 +1176,19 @@ forward_xp(ExceptionInformation *xp)
 
   int r;
 
-  /* registers >= fn should be tagged and forwarded as roots.
-     the PC, LR, loc_pc, and CTR should be treated as "locatives".
+  /* HVS 2025-07-18: This comment is from PPC64 code 
+     registers >= fn should be tagged and forwarded as roots.
+     the PC, LR  should be treated as "locatives".
      */
 
-  for (r = fn; r < 32; r++) {
+  for (r = temp3; r < 31; r++) {
     update_noderef((LispObj*) (&(regs[r])));
   }
 
-  update_locref((LispObj*) (&(regs[loc_pc])));
 
   update_locref((LispObj*) (&(xpPC(xp))));
   update_locref((LispObj*) (&(xpLR(xp))));
-  update_locref((LispObj*) (&(xpCTR(xp))));
+  
 
 }
 
@@ -1530,8 +1321,6 @@ compact_dynamic_heap()
           elements = header_element_count(node);
           tag = header_subtag(node);
 
-#ifdef PPC
-#ifdef PPC64
           switch(fulltag_of(tag)) {
           case ivector_class_64_bit:
             imm_dnodes = ((elements+1)+1)>>1;
@@ -1552,25 +1341,6 @@ compact_dynamic_heap()
               imm_dnodes = (((elements+4)+7)>>3);
             }
           }
-#else
-          if (tag <= max_32_bit_ivector_subtag) {
-            if (tag == subtag_code_vector) {
-              GCrelocated_code_vector = true;
-            }
-            imm_dnodes = (((elements+1)+1)>>1);
-          } else if (tag <= max_8_bit_ivector_subtag) {
-            imm_dnodes = (((elements+4)+7)>>3);
-          } else if (tag <= max_16_bit_ivector_subtag) {
-            imm_dnodes = (((elements+2)+3)>>2);
-          } else if (tag == subtag_bit_vector) {
-            imm_dnodes = (((elements+32)+63)>>6);
-          } else if (tag == subtag_complex_double_float_vector) {
-            imm_dnodes = (elements*2)+1;
-          } else {
-            imm_dnodes = elements+1;
-          }
-#endif
-#endif
 
           dnode += imm_dnodes;
           while (--imm_dnodes) {
@@ -1626,7 +1396,6 @@ unboxed_bytes_in_range(LispObj *start, LispObj *end)
         } else {
           subtag = header_subtag(header);
 
-#ifdef PPC64
           switch(fulltag_of(header)) {
           case ivector_class_64_bit:
             bytes = 8 + (elements<<3);
@@ -1645,23 +1414,6 @@ unboxed_bytes_in_range(LispObj *start, LispObj *end)
               bytes = 8 + (elements<<1);
             }
           }
-#else
-          if (subtag <= max_32_bit_ivector_subtag) {
-            bytes = 4 + (elements<<2);
-          } else if (subtag <= max_8_bit_ivector_subtag) {
-            bytes = 4 + elements;
-          } else if (subtag <= max_16_bit_ivector_subtag) {
-            bytes = 4 + (elements<<1);
-          } else if (subtag == subtag_complex_double_float_vector) {
-            bytes = 8 + (elements<<4);
-
-          } else if (subtag = subtag_bit_vector) {
-            bytes = 4 + ((elements+7)>>3);
-          } else {
-            bytes = 8 + (elements<<4);
-          }
-#endif
-
 
           bytes = (bytes+dnode_size-1) & ~(dnode_size-1);
           total += bytes;
@@ -1753,15 +1505,9 @@ copy_ivector_reference(LispObj *ref, BytePtr low, BytePtr high, area *dest)
 void
 purify_locref(LispObj *locaddr, BytePtr low, BytePtr high, area *to)
 {
-#ifdef PPC
-  LispObj
-    loc = *locaddr,
-    *headerP;
-  opcode
-    *p,
-    insn;
-  natural
-    tag = fulltag_of(loc);
+  LispObj loc = *locaddr, *headerP;
+  opcode *p, insn;
+  natural tag = fulltag_of(loc);
 
   if (((BytePtr)ptr_from_lispobj(loc) > low) &&
       ((BytePtr)ptr_from_lispobj(loc) < high)) {
@@ -1770,12 +1516,10 @@ purify_locref(LispObj *locaddr, BytePtr low, BytePtr high, area *to)
     switch (tag) {
     case fulltag_even_fixnum:
     case fulltag_odd_fixnum:
-#ifdef PPC64
     case fulltag_cons:
     case fulltag_misc:
-#endif
       if (*headerP == forward_marker) {
-	*locaddr = (headerP[1]+tag);
+	    *locaddr = (headerP[1]+tag);
       } else {
 	/* Grovel backwards until the header's found; copy
 	   the code vector to to space, then treat it as if it 
@@ -1785,25 +1529,13 @@ purify_locref(LispObj *locaddr, BytePtr low, BytePtr high, area *to)
 	  p -= 2;
 	  tag += 8;
 	  insn = *p;
-#ifdef PPC64
-	} while (insn != PPC64_CODE_VECTOR_PREFIX);
+	} while (insn != ARM64);
 	headerP = ((LispObj*)p)-1;
 	*locaddr = purify_displaced_object(((LispObj)headerP), to, tag);
-#else
-      } while ((insn & code_header_mask) != subtag_code_vector);
-      *locaddr = purify_displaced_object(ptr_to_lispobj(p), to, tag);
-#endif
     }
     break;
-
-#ifndef PPC64
-  case fulltag_misc:
-    copy_ivector_reference(locaddr, low, high, to);
-    break;
-#endif
   }
 }
-#endif
 }
 
 void
@@ -1903,7 +1635,7 @@ purify_xp(ExceptionInformation *xp, BytePtr low, BytePtr high, area *to)
      The PC, LR, loc_pc, and CTR should be treated as "locatives".
    */
 
-  for (r = fn; r < 32; r++) {
+  for (r = temp3; r < 32; r++) {
     copy_ivector_reference((LispObj*) (&(regs[r])), low, high, to);
   };
 
@@ -1911,7 +1643,6 @@ purify_xp(ExceptionInformation *xp, BytePtr low, BytePtr high, area *to)
 
   purify_locref((LispObj*) (&(xpPC(xp))), low, high, to);
   purify_locref((LispObj*) (&(xpLR(xp))), low, high, to);
-  purify_locref((LispObj*) (&(xpCTR(xp))), low, high, to);
 }
 
 void
@@ -2046,9 +1777,7 @@ impurify_locref(LispObj *p, LispObj low, LispObj high, int delta)
   LispObj q = *p;
   
   switch (fulltag_of(q)) {
-#ifdef PPC64
   case fulltag_cons:
-#endif
   case fulltag_misc:
   case fulltag_even_fixnum:
   case fulltag_odd_fixnum:

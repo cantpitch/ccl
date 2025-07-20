@@ -28,7 +28,7 @@ typedef ucontext_t ExceptionInformation;
 #define IMAGE_BASE_ADDRESS 0x04001000
 
 #include "lisptypes.h"
-#include "arm-constants.h"
+#include "arm-constants32.h"
 
 #define UC_MCONTEXT(UC) UC->uc_mcontext
 

@@ -11,7 +11,7 @@ SECTIONS
   .pad : { pad.o(.text) }
   .subprims ALIGN(0x1000) :
   {
-    arm-spentry.o(.text)
+    arm-spentry32.o(.text)
   }
   .interp         : { *(.interp) }
   .note.gnu.build-id : { *(.note.gnu.build-id) }

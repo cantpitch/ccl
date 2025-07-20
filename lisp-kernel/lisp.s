@@ -66,13 +66,13 @@
 	 include(x86-uuo.s)
 	')
         ifdef(`ARM',`
-         include(arm-constants.s)
-         include(arm-macros.s)
-         include(arm-uuo.s)
+         include(arm-constants32.s)
+         include(arm-macros32.s)
+         include(arm-uuo32.s)
         ')
         ifdef(`ARM64',`
-         include(arm64-constants.s)
-         include(arm64-macros.s)
-         include(arm64-uuo.s)
+         include(arm-constants64.s)
+         include(arm-macros64.s)
+         include(arm-uuo64.s)
         ')
 

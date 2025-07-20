@@ -25,7 +25,7 @@ typedef struct ucontext ExceptionInformation;
 #define IMAGE_BASE_ADDRESS 0x50000000
 
 #include "lisptypes.h"
-#include "arm-constants.h"
+#include "arm-constants32.h"
 
 /* xp accessors */
 #define xpGPRvector(x) ((natural *)&((x)->uc_mcontext.arm_r0))

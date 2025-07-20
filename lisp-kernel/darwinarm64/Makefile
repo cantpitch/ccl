@@ -40,19 +40,19 @@ SRCDIRS =
 	$(CC) -include ../$(PLATFORM_H) -c $< $(CDEFINES) $(CDEBUG) $(COPT) \
 	$(WFORMAT) -mmacosx-version-min=$(OSVERSION) -o $@ 
 
-ARM64_ASM_OBJ = arm64-asmutils.o 
-ARM64_ASM_INC = arm64-constants.s arm64-macros.s arm64-uuo.s
-ARM64_C_OBJ = arm64-gc.o arm64-exceptions.o 
-ARM64_C_INC = arm64-constants.h arm64-exceptions.h $(PLATFORM_H)
+ARM64_ASM_OBJ = arm-asmutils64.o 
+ARM64_ASM_INC = arm-constants64.s arm-macros64.s arm-uuo64.s
+ARM64_C_OBJ = arm-gc64.o arm-exceptions64.o 
+ARM64_C_INC = arm-constants64.h arm-exceptions64.h $(PLATFORM_H)
 
-SPOBJ = pad.o arm64-spentry.o
+SPOBJ = pad.o arm-spentry64.o arm-spjump64.o arm-subprims64.o
 COBJ  = gc-common.o bits.o image.o thread_manager.o lisp-debug.o memory.o unix-calls.o mach-o-image.o \
 	$(ARM64_C_OBJ) 
 ASMOBJ = imports.o $(ARM64_ASM_OBJ) 
 
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o plbt.o arm64_print.o
 KERNELOBJ= pmcl-kernel.o $(COBJ) $(ASMOBJ)
-TESTOBJ = testrunner.o pmcl-kernel-mock.o unity.o $(COBJ) $(ASMOBJ)
+TESTOBJ = testrunner.o memory_tests.o pmcl-kernel-mock.o unity.o $(COBJ) $(ASMOBJ)
 
 SPINC =	lisp.s m4macros.m4 errors.s lisp_globals.s $(ARM64_ASM_INC) 
 CHEADERS = area.h bits.h lisp-errors.h gc.h lisp.h lisp-exceptions.h lisp_globals.h macros.h memprotect.h image.h \

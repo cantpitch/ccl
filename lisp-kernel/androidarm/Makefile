@@ -71,23 +71,23 @@ endif
 
 
 # -nostdinc -isystem ${NDK}/usr/gcc-include -isystem $(NDK)/usr/include
-SPOBJ = pad.o  arm-spentry.o 
+SPOBJ = pad.o  arm-spentry32.o 
 #arm-subprims.o
-ASMOBJ = arm-asmutils.o imports.o
+ASMOBJ = arm-asmutils32.o imports.o
 
-COBJ  = pmcl-kernel.o gc-common.o arm-gc.o bits.o  arm-exceptions.o \
+COBJ  = pmcl-kernel.o gc-common.o arm-gc32.o bits.o  arm-exceptions32.o \
 	image.o thread_manager.o lisp-debug.o memory.o unix-calls.o \
 	android_native_app_glue.o
 
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o albt.o arm_print.o
-KERNELOBJ= $(COBJ) arm-asmutils.o  imports.o
+KERNELOBJ= $(COBJ) arm-asmutils32.o  imports.o
 
-SPINC =	lisp.s m4macros.m4 arm-constants.s arm-macros.s errors.s arm-uuo.s \
+SPINC =	lisp.s m4macros.m4 arm-constants32.s arm-macros32.s errors.s arm-uuo32.s \
 	lisp_globals.s
 
-CHEADERS = area.h bits.h arm-constants.h lisp-errors.h gc.h lisp.h \
+CHEADERS = area.h bits.h arm-constants32.h lisp-errors.h gc.h lisp.h \
 	lisp-exceptions.h lisp_globals.h macros.h memprotect.h image.h \
-	threads.h arm-exceptions.h $(PLATFORM_H)
+	threads.h arm-exceptions32.h $(PLATFORM_H)
 
 # Subprims linked into the kernel ?
 # Yes:
@@ -104,7 +104,7 @@ APPLIBS = $(OSLIBS) $(NDKLIB)/crtbegin_dynamic.o $(NDKLIB)/crtend_android.o $(GC
 
 
 ../../libaarmcl.so:	$(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ) ./armandroid.x ./fixlib
-	$(LD) --shared -fPIC -Bdynamic -dynamic-linker /system/bin/linker -nostdlib -z nocopyreloc  -o ../../libaarmcl.so  -L $(NDKLIB) pad.o arm-spentry.o  pmcl-kernel.o gc-common.o arm-gc.o bits.o arm-exceptions.o image.o thread_manager.o lisp-debug.o memory.o unix-calls.o arm-asmutils.o imports.o lispdcmd.o plprint.o plsym.o albt.o arm_print.o android_native_app_glue.o --no-as-needed --warn-shared-textrel $(OSLIBS)
+	$(LD) --shared -fPIC -Bdynamic -dynamic-linker /system/bin/linker -nostdlib -z nocopyreloc  -o ../../libaarmcl.so  -L $(NDKLIB) pad.o arm-spentry32.o  pmcl-kernel.o gc-common.o arm-gc32.o bits.o arm-exceptions32.o image.o thread_manager.o lisp-debug.o memory.o unix-calls.o arm-asmutils32.o imports.o lispdcmd.o plprint.o plsym.o albt.o arm_print.o android_native_app_glue.o --no-as-needed --warn-shared-textrel $(OSLIBS)
 #	./fixlib $(LIBBASE) >> ../../libaarmcl.so
 
 ../../aarmcl:	aarmcl.o

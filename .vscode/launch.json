@@ -8,6 +8,13 @@
             "program": "${workspaceFolder}/darmcl64",
         },
         {
+            "name": "Launch dx86cl64",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/dx86cl64",
+            "args": ["dx86cl64.image"]
+        },
+        {
             "name": "Launch x86-64 testrunner",
             "type": "lldb",
             "request": "launch",
