@@ -65,12 +65,50 @@ define(`set_nargs',`
     __(mov nargs,#($1)<<fixnumshift)
 ')
 
-define(`vref32',`
-    __(ldr $1,[$2,#misc_data_offset+(($3)<<2)])
-')
-
 define(`getvheader',`
     __(ldr $1,[$2,#vector.header])
+')
+
+/* "Length" is fixnum element count */
+define(`header_length',`
+    __(bic $1,$2,#subtag_mask)
+    __(mov $1,$1,lsr #num_subtag_bits-fixnumshift)
+')
+
+define(`vector_length',`
+    __(getvheader($3,$2))
+    __(header_length($1,$3))
+')
+
+define(`ref_global',`
+    __(mov ifelse($3,`',$1,$3),#nil_value)
+    __(ldr $1,[ifelse($3,`',$1,$3),#lisp_globals.$2])
+')
+
+define(`ref_nrs_value',`
+    __(mov $1,#nil_value)
+    __(ldr $1,[$1,#((nrs.$2)+(symbol.vcell))])
+')
+
+define(`ref_nrs_function',`
+    __(mov $1,#nil_value)
+    __(ldr $1,[$1,#((nrs.$2)+(symbol.fcell))])
+')
+
+define(`_car',`
+    __(ldr $1,[$2,#cons.car])
+')
+
+define(`_cdr',`
+    __(ldr $1,[$2,#cons.cdr])
+')
+
+define(`_rplaca',`
+    __(str $2,[$1,#cons.car])
+')
+
+define(`_rplacd',`
+    __(str $2,[$1,#cons.cdr])
 ')
 
 ifdef(`ARM64',`

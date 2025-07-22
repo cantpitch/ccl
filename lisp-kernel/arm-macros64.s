@@ -30,6 +30,11 @@ define(`extract_typecode',`
 macro_label(not_misc):
 ')
 
+/* "real" stack operations on ARM64 require that the stack pointer be 16-byte aligned.
+   https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/using-the-stack-in-aarch64-implementing-push-and-pop
+ */
+
+
 // define(`push',`
 //     __(stru($1,-node_size($2)))
 //     ')
@@ -40,13 +45,13 @@ macro_label(not_misc):
 //     __(la $2,node_size($2))
 //     ')
     
-// define(`vpush',`
-//     __(push($1,vsp))
-//     ')
+define(`vpush',`
+    __(str $1,[vsp,#-node_size]!)
+')
     
-// define(`vpop',`
-//     __(pop($1,vsp))
-//     ')
+define(`vpop',`
+    __(ldr $1,[vsp],#node_size)
+')
 
 define(`vref64',`
     __(ldr $1,[$2,#misc_data_offset+(($3)<<3)])
@@ -56,126 +61,72 @@ define(`vrefr',`
     __(vref64($1,$2,$3))
 ')
 
-    /* Size is unboxed element count */
-define(`header_size',`
-    __(srri($1,$2,num_subtag_bits))
-    ')
-    
-    /* "Length" is fixnum element count */
-define(`header_length',`
-ifdef(`PPC64',`
-        __(rldicr $1,$2,nbits_in_word-(num_subtag_bits-nfixnumtagbits),63-nfixnumtagbits)
-        __(clrldi $1,$1,(num_subtag_bits-nfixnumtagbits))
-        ',`               
-    __(rlwinm $1,$2,nbits_in_word-(num_subtag_bits-nfixnumtagbits),(num_subtag_bits-nfixnumtagbits),31-nfixnumtagbits)
-        ')
-')        
+// //     /* Size is unboxed element count */
+// // define(`header_size',`
+// //     __(srri($1,$2,num_subtag_bits))
+// //     ')
 
+// define(`extract_unsigned_byte_bits',`
+// ifdef(`PPC64',`
+//         __(rldicr $1,$2,64-fixnumshift,63-$3)
+// ',`                
+//         __(rlwinm $1,$2,0,32-fixnumshift,31-($3+fixnumshift))
+// ')        
+// ')
 
-define(`vector_size',`
-    __(getvheader(ifelse($3.`',$1,$3),$2))
-    __(header_size($1,ifelse($3.`',$1,$3)))
-    ')
-    
-define(`vector_length',`
-    __(getvheader($3,$2))
-    __(header_length($1,$3))
-    ')
+// define(`extract_unsigned_byte_bits_',`
+// ifdef(`PPC64',`
+//         __(rldicr. $1,$2,64-fixnumshift,63-$3)
+// ',`                
+//         __(rlwinm. $1,$2,0,32-fixnumshift,31-($3+fixnumshift))
+// ')        
+// ')
 
-    
-define(`ref_global',`
-    __(ldr($1,lisp_globals.$2(0)))
-')
-
-define(`set_global',`
-    __(str($1,lisp_globals.$2(0)))
-')
-
-define(`ref_nrs_value',`
-    __(ldr($1,((nrs.$2)+(symbol.vcell))(0)))
-')
-    
-define(`set_nrs_value',`
-    __(str($1,((nrs.$2)+(symbol.vcell))(0)))
-')
-
-define(`extract_unsigned_byte_bits',`
-ifdef(`PPC64',`
-        __(rldicr $1,$2,64-fixnumshift,63-$3)
-',`                
-        __(rlwinm $1,$2,0,32-fixnumshift,31-($3+fixnumshift))
-')        
-')
-
-define(`extract_unsigned_byte_bits_',`
-ifdef(`PPC64',`
-        __(rldicr. $1,$2,64-fixnumshift,63-$3)
-',`                
-        __(rlwinm. $1,$2,0,32-fixnumshift,31-($3+fixnumshift))
-')        
-')
-
-    /* vpop argregs - nargs is known to be non-zero */
-define(`vpop_argregs_nz',`
-    new_macro_labels()
-    __(cmplri(cr1,nargs,node_size*2))
-    __(vpop(arg_z))
-    __(blt cr1,macro_label(l0))
-    __(vpop(arg_y))
-    __(bne cr1,macro_label(l0))
-    __(vpop(arg_x))
-macro_label(l0):')
+//     /* vpop argregs - nargs is known to be non-zero */
+// define(`vpop_argregs_nz',`
+//     new_macro_labels()
+//     __(cmplri(cr1,nargs,node_size*2))
+//     __(vpop(arg_z))
+//     __(blt cr1,macro_label(l0))
+//     __(vpop(arg_y))
+//     __(bne cr1,macro_label(l0))
+//     __(vpop(arg_x))
+// macro_label(l0):')
 
                 
-    /* vpush argregs */
-define(`vpush_argregs',`
-    new_macro_labels()
-    __(cmplri(cr0,nargs,0))
-    __(cmplri(cr1,nargs,node_size*2))
-    __(beq cr0,macro_label(done))
-    __(blt cr1,macro_label(z))
-    __(beq cr1,macro_label(yz))
-    __(vpush(arg_x))
-macro_label(yz):
-    __(vpush(arg_y))
-macro_label(z):
-    __(vpush(arg_z))
-macro_label(done):
-')
+//     /* vpush argregs */
+// define(`vpush_argregs',`
+//     new_macro_labels()
+//     __(cmplri(cr0,nargs,0))
+//     __(cmplri(cr1,nargs,node_size*2))
+//     __(beq cr0,macro_label(done))
+//     __(blt cr1,macro_label(z))
+//     __(beq cr1,macro_label(yz))
+//     __(vpush(arg_x))
+// macro_label(yz):
+//     __(vpush(arg_y))
+// macro_label(z):
+//     __(vpush(arg_z))
+// macro_label(done):
+// ')
 
-define(`create_lisp_frame',`
-    __(stru(sp,-lisp_frame.size(sp)))
-')
+// define(`create_lisp_frame',`
+//     __(stru(sp,-lisp_frame.size(sp)))
+// ')
 
                 
-define(`build_lisp_frame',`
-    create_lisp_frame()
-    __(str(ifelse($1,`',fn,$1),lisp_frame.savefn(sp)))
-    __(str(ifelse($2,`',loc_pc,$2),lisp_frame.savelr(sp)))
-    __(str(ifelse($3,`',vsp,$3),lisp_frame.savevsp(sp)))
-')
+// define(`build_lisp_frame',`
+//     create_lisp_frame()
+//     __(str(ifelse($1,`',fn,$1),lisp_frame.savefn(sp)))
+//     __(str(ifelse($2,`',loc_pc,$2),lisp_frame.savelr(sp)))
+//     __(str(ifelse($3,`',vsp,$3),lisp_frame.savevsp(sp)))
+// ')
 
             
-define(`discard_lisp_frame',`
-    __(la sp,lisp_frame.size(sp))
-    ')
-    
-    
-define(`_car',`
-    __(ldr($1,cons.car($2)))
-')
-    
-define(`_cdr',`
-    __(ldr($1,cons.cdr($2)))
-    ')
-    
-define(`_rplaca',`
-    __(str($2,cons.car($1)))
-    ')
-    
-define(`_rplacd',`
-    __(str($2,cons.cdr($1)))
-    ')
+// define(`discard_lisp_frame',`
+//     __(la sp,lisp_frame.size(sp))
+//     ')
+
 
 define(`vpush_saveregs',`
     __(vpush(save7))

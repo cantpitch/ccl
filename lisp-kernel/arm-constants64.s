@@ -31,7 +31,7 @@ define(`arg_y',`x14')
 define(`arg_z',`x15')                
 define(`save0',`x16')
 define(`save1',`x17')
-/* macos uses x18 (Platform Register) */
+/* macos uses x18 (Platform Register) https://stackoverflow.com/questions/71152539/consequence-of-violating-macoss-arm64-calling-convention */
 define(`save2',`x18')
 define(`save3',`x19')
 define(`save4',`x20')
