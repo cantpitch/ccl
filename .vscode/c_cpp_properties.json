@@ -17,6 +17,23 @@
             "cppStandard": "c++14",
             "intelliSenseMode": "macos-clang-arm64",
             "configurationProvider": "ms-vscode.makefile-tools"
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [
+                "${workspaceFolder}/lisp-kernel/platform-linuxx8664.h"
+            ],
+            "defines": [
+                "X86",
+                "X8664"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

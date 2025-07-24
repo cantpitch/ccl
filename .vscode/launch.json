@@ -19,6 +19,14 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/lisp-kernel/darwinx8664/testrunner",
+        },
+        {
+            "name": "Launch lx86cl64",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/lx86cl64",
+            "args": ["-I", "lx86cl64.image"],
+            "cwd": "${workspaceFolder}",
         }
     ]
 }

@@ -19,7 +19,9 @@
 #include "gc.h"
 #include "area.h"
 #include <assert.h>
+#ifdef DARWIN
 #include <crt_externs.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include "lisp-exceptions.h"
