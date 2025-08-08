@@ -49,7 +49,7 @@
 #ifndef EXCEPTION_WRITE_FAULT
 #define EXCEPTION_WRITE_FAULT 1
 #endif
-#endif
+#endif /* WINDOWS */
 
 void
 normalize_tcr(ExceptionInformation *, TCR *, Boolean);

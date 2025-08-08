@@ -45,7 +45,7 @@ ARM64_ASM_INC = arm-constants64.s arm-macros64.s arm-uuo64.s
 ARM64_C_OBJ = arm-gc64.o arm-exceptions64.o 
 ARM64_C_INC = arm-constants64.h arm-exceptions64.h $(PLATFORM_H)
 
-SPOBJ = pad.o arm-spentry64.o arm-spjump64.o arm-subprims64.o
+SPOBJ = pad.o arm-spentry64.o arm-subprims64.o
 COBJ  = gc-common.o bits.o image.o thread_manager.o lisp-debug.o memory.o unix-calls.o mach-o-image.o \
 	$(ARM64_C_OBJ) 
 ASMOBJ = imports.o $(ARM64_ASM_OBJ) 

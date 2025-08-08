@@ -26,8 +26,10 @@
 
 #include <sys/signal.h>
 #include <sys/ucontext.h>
+#include <stdint.h>
 
-typedef u_int32_t opcode, *pc;
+typedef u_int32_t opcode;
+typedef u_int64_t pc;
 
 typedef mcontext_t MCONTEXT_T;
 typedef ucontext_t ExceptionInformation;
@@ -56,10 +58,10 @@ extern natural os_major_version;
 // xp accessors for Darwin ARM64 (Apple Silicon)
 #define xpGPRvector(x) ((natural *)&((x)->uc_mcontext->__ss.__x[0]))
 #define xpGPR(x, gprno) (xpGPRvector(x))[gprno]
-#define xpPC(x) ((pc)(&((x)->uc_mcontext->__ss.__pc)))
-#define xpLR(x) ((pc)(&((x)->uc_mcontext->__ss.__lr)))
-#define xpFP(x) ((pc)(&((x)->uc_mcontext->__ss.__fp)))
-#define xpSP(x) ((pc)(&((x)->uc_mcontext->__ss.__sp)))
+#define xpPC(x) ((x)->uc_mcontext->__ss.__pc)
+#define xpLR(x) ((x)->uc_mcontext->__ss.__lr)
+#define xpFP(x) ((x)->uc_mcontext->__ss.__fp)
+#define xpSP(x) ((x)->uc_mcontext->__ss.__sp)
 #define xpPSR(x) ((x)->uc_mcontext->__ss.__cpsr)
 #define xpFaultAddress(x) ((x)->uc_mcontext->__es.__far)
 #define xpFaultStatus(x) ((x)->uc_mcontext->__es.__esr)

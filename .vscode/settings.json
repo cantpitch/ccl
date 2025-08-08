@@ -22,7 +22,9 @@
         "string.h": "c",
         "lisptypes.h": "c",
         "gc.h": "c",
-        "__locale": "c"
+        "__locale": "c",
+        "stdint.h": "c",
+        "mach.h": "c"
     },
     "editor.formatOnSave": false
 }

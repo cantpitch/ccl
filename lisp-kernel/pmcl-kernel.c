@@ -865,7 +865,7 @@ user_signal_handler (int signum, siginfo_t *info, ExceptionInformation *context)
 #endif
 }
 
-#endif
+#endif /* !WINDOWS */
 
 
 void
@@ -877,11 +877,11 @@ register_user_signal_handler()
   signal(SIGINT, SIG_IGN);
 
   SetConsoleCtrlHandler(ControlEventHandler,TRUE);
-#else
+#else /* !WINDOWS */
   install_signal_handler(SIGINT, (void *)user_signal_handler, 0);
   install_signal_handler(SIGTERM, (void *)user_signal_handler, 0);
   install_signal_handler(SIGQUIT, (void *)user_signal_handler, 0);
-#endif
+#endif /* !WINDOWS */
 }
 
 int
@@ -889,7 +889,7 @@ wait_for_signal(int signo, int seconds, int milliseconds)
 {
 #ifdef WINDOWS
   return EINVAL;
-#else
+#else /* !WINDOWS */
   if ((signo <= 0) || (signo >= NSIG)) {
     return EINVAL;
   }
@@ -901,7 +901,7 @@ wait_for_signal(int signo, int seconds, int milliseconds)
     install_signal_handler(signo,(void *)user_signal_handler, 0);
   }
   return wait_on_semaphore((void *)user_signal_semaphores[signo],seconds,milliseconds);
-#endif
+#endif /* !WINDOWS */
 }
 
 BytePtr

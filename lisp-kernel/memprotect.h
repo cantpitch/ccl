@@ -129,7 +129,7 @@ void
 exception_cleanup(void);
 
 
-void
-initialize_refidx_from_refbits(bitvector, bitvector, natural);
+// void
+// initialize_refidx_from_refbits(bitvector, bitvector, natural);
   
 #endif /* __memprotect_h__ */

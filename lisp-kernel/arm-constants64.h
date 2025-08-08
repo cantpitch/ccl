@@ -219,24 +219,13 @@ typedef struct double_float {
   LispObj value;
 } double_float;
 
-
-
-typedef struct eabi_c_frame {
-  struct eabi_c_frame *backlink;
-  unsigned savelr;
+// https://github.com/ARM-software/abi-aa/blob/2982a9f3b512a5bfdc9e3fea5d3b298f9165c36b/aapcs64/aapcs64.rst#parameter-passing
+// https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms
+typedef struct aarch64_c_frame {
+  struct aarch64_c_frame *backlink;
+  LispObj savelr;
   LispObj params[8];
-} eabi_c_frame;
-
-/* PowerOpen ABI C frame */
-
-typedef struct c_frame {
-  struct c_frame *backlink;
-  natural crsave;
-  natural savelr;
-  natural unused[2];
-  natural savetoc;		/* Used with CFM (and on Linux.) */
-  natural params[8];		/* Space for callee to save r3-r10 */
-} c_frame;
+} aarch64_c_frame;
 
 typedef struct lisp_frame {
   struct lisp_frame *backlink;
@@ -331,6 +320,7 @@ typedef struct tcr {
   natural shutdown_count;
   void *safe_ref_address;
   void *nfp;
+  void *io_datum;
 } TCR;
 
 #define t_offset -(sizeof(lispsymbol))
@@ -344,6 +334,8 @@ typedef struct tcr {
 #define heap_segment_size 0x00020000L
 #define log2_heap_segment_size 17L
 
-
+#define ABI_VERSION_MIN 1045
+#define ABI_VERSION_CURRENT 1045
+#define ABI_VERSION_MAX 1045
 
 #endif /* __arm_constants64_h */
