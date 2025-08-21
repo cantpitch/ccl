@@ -24,7 +24,9 @@
         "gc.h": "c",
         "__locale": "c",
         "stdint.h": "c",
-        "mach.h": "c"
+        "mach.h": "c",
+        "os-darwin.h": "c",
+        "arm-constants64.h": "c"
     },
     "editor.formatOnSave": false
 }

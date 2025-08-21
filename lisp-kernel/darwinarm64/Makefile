@@ -34,14 +34,18 @@ LISP_KERNEL = ../../darmcl64
 SRCDIRS = 
 
 
+.m4.s:
+	mkdir -p obj
+	$(M4) $(M4FLAGS) -I ../ $< > $@
+
 .s.o:
-	$(M4) $(M4FLAGS) -I../ $< | $(AS) -x assembler -c $(ASFLAGS) -o $@ -
+	$(M4) $(M4FLAGS) -I ../ $< | $(AS) -x assembler -c $(ASFLAGS) -o $@ -
 .c.o:
 	$(CC) -include ../$(PLATFORM_H) -c $< $(CDEFINES) $(CDEBUG) $(COPT) \
 	$(WFORMAT) -mmacosx-version-min=$(OSVERSION) -o $@ 
 
 ARM64_ASM_OBJ = arm-asmutils64.o 
-ARM64_ASM_INC = arm-constants64.s arm-macros64.s arm-uuo64.s
+ARM64_ASM_INC = arm-constants64.s.m4 arm-macros64.s.m4 arm-uuo64.s.m4
 ARM64_C_OBJ = arm-gc64.o arm-exceptions64.o 
 ARM64_C_INC = arm-constants64.h arm-exceptions64.h $(PLATFORM_H)
 

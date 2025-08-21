@@ -1,5 +1,5 @@
-#ifndef __PLATFORM_DARWINARM64_H__
-#define __PLATFORM_DARWINARM64_H__
+#ifndef __platform_darwinarm64_h__
+#define __platform_darwinarm64_h__ 1
 
 /*
  * Copyright 2024 Clozure Associates
@@ -74,4 +74,4 @@ extern natural os_major_version;
 
 #include "os-darwin.h"
 
-#endif /* __PLATFORM_DARWINARM64_H__ */
+#endif /* __platform_darwinarm64_h__ */
