@@ -67,14 +67,14 @@
 	')
         ifdef(`ARM',`
          include(arm-constants32.s)
-         include(arm-macros.s.m4)
+         include(arm-macros.s)
          include(arm-macros32.s)
          include(arm-uuo32.s)
         ')
         ifdef(`ARM64',`
-         include(arm-constants64.s.m4)
-         include(arm-macros.s.m4)
-         include(arm-macros64.s.m4)
-         include(arm-uuo64.s.m4)
+         include(arm-constants64.s)
+         include(arm-macros.s)
+         include(arm-macros64.s)
+         include(arm-uuo64.s)
         ')
 

@@ -1,0 +1,59 @@
+# ---- Configurable variables ----
+MACOSX_SDK := $(shell xcrun --sdk macosx --show-sdk-path)
+TARGET     := darmcl64
+CC         := cc
+AS         := cc -x assembler          # using the C compiler as assembler for portability
+M4         := m4
+
+VPATH	 := ../ ../test ../arch/arm/aarch64
+CFLAGS   ?= -O2 -g -Wall -Wextra -I../ -include ../platform-darwinarm64.h -isysroot $(MACOSX_SDK) -DARM64 -DDARWIN \
+	-D_REENTRANT -D_XOPEN_SOURCE -DDISABLE_EGC -DGC_INTEGRITY_CHECKING -Wp,-dM
+ASFLAGS  ?= -c -arch arm64 -g -mmacosx-version-min=13.0
+LDFLAGS  ?=
+M4FLAGS  ?= -I../arch/arm -I../arch/arm/aarch64 -DDARWIN -DARM64
+
+# ---- Source discovery ----
+C_SRCS   := arm64_print.c arm-gc64.c arm-exceptions64.c bits.c gc-common.c image.c lisp-debug.c mach-o-image.c \
+	memory.c plbt.c plprint.c plsym.c pmcl-kernel.c unix-calls.c
+ASM_SRCS := arm-asmutils64.s arm-spentry64.s arm-subprims64.s arm-uuo64.s
+
+# All sources;
+SRCS     := $(C_SRCS) $(ASM_SRCS)
+
+# Object files (derive from both .c and .s)
+OBJS     := $(SRCS:.c=.o)
+OBJS     := $(OBJS:.s=.o)
+
+# Dependency files for C sources
+DEPS     := $(C_SRCS:.c=.d)
+
+# ---- Default target ----
+.PHONY: all
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+# ---- Pattern rules ----
+
+# 1) Compile C to .o (with dep files)
+%.o: %.c
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+
+# 3) ARM64 .s need to be processed with m4 first before assembly to .o
+%.o: %.s
+	$(M4) $(M4FLAGS) -I ../ $< | $(AS) $(ASFLAGS) -o $@ -
+
+# ---- Housekeeping ----
+.PHONY: clean distclean run
+clean:
+	$(RM) $(OBJS) $(DEPS)
+
+distclean: clean
+	$(RM) $(TARGET)
+
+run: $(TARGET)
+	./$(TARGET)
+
+# Include auto-generated dependencies (safe if none exist)
+-include $(DEPS)

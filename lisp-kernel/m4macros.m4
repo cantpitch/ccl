@@ -26,107 +26,125 @@ define(`NOstabs',`0')
 define(`BSDstabs',`1')
 define(`ELFstabs',`2')
 define(`COFFstabs',`3')
+
 undefine(`EABI')
 undefine(`POWEROPENABI')
 undefine(`rTOC')
 
-
-ifdef(`DARWIN',`define(`SYSstabs',`NOstabs')
-        define(`DarwinAssembler',`')
-        define(`CNamesNeedUnderscores',`')
-        define(`LocalLabelPrefix',`L')
-        define(`MacroLabelPrefix',`L__')
-        define(`StartTextLabel',`Ltext0')
-        define(`EndTextLabel',`Letext')
-        ifdef(`PPC',`
-            define(`POWEROPENABI',`')')
-        ifdef(`X86',`
-            define(`SYSCALL_SETS_CARRY_ON_ERROR',`')
-		    define(`SSE2_MATH_LIB',`')')
+ifdef(`DARWIN',`
+    define(`SYSstabs',`NOstabs')
+    define(`DarwinAssembler',`')
+    define(`CNamesNeedUnderscores',`')
+    define(`LocalLabelPrefix',`L')
+    define(`MacroLabelPrefix',`L__')
+    define(`StartTextLabel',`Ltext0')
+    define(`EndTextLabel',`Letext')
+    ifdef(`PPC',`
+        define(`POWEROPENABI',`')
+    ')
+    ifdef(`X86',`
+        define(`SYSCALL_SETS_CARRY_ON_ERROR',`')
+        define(`SSE2_MATH_LIB',`')
+    ')
 ')
 
-ifdef(`LINUX',`define(`SYSstabs',`ELFstabs')
-	       define(`HaveWeakSymbols',`')
-	       define(`LocalLabelPrefix',`.L')
-	       define(`MacroLabelPrefix',`.L__')
-	       define(`StartTextLabel',`.Ltext0')
-	       define(`EndTextLabel',`.Letext')
-               ifdef(`PPC64',`
-               define(`POWEROPENABI',`')
-               define(`rTOC',`r2')', `
-	       define(`EABI',`')')')
+ifdef(`LINUX',`
+    define(`SYSstabs',`ELFstabs')
+    define(`HaveWeakSymbols',`')
+    define(`LocalLabelPrefix',`.L')
+    define(`MacroLabelPrefix',`.L__')
+    define(`StartTextLabel',`.Ltext0')
+    define(`EndTextLabel',`.Letext')
+    ifdef(`PPC64',`
+        define(`POWEROPENABI',`')
+        define(`rTOC',`r2')
+    ',`
+        define(`EABI',`')
+    ')
+')
 
-ifdef(`FREEBSD',`define(`SYSstabs',`NOstabs')
-	       define(`HaveWeakSymbols',`')
-	       define(`LocalLabelPrefix',`.L')
-	       define(`MacroLabelPrefix',`.L__')
-	       define(`StartTextLabel',`.Ltext0')
-	       define(`EndTextLabel',`.Letext')'
-                ifdef(`X86',`
-                define(`SYSCALL_SETS_CARRY_ON_ERROR',`')')
+ifdef(`FREEBSD',`
+    define(`SYSstabs',`NOstabs')
+    define(`HaveWeakSymbols',`')
+    define(`LocalLabelPrefix',`.L')
+    define(`MacroLabelPrefix',`.L__')
+    define(`StartTextLabel',`.Ltext0')
+    define(`EndTextLabel',`.Letext')
+    '
+    ifdef(`X86',`
+        define(`SYSCALL_SETS_CARRY_ON_ERROR',`')
+    ')
 )
 
-ifdef(`SOLARIS',`define(`SYSstabs',`ELFstabs')
-	       define(`HaveWeakSymbols',`')
-	       define(`LocalLabelPrefix',`.L')
-	       define(`MacroLabelPrefix',`.L__')
-	       define(`StartTextLabel',`.Ltext0')
-	       define(`EndTextLabel',`.Letext')')
+ifdef(`SOLARIS',`
+    define(`SYSstabs',`ELFstabs')
+    define(`HaveWeakSymbols',`')
+    define(`LocalLabelPrefix',`.L')
+    define(`MacroLabelPrefix',`.L__')
+    define(`StartTextLabel',`.Ltext0')
+    define(`EndTextLabel',`.Letext')
+')
 
-ifdef(`WINDOWS',`define(`SYSstabs',`COFFstabs')
-        ifdef(`WIN_32',`define(`CNamesNeedUnderscores',`')')
-               define(`LocalLabelPrefix',`L')
-               define(`MacroLabelPrefix',`L__')
-	       define(`StartTextLabel',`Ltext0')
-	       define(`EndTextLabel',`Letext')')
+ifdef(`WINDOWS',`
+    define(`SYSstabs',`COFFstabs')
+    ifdef(`WIN_32',`
+        define(`CNamesNeedUnderscores',`')
+    ')
+    define(`LocalLabelPrefix',`L')
+    define(`MacroLabelPrefix',`L__')
+    define(`StartTextLabel',`Ltext0')
+    define(`EndTextLabel',`Letext')
+')
 
 
 /*  Names exported to (or imported from) C may need leading underscores.  */
 /*  Still.  After all these years.  Why ?  */
-
 define(`C',`ifdef(`CNamesNeedUnderscores',``_'$1',`$1')')
 
 define(`_linecounter_',0)
 
 define(`_emit_BSD_source_line_stab',`
-ifdef(`X86',`
+    ifdef(`X86',`
 # __line__ "__file__" 1',`
-	.stabd 68,0,$1
+    .stabd 68,0,$1
 ')')
 
+/* Darwin doesn't have stabs, but source line references are useful for compiling */
+define(`_emit_source_line_nostab',`
+    ifdef(`DARWIN',`
+# __line__ "__file__" 1',`')')
 
 /*  We don't really do "weak importing" of symbols from a separate  */
 /*  subprims library anymore; if we ever do and the OS supports it,  */
 /*  here's how to say that we want it ...  */
 
 define(`WEAK',`ifdef(`HaveWeakSymbols',`
-	.weak $1
+    .weak $1
 ',`
-	.globl $1
+    .globl $1
 ')')
 
 define(`_emit_ELF_source_line_stab',`
   define(`_linecounter_',incr(_linecounter_))
-	.stabn 68,0,$1,`.LM'_linecounter_`-'__func_name
+    .stabn 68,0,$1,`.LM'_linecounter_`-'__func_name
 `.LM'_linecounter_:
 ')
 
-define(`_emit_COFF_source_line_stab',`
-        _emit_ELF_source_line_stab($1)
-')
+define(`_emit_COFF_source_line_stab',`_emit_ELF_source_line_stab($1)')
 
 
 define(`emit_source_line_stab',`
-	ifelse(eval(SYSstabs),
-              eval(NOstabs),
-              `',
-              eval(SYSstabs),
-              eval(BSDstabs),
-  	      `_emit_BSD_source_line_stab($1)',
-              eval(SYSstabs),
-              eval(ELFstabs),
-              `_emit_ELF_source_line_stab($1)',
-              `_emit_COFF_source_line_stab($1)')')
+    ifelse(
+        eval(SYSstabs),
+        eval(NOstabs),
+        `_emit_source_line_nostab($1)',
+        eval(SYSstabs),
+        eval(BSDstabs),
+        `_emit_BSD_source_line_stab($1)',
+        eval(SYSstabs),
+        eval(ELFstabs),
+        `_emit_ELF_source_line_stab($1)',
+        `_emit_COFF_source_line_stab($1)')')
 
 
 
@@ -165,73 +183,76 @@ define(`__pwd__',substr(pwd0,0,decr(len(pwd0)))`/')
 
 
 define(`_beginfile',`
-        ifelse(eval(SYSstabs),eval(NOstabs),`',`
-	.stabs "__pwd__",N_SO,0,0,StartTextLabel()
-	.stabs "__file__",N_SO,0,0,StartTextLabel()
-')
-ifdef(`PPC64',`
-ifdef(`DARWIN',`
-        .machine ppc64
-')')
-	.text
+    ifelse(eval(SYSstabs),eval(NOstabs),`',`
+    .stabs "__pwd__",N_SO,0,0,StartTextLabel()
+    .stabs "__file__",N_SO,0,0,StartTextLabel()
+    ')
+    ifdef(`PPC64',`
+        ifdef(`DARWIN',`
+    .machine ppc64
+        ')
+    ')
+    .text
 StartTextLabel():
 # __line__ "__file__"
 ')
 
 define(`_endfile',`
-        ifelse(eval(SYSstabs),eval(NOstabs),`',`
-	.stabs "",N_SO,0,0,EndTextLabel()
-')
+    ifelse(eval(SYSstabs),eval(NOstabs),`',`
+    .stabs "",N_SO,0,0,EndTextLabel()
+    ')
 EndTextLabel():
 # __line__
 ')
 
 define(`_startfn',`define(`__func_name',$1)
 # __line__
-	ifelse(eval(SYSstabs),eval(ELFstabs),`
-	.type $1,ifdef(`ARM',%function,@function)
-')
+    ifelse(eval(SYSstabs),eval(ELFstabs),`
+    .type $1,ifdef(`ARM',%function,@function)
+    ')
 
 $1:
-ifdef(`WINDOWS',`
-	.def	$1;	.scl	2;	.type	32;	.endef
-',`
+    ifdef(`WINDOWS',`
+    .def	$1;	.scl	2;	.type	32;	.endef
+    ',`
         ifelse(eval(SYSstabs),eval(NOstabs),`',`
-        .stabd 68,0,__line__
-')')
-	ifelse(eval(SYSstabs),eval(ELFstabs),`
-	.stabs "$1:F1",36,0,__line__,$1
-')
-	.set func_start,$1
+    .stabd 68,0,__line__
+        ')
+    ')
+    ifelse(eval(SYSstabs),eval(ELFstabs),`
+    .stabs "$1:F1",36,0,__line__,$1
+    ')
+    .set func_start,$1
 # __line__ "__file__" 1 ')
 
 
 
 define(`_exportfn',`
-	.globl $1
-	_startfn($1)
-ifdef(`PPC64',`
-ifdef(`LINUX',`
+    .globl $1
+    _startfn($1)
+    ifdef(`PPC64',`
+        ifdef(`LINUX',`
         .global `.'$1
 `.'$1:
-')')
+        ')
+    ')
 # __line__
 ')
 
 
 define(`_endfn',`
 LocalLabelPrefix`'__func_name`999':
-ifdef(`WINDOWS',`
-',`
+    ifdef(`WINDOWS',`
+        ',`
         ifelse(eval(SYSstabs),eval(NOstabs),`',`
-	.stabs "",36,0,0,LocalLabelPrefix`'__func_name`999'-__func_name
-')
-	.line __line__
-	ifelse(eval(SYSstabs),eval(ELFstabs),`
-        .size __func_name,LocalLabelPrefix`'__func_name`999'-__func_name
-')
-')
-	undefine(`__func_name')
+    .stabs "",36,0,0,LocalLabelPrefix`'__func_name`999'-__func_name
+        ')
+    .line __line__
+        ifelse(eval(SYSstabs),eval(ELFstabs),`
+    .size __func_name,LocalLabelPrefix`'__func_name`999'-__func_name
+        ')
+    ')
+    undefine(`__func_name')
 ')
 
 
@@ -239,25 +260,26 @@ ifdef(`WINDOWS',`
 /*   This just generates a bunch of assembler equates; m4  */
 /*   doesn't remember much of it ..  */
 
-define(`_struct', `define(`__struct_name',$1)
- define(`_struct_org_name', _$1_org) 
- define(`_struct_base_name', _$1_base)
-	.set _struct_org_name,$2
-	.set _struct_base_name,_struct_org_name
- ifelse($3,`',`
-  undefine(`_struct_fixed_size_name')
-  ',`
-  define(`_struct_fixed_size_name', _$1_fixed_size)
-	.set _struct_fixed_size_name,$3
-  ')
+define(`_struct', `
+    define(`__struct_name',$1)
+    define(`_struct_org_name', _$1_org) 
+    define(`_struct_base_name', _$1_base)
+    .set _struct_org_name,$2
+    .set _struct_base_name,_struct_org_name
+    ifelse($3,`',`
+        undefine(`_struct_fixed_size_name')
+    ',`
+        define(`_struct_fixed_size_name', _$1_fixed_size)
+    .set _struct_fixed_size_name,$3
+    ')
 ')
 
 define(`_struct_pad',`
-	.set _struct_org_name,_struct_org_name + $1
+    .set _struct_org_name,_struct_org_name + $1
 ')
  
 define(`_struct_label',`
-	.set __struct_name`.'$1, _struct_org_name
+    .set __struct_name`.'$1, _struct_org_name
 ')
 
 /*  _field(name,size)   */
@@ -272,11 +294,12 @@ define(`_node', `_field($1, node_size)')
 define(`_rnode', `_rfield($1, node_size)')
 
 
-define(`_ends',`ifdef(`_struct_fixed_size_name',`
-	.set  __struct_name`.size',_struct_fixed_size_name
-	',`
-	.set  __struct_name`.size', _struct_org_name-_struct_base_name
-	')
+define(`_ends',`
+    ifdef(`_struct_fixed_size_name',`
+    .set  __struct_name`.size',_struct_fixed_size_name
+        ',`
+    .set  __struct_name`.size', _struct_org_name-_struct_base_name
+    ')
 ')
 
 
@@ -287,19 +310,19 @@ define(`_ends',`ifdef(`_struct_fixed_size_name',`
 
 
 define(`_structf',`
-	_struct($1,ifelse($2,`',-misc_bias,$2))
-        _node(header)
+    _struct($1,ifelse($2,`',-misc_bias,$2))
+    _node(header)
 ')
 
 define(`_endstructf',`
-	.set __struct_name.`element_count',((_struct_org_name-node_size)-_struct_base_name)/node_size
-	_ends
+    .set __struct_name.`element_count',((_struct_org_name-node_size)-_struct_base_name)/node_size
+    _ends
 ')
 
 
 define(`__',`emit_source_line_stab(__line__)
-	$@
-	')
+    $@
+    ')
 
 define(`__local_label_counter__',0)
 define(`__macro_label_counter__',0)
@@ -362,10 +385,12 @@ define(`USE_POWEROPEN_C_FRAME',`')
 undefine(`USE_EABI_C_FRAME')
 
 ifdef(`LINUX',`
-ifdef(`PPC64',`',`
-define(`USE_EABI_C_FRAME',`')
-undefine(`USE_POWEROPEN_C_FRAME')
-')')
+    ifdef(`PPC64',
+        `',`
+        define(`USE_EABI_C_FRAME',`')
+        undefine(`USE_POWEROPEN_C_FRAME')
+    ')
+')
 
 
 

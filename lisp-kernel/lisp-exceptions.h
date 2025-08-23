@@ -140,11 +140,11 @@ exception_fn_name( ExceptionInformation *, int, char *, size_t );
 #endif
 
 #ifdef ARM
-#include "arm-exceptions32.h"
+#include "arch/arm/aarch32/arm-exceptions32.h"
 #endif
 
 #ifdef ARM64
-#include "arm-exceptions64.h"
+#include "arch/arm/aarch64/arm-exceptions64.h"
 #endif
 
 #ifdef DARWIN
