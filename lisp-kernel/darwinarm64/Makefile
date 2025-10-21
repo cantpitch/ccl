@@ -52,13 +52,11 @@ COBJ  = pmcl-kernel.o gc-common.o arm64-gc.o bits.o arm64-exceptions.o \
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o plbt.o arm64_print.o
 KERNELOBJ= $(COBJ) arm64-asmutils.o  imports.o
 
-SPINC =	lisp.s m4macros.m4 arm64-constants.s arm64-macros.s errors.s \
-	arm64-uuo.s arm64-constants64.s lisp_globals.s
+SPINC =	lisp.s m4macros.m4 arm64-macros.s errors.s arm64-uuo.s arm64-constants.s lisp_globals.s
 
-CHEADERS = area.h bits.h arm64-constants.h lisp-errors.h gc.h lisp.h \
-	lisp-exceptions.h lisp_globals.h macros.h memprotect.h image.h \
-	threads.h arm64-constants64.h arm64-exceptions.h $(PLATFORM_H) \
-	constants.h
+CHEADERS = area.h bits.h arm64-constants.h lisp-errors.h gc.h lisp.h lisp-exceptions.h \
+	lisp_globals.h macros.h memprotect.h image.h threads.h arm64-constants.h arm64-exceptions.h \
+	$(PLATFORM_H) constants.h
 
 # Subprims linked into the kernel ?
 # Yes:
