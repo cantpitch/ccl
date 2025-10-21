@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch darmcl64",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/darmcl64",
+            "cwd": "${workspaceFolder}",
+        },
+        {
+            "name": "Launch dx86cl64",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/dx86cl64",
+            "args": ["-I", "dx86cl64.image"],
+            "cwd": "${workspaceFolder}",
+        },
+        {
+            "name": "Launch x64 testrunner",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/lisp-kernel/darwinx8664/testrunner",
+            "cwd": "${workspaceFolder}",
+        },
+        {
+            "name": "Launch lx86cl64",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/lx86cl64",
+            "args": ["-I", "lx86cl64.image"],
+            "cwd": "${workspaceFolder}",
+        },
+        {
+            "name": "Launch lx86cl32",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/lx86cl32",
+            "args": ["-I", "lx86cl32.image"],
+            "cwd": "${workspaceFolder}",
+        }
+    ]
+}
