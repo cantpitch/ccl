@@ -59,6 +59,12 @@
 #define is_node_fulltag(f)  ((1<<(f))&((1<<fulltag_cons)|(1<<fulltag_misc)))
 #endif
 
+#ifdef ARM64
+// NOTE: Copied from PPC, not tested
+#define is_node_fulltag(f)  ((1<<(f))&((1<<fulltag_cons)|(1<<fulltag_misc)))
+#define ARM64_CODE_VECTOR_PREFIX (('C'<< 24) | ('O' << 16) | ('D' << 8) | 'E')
+#endif
+
 extern LispObj GCarealow, GCareadynamiclow;
 extern natural GCndnodes_in_area, GCndynamic_dnodes_in_area;
 extern bitvector GCmarkbits, GCdynamic_markbits,managed_static_refbits,global_refidx,dynamic_refidx,managed_static_refidx;

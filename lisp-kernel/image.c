@@ -29,7 +29,7 @@
 #include <time.h>
 
 
-#if defined(PPC64) || defined(X8632)
+#if defined(PPC64) || defined(X8632) || defined(ARM64)
 #define RELOCATABLE_FULLTAG_MASK \
   ((1<<fulltag_cons)|(1<<fulltag_misc))
 #else
