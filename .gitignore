@@ -45,3 +45,5 @@ lisp-kernel/darwinarm64/mach_exc_server.c
 lisp-kernel/darwinarm64/probes.h
 lisp-kernel/static-linuxppc/external-functions.h
 
+lisp-kernel/linuxppc64/lisp.s
+lisp-kernel/linuxppc64/m4test.m4
