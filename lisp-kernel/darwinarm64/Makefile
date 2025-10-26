@@ -62,7 +62,7 @@ CHEADERS = area.h bits.h arm64-constants.h lisp-errors.h gc.h lisp.h lisp-except
 # Yes:
 
 KSPOBJ = $(SPOBJ)
-all:	../../darm64cl
+all:	../../darmcl64
 
 
 # No:
@@ -73,7 +73,7 @@ all:	../../darm64cl
 OSLIBS = -lsystem
 
 
-../../darm64cl:	$(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ)
+../../darmcl64:	$(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ)
 	$(CC) -arch arm64 $(CDEBUG)  -sectalign __TEXT __text 0x1000  \
 	-L$(MACOSX_SDK)/usr/lib -o $@ $(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ) 
 
@@ -100,7 +100,7 @@ mach_exc_server.c: mach_exc.defs
 mach_exc.h: mach_exc_server.c
 
 cclean:
-	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ../../darm64cl \
+	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ../../darmcl64 \
 	probes.h \
 	mach_exc.h mach_exc_server.c
 
@@ -108,5 +108,5 @@ cclean:
 clean:	cclean
 	$(RM) -f $(SPOBJ)
 
-strip:	../../darm64cl
-	strip -g ../../darm64cl
+strip:	../../darmcl64
+	strip -g ../../darmcl64
