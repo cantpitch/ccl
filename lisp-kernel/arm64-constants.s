@@ -401,7 +401,10 @@ define_subtag(illegal,fulltag_imm_3,2)
 illegal_marker = subtag_illegal
 define_subtag(no_thread_local_binding,fulltag_imm_3,3)
 no_thread_local_binding_marker = subtag_no_thread_local_binding        
-
+define_subtag(stack_alloc,fulltag_imm_3,4)
+stack_alloc_marker = subtag_stack_alloc
+define_subtag(lisp_frame,fulltag_imm_3,5)
+lisp_frame_marker = subtag_lisp_frame
 	
 max_64_bit_constant_index = ((0x7fff + misc_dfloat_offset)>>3)
 max_32_bit_constant_index = ((0x7fff + misc_data_offset)>>2)

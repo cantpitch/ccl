@@ -204,7 +204,42 @@ PPC and ARM64 have pretty different register allocations for their ABIs, but sin
 |   |   |   |
 |   |   |   |
 
+# `stack_alloc_marker`
+* PPC64 doesn't use a `stack_alloc_marker` because it has the PowerOpen ABI stack frame.
+* ARM32 and the aborted ARM64 use a `stack_alloc_marker` for displaying and walking the stack.
 
+## ARM32 
+In `arm-constants.h` it's defined as `#define stack_alloc_marker SUBTAG(fulltag_imm,1)` which is `3 | (1 << 3)` => `0xB`.
+
+## Previous ARM64
+In `arm64-constants.s.prev` it was going to be defined as:
+```arm64-constants.s.prev
+tag_stack_alloc = (tag_imm | 6) ; This was supposed to be `imm_tag_mask`
+stack_alloc_marker = (tag_stack_alloc << tag_shift)   
+```
+which (after corrections) would be:
+```
+tag_stack_alloc = (0x10 | 6)
+stack_alloc_marker = (0x10 | 6) << tag_shift ; This was going to use ARM64's high tag ability, so the shift is immaterial.
+```
+The tag was going to be `0x16`.
+
+The question becomes, what should it be on ARM64 now?
+
+For now, in `arm64-constants.h` it will be defined (along with `lisp_frame_marker` another potential necessity on ARM64) as:
+```
+#define subtag_stack_alloc SUBTAG(fulltag_imm_3,4)
+#define stack_alloc_marker subtag_stack_alloc
+#define subtag_lisp_frame SUBTAG(fulltag_imm_3,5)
+#define lisp_frame_marker subtag_lisp_frame
+```
+and in `arm64-constants.s` as:
+```
+define_subtag(stack_alloc,fulltag_imm_3,4)
+stack_alloc_marker = subtag_stack_alloc
+define_subtag(lisp_frame,fulltag_imm_3,5)
+lisp_frame_marker = subtag_lisp_frame
+```
 # Glossary
 
 ## node & dnode

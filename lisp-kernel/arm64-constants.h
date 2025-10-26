@@ -229,7 +229,11 @@
 #define subtag_illegal SUBTAG(fulltag_imm_3,2)
 #define illegal_marker subtag_illegal
 #define subtag_no_thread_local_binding SUBTAG(fulltag_imm_3,3)
-#define no_thread_local_binding_marker subtag_no_thread_local_binding        
+#define no_thread_local_binding_marker subtag_no_thread_local_binding
+#define subtag_stack_alloc SUBTAG(fulltag_imm_3,4)
+#define stack_alloc_marker subtag_stack_alloc
+#define subtag_lisp_frame SUBTAG(fulltag_imm_3,5)
+#define lisp_frame_marker subtag_lisp_frame
 #define subtag_forward_marker SUBTAG(fulltag_imm_3,7)
 	
 #define max_64_bit_constant_index ((0x7fff + misc_dfloat_offset)>>3)
