@@ -1480,8 +1480,8 @@ terminate_lisp()
 #define min_os_version "5.10"
 #endif
 
-#ifdef PPC
-#if defined(PPC64) || !defined(DARWIN)
+#if defined(PPC) || defined(ARM64)
+#if defined(PPC64) || defined(ARM64) || !defined(DARWIN)
 /* ld64 on Darwin doesn't offer anything close to reliable control
    over the layout of a program in memory.  About all that we can
    be assured of is that the canonical subprims jump table address
@@ -1570,7 +1570,6 @@ remap_spjump()
 }
 #endif
 #endif
-
 
 natural os_major_version = 0;
 
@@ -1947,7 +1946,10 @@ main
   ensure_gs_available(real_executable_name);
 #endif
 #endif
-#if (defined(DARWIN) && defined(PPC64)) || (defined(LINUX) && defined(PPC))|| defined(X8664) || (defined(X8632) && !defined(DARWIN))
+#if (defined(DARWIN) && (defined(PPC64) || defined(ARM64))) || \
+    (defined(LINUX) && defined(PPC))|| \
+    defined(X8664) || \
+    (defined(X8632) && !defined(DARWIN))
   remap_spjump();
 #endif
 
@@ -2207,6 +2209,13 @@ set_nil(LispObj r)
   return NULL;
 }
 
+/* For ARM64, we just use the cache flush builtin */
+#ifdef ARM64
+void flush_cache_lines(void *start, size_t nbytes)
+{
+  __clear_cache(start, (start + nbytes));
+}
+#endif
 
 void
 xMakeDataExecutable(BytePtr start, natural nbytes)
@@ -2219,9 +2228,11 @@ xMakeDataExecutable(BytePtr start, natural nbytes)
   end = (ustart + nbytes + cache_block_size - 1) & ~(cache_block_size-1);
   flush_cache_lines(base, (end-base)/cache_block_size, cache_block_size);
 #endif
+#if defined(ARM) || defined(ARM64)
 #ifdef ARM
   extern void flush_cache_lines(void *, size_t);
-  flush_cache_lines(start,nbytes);
+#endif
+  flush_cache_lines(start, nbytes);
 #endif
 }
 

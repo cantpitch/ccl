@@ -36,8 +36,10 @@ _exportfn(C(zero_cache_lines))
     __(blr)
 _endfn
 
+
 /*  Flush R4 cache lines, starting at address in R3.  Each line is */
 /* assumed to be R5 bytes wide. */
+/* ARM64 defined in pmcl-kernel.c with __clear_cache() */
 /* PPC CODE
 _exportfn(C(flush_cache_lines))
     __(cmpri(cr0,r4,0))
