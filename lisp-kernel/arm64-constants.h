@@ -1,7 +1,6 @@
-#ifndef __arm_constants64_h
-#define __arm_constants64_h
-
+/***** BEGIN IMPORT FROM arm-constants.h *****/
 /*
+ * Copyright 1994-2009 Clozure Associates
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,45 +18,73 @@
 #include "constants.h"
 
 /*  Register usage: */
+#define rzero 0
+#define sp 1
+#define linux_sys_reg 2  /* volatile reg on Darwin ; thread ptr on Linux32, TOC on
+                                Linux64. */
+#define imm0 3
+#define imm1 4
+#define imm2 5
+#define imm3 6
+#define imm4 7
+#define imm5 8
+#define allocptr 9
+#define allocbase 10
+#define nargs 11
+#define tsp 12
+#define loc_pc 14		/*  code vector locative */
+#define vsp 15		
+#define fn 16
+#define temp3 17
+#define temp2 18
+#define temp1 19
+#define temp0 20	
+#define arg_x 21
+#define arg_y 22
+#define arg_z 23
+#define save7 24
+#define save6 25
+#define save5 26
+#define save4 27
+#define save3 28
+#define save2 29
+#define save1 30
+#define save0 31
 
-#define imm0 0 
-#define imm1 1
-#define imm2 2
-#define imm3 3
-#define imm4 4
-#define imm5 5
-#define imm6 6
-#define imm7 7
-#define nargs 8
-#define temp3 9
-#define temp2 10
-#define temp1 11
-#define temp0 12
-#define arg_x 13                
-#define arg_y 14                
-#define arg_z 15                
-#define save0 16
-#define save1 17
-/* macos uses x18 (Platform Register) */
-#define save2 18
-#define save3 19
-#define save4 20
-#define save5 21
-#define save6 22
-#define save7 23       
-#define loc_pc 24
-#define vsp 25
-#define allocptr 26
-#define allocbase 27
-#define rcontext 28
-#define fp 29 /* frame pointer */
-#define lr 30 /* link register */
-
+#define vfp save0	/*  frame pointer if needed (stack consing). */
 #define fname temp3
 #define nfn temp2
+#define next_method_context temp1
+#define closure_data temp0
+
+
+#define BA_MASK ((unsigned) ((-1<<26) | (1<<1)))
+#define BA_VAL  ((unsigned) ((18<<26) | (1<<1)))
+
 
 #define STATIC_BASE_ADDRESS 0x00002000
 
+/***** END IMPORT FROM arm-constants.h *****/
+/***** BEGIN IMPORT FROM arm-constants64.h *****/
+
+/*
+ * Copyright 1994-2009 Clozure Associates
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+#define rcontext 2
 
 #define nbits_in_word 64L
 #define log2_nbits_in_word 6L
@@ -202,9 +229,7 @@
 #define subtag_illegal SUBTAG(fulltag_imm_3,2)
 #define illegal_marker subtag_illegal
 #define subtag_no_thread_local_binding SUBTAG(fulltag_imm_3,3)
-#define no_thread_local_binding_marker subtag_no_thread_local_binding   
-#define subtag_stack_alloc SUBTAG(fulltag_imm_3,4)
-#define stack_alloc_marker subtag_stack_alloc
+#define no_thread_local_binding_marker subtag_no_thread_local_binding        
 #define subtag_forward_marker SUBTAG(fulltag_imm_3,7)
 	
 #define max_64_bit_constant_index ((0x7fff + misc_dfloat_offset)>>3)
@@ -221,13 +246,24 @@ typedef struct double_float {
   LispObj value;
 } double_float;
 
-// https://github.com/ARM-software/abi-aa/blob/2982a9f3b512a5bfdc9e3fea5d3b298f9165c36b/aapcs64/aapcs64.rst#parameter-passing
-// https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms
-typedef struct aarch64_c_frame {
-  struct aarch64_c_frame *backlink;
-  LispObj savelr;
+
+
+typedef struct eabi_c_frame {
+  struct eabi_c_frame *backlink;
+  unsigned savelr;
   LispObj params[8];
-} aarch64_c_frame;
+} eabi_c_frame;
+
+/* PowerOpen ABI C frame */
+/* PPC CODE */
+// typedef struct c_frame {
+//   struct c_frame *backlink;
+//   natural crsave;
+//   natural savelr;
+//   natural unused[2];
+//   natural savetoc;		/* Used with CFM (and on Linux.) */
+//   natural params[8];		/* Space for callee to save r3-r10 */
+// } c_frame;
 
 typedef struct lisp_frame {
   struct lisp_frame *backlink;
@@ -271,8 +307,10 @@ typedef struct xframe_list {
 #include "lisp-errors.h"
 
 
+
 #define TCR_BIAS (0x0)
 
+/* ARM64 */
 typedef struct tcr {
   struct tcr* next;
   struct tcr* prev;
@@ -322,8 +360,62 @@ typedef struct tcr {
   natural shutdown_count;
   void *safe_ref_address;
   void *nfp;
-  void *io_datum;
+  void *io_datum; /* ARM64 copied from x86-constants64.h to compile */
 } TCR;
+
+/* PPC CODE */
+// typedef struct tcr {
+//   struct tcr* next;
+//   struct tcr* prev;
+//   struct {
+//     float f;
+//     uint32_t tag;
+//   } single_float_convert;
+//   union {
+//     double d;
+//     struct {uint32_t h, l;} words;
+//   } lisp_fpscr;			/* lisp thread's fpscr (in low word) */
+//   special_binding* db_link;	/* special binding chain head */
+//   LispObj catch_top;		/* top catch frame */
+//   LispObj* save_vsp;  /* VSP when in foreign code */
+//   LispObj* save_tsp;  /* TSP when in foreign code */
+//   struct area* cs_area; /* cstack area pointer */
+//   struct area* vs_area; /* vstack area pointer */
+//   struct area* ts_area; /* tstack area pointer */
+//   LispObj cs_limit;		/* stack overflow limit */
+//   natural bytes_allocated;
+//   natural log2_allocation_quantum;      /* for per-tread consing */
+//   signed_natural interrupt_pending;	/* pending interrupt flag */
+//   xframe_list* xframe; /* exception-frame linked list */
+//   int* errno_loc;		/* per-thread (?) errno location */
+//   LispObj ffi_exception;	/* fpscr bits from ff-call */
+//   LispObj osid;			/* OS thread id */
+//   signed_natural valence;			/* odd when in foreign code */
+//   signed_natural foreign_exception_status;	/* non-zero -> call lisp_exit_hook */
+//   void* native_thread_info;	/* platform-dependent */
+//   void* native_thread_id;	/* mach_thread_t, pid_t, etc. */
+  
+//   void* last_allocptr;
+//   void* save_allocptr;
+//   void* save_allocbase;
+//   void* reset_completion;
+//   void* activate;
+//   signed_natural suspend_count;
+//   ExceptionInformation* suspend_context;
+//   ExceptionInformation* pending_exception_context;
+//   void* suspend;		/* suspension semaphore */
+//   void* resume;			/* resumption semaphore */
+//   natural flags;
+//   ExceptionInformation* gc_context;
+//   void* termination_semaphore;
+//   signed_natural unwinding;
+//   natural tlb_limit;
+//   LispObj* tlb_pointer;
+//   natural shutdown_count;
+//   void *safe_ref_address;
+//   void *nfp;
+// } TCR;
+
 
 #define t_offset -(sizeof(lispsymbol))
 
@@ -336,8 +428,8 @@ typedef struct tcr {
 #define heap_segment_size 0x00020000L
 #define log2_heap_segment_size 17L
 
-#define ABI_VERSION_MIN 1045
-#define ABI_VERSION_CURRENT 1045
-#define ABI_VERSION_MAX 1045
+#define ABI_VERSION_MIN 1040
+#define ABI_VERSION_CURRENT 1040
+#define ABI_VERSION_MAX 1040
 
-#endif /* __arm_constants64_h */
+/***** END IMPORT FROM arm-constants64.h *****/
