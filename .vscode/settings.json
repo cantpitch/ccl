@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "signal.h": "c",
+        "mach.h": "c",
+        "lisp.h": "c",
+        "thread_state.h": "c",
+        "thread_status.h": "c",
+        "arm64-constants.h": "c"
+    }
+}

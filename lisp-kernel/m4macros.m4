@@ -94,6 +94,11 @@ ifdef(`X86',`
 	.stabd 68,0,$1
 ')')
 
+/* Darwin doesn't have stabs, but source line references are useful for compiling */
+define(`_emit_source_line_nostab',`
+    ifdef(`DARWIN',`
+# __line__ "__file__" 1',`')')
+
 
 /*  We don't really do "weak importing" of symbols from a separate  */
 /*  subprims library anymore; if we ever do and the OS supports it,  */
@@ -117,12 +122,12 @@ define(`_emit_COFF_source_line_stab',`
 
 
 define(`emit_source_line_stab',`
-	ifelse(eval(SYSstabs),
+       ifelse(eval(SYSstabs),
               eval(NOstabs),
-              `',
+              `_emit_source_line_nostab($1)',
               eval(SYSstabs),
               eval(BSDstabs),
-  	      `_emit_BSD_source_line_stab($1)',
+              `_emit_BSD_source_line_stab($1)',
               eval(SYSstabs),
               eval(ELFstabs),
               `_emit_ELF_source_line_stab($1)',

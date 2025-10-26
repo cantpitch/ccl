@@ -23,7 +23,6 @@
 #include "memprotect.h"
 
 
-
 #ifdef PPC
 #define is_node_fulltag(f)  ((1<<(f))&((1<<fulltag_cons)|(1<<fulltag_misc)))
 #ifdef PPC64
@@ -109,7 +108,7 @@ typedef unsigned char qnode;
 #define gc_area_dnode(w)  area_dnode(w,GCarealow)
 #define gc_dynamic_area_dnode(w) area_dnode(w,GCareadynamiclow)
 
-#if defined(PPC64) || defined(X8632)
+#if defined(PPC64) || defined(X8632) || defined(ARM64)
 #define forward_marker subtag_forward_marker
 #else
 #ifdef ARM
@@ -119,7 +118,7 @@ typedef unsigned char qnode;
 #endif
 #endif
 
-#ifdef PPC64
+#if defined(PPC64) || defined(ARM64)
 #define VOID_ALLOCPTR ((LispObj)(0x8000000000000000-dnode_size))
 #else
 #define VOID_ALLOCPTR ((LispObj)(-dnode_size))

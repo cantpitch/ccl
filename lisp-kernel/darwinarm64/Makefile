@@ -50,7 +50,7 @@ COBJ  = pmcl-kernel.o gc-common.o arm64-gc.o bits.o arm64-exceptions.o \
 	image.o thread_manager.o lisp-debug.o memory.o unix-calls.o
 
 DEBUGOBJ = lispdcmd.o plprint.o plsym.o plbt.o arm64_print.o
-KERNELOBJ= $(COBJ) arm64-asmutils.o  imports.o
+KERNELOBJ= $(COBJ) arm64-asmutils.o imports.o mach_exc_server.o
 
 SPINC =	lisp.s m4macros.m4 arm64-macros.s errors.s arm64-uuo.s arm64-constants.s lisp_globals.s
 
@@ -74,18 +74,36 @@ OSLIBS = -lsystem
 
 
 ../../darm64cl:	$(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ)
-	$(CC) -v -arch arm64 $(CDEBUG)  -sectalign __TEXT __text 0x1000  \
+	$(CC) -arch arm64 $(CDEBUG)  -sectalign __TEXT __text 0x1000  \
 	-L$(MACOSX_SDK)/usr/lib -o $@ $(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ) 
 
 
 $(SPOBJ): $(SPINC)
 $(ASMOBJ): $(SPINC)
-$(COBJ): $(CHEADERS)
-$(DEBUGOBJ): $(CHEADERS) lispdcmd.h
+$(COBJ): $(CHEADERS) probes.h
+$(DEBUGOBJ): $(CHEADERS) lispdcmd.h probes.h
 
+probes.h: probes.d
+	dtrace -h -s $<
+
+mach_exc_server.o: mach_exc_server.c mach_exc.h
+
+# What we want here is a grouped target, but we need
+# GNU make version 4.3 for that.
+# mach_exc.h mach_exc_server.c &: mach_exc.defs
+
+mach_exc_server.c: mach_exc.defs
+	mig -arch arm64 -header /dev/null -user /dev/null \
+		-sheader mach_exc.h -server mach_exc_server.c \
+		 $<
+
+mach_exc.h: mach_exc_server.c
 
 cclean:
-	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ../../darm64cl
+	$(RM) -f $(KERNELOBJ) $(DEBUGOBJ) ../../darm64cl \
+	probes.h \
+	mach_exc.h mach_exc_server.c
+
 
 clean:	cclean
 	$(RM) -f $(SPOBJ)

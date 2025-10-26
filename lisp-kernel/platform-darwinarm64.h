@@ -36,7 +36,7 @@ extern natural os_major_version;
 // xp accessors for Darwin ARM64 (Apple Silicon)
 #define xpGPRvector(x) ((natural *)&((x)->uc_mcontext->__ss.__x[0]))
 #define xpGPR(x, gprno) (xpGPRvector(x))[gprno]
-#define xpPC(x) ((natural *)((x)->uc_mcontext->__ss.__pc))
+#define xpPC(x) (*((pc*)(&((x)->uc_mcontext->__ss.__pc))))
 #define xpLR(x) ((x)->uc_mcontext->__ss.__lr)
 #define xpFP(x) ((x)->uc_mcontext->__ss.__fp)
 #define xpSP(x) ((x)->uc_mcontext->__ss.__sp)

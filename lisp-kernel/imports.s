@@ -30,7 +30,6 @@ define(`PTR',`
         __endif
 ')
 	_beginfile
-
         	
 	.globl C(import_ptrs_base)
 define(`defimport',`
@@ -40,6 +39,9 @@ define(`defimport',`
 # __line__
 ')
 	.data
+__ifdef(`ARM64')
+        .align 8
+__endif
 import_ptrs_start:
 
 	defimport(fd_setsize_bytes)
