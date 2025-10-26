@@ -41,7 +41,7 @@ extern LispObj lisp_nil;
 #ifdef PPC
 #define ALTIVEC_PRESENT (-19)   /* non-zero if AltiVec present. */
 #endif
-#ifdef ARM
+#if defined(ARM) || defined(ARM64)
 #define FLOAT_ABI (-19)         /* non zero when hard-float ABI in effect */
 #endif
 #define FWDNUM (-20)            /* fixnum: GC "forwarder" call count. */

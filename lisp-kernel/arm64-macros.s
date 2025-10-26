@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* The assembler has to do the arithmetic here:	 the expression */
-/*   may not be evaluable by m4. */
 
-
+/* trap return address - tra($1: label)
+ * - Creates a "trap return address" that is 8 byte aligned with a 0L 
+ *   marker followed by the label. 
+ * - There are no instances in the code using the offset version (e.g. 
+ *   $1-$2) in the assembly code. That doesn't mean there aren't offset
+ *   versions of a TRA that don't use this macro to be created.
+ */
 define(`tra',`
-        .p2align 3
+    .align 8
 	ifelse($2,`',`
 	.long 0
 	',`
@@ -27,8 +31,11 @@ define(`tra',`
 $1:	
 ')
 
-/* OLD CODE
+/***** BEGIN IMPORT FROM ppc-macros.s *****/
 
+/* The assembler has to do the arithmetic here:	 the expression */
+/*   may not be evaluable by m4. */
+/* OLD CODE
 define(`lwi',`ifdef(`DARWIN',`
 	.if ((($2) & 0xffff8000) == 0xffff8000)
 	 li $1,($2)
@@ -828,3 +835,4 @@ define(`ivector_typecode_p',`
 macro_label(done):
         ')
 */
+/***** END IMPORT FROM ppc-macros.s *****/
