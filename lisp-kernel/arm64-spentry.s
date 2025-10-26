@@ -45,7 +45,7 @@ _spentry(bad_funcall)
 Xspentry_start:         
 	.globl C(bad_funcall)	
 __(tra(C(bad_funcall)))
-	/* OLD CODE __(uuo_error_not_callable) */
+	/* PPC CODE __(uuo_error_not_callable) */
 _endsubp(bad_funcall)
 
 _spentry(jmpsym)
@@ -93,10 +93,10 @@ _spentry(mkcatchmv)
 /* Otherwise, process unwind-protects and throw to indicated catch frame.  */
 	
 _spentry(throw)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(imm1,tcr.catch_top(rcontext)))
 	__(li imm0,0) OLD CODE */ /* count intervening catch/unwind-protect frames.  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,imm1,0))
 	__(ldrx(temp0,vsp,nargs))
 	__(beq- cr0,local_label(_throw_tag_not_found))
@@ -114,7 +114,7 @@ OLD CODE */
 /* imm2: (tstack-consed) target catch frame, imm0: count of intervening  */
 /* frames. If target isn't a multiple-value receiver, discard extra values */
 /* (less hair, maybe.)  */
-/* OLD CODE
+/* PPC CODE
 local_label(_throw_found):
 	__(ldr(imm1,catch_frame.mvflag(imm2)))
 	__(cmpri(cr0,imm1,0))
@@ -149,7 +149,7 @@ local_label(_throw_dont_unbind):
 	__(bne cr1,local_label(_throw_multiple))
 OLD CODE */
         /* Catcher expects single value in arg_z  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(arg_z,-node_size(imm0)))
 	__(b local_label(_throw_pushed_values))
 local_label(_throw_multiple):
@@ -186,7 +186,7 @@ OLD CODE */
 
 /* This takes N multiple values atop the vstack.  */
 _spentry(nthrowvalues)
-/* OLD CODE
+/* PPC CODE
         __(li imm1,1)
 	__(mr imm4,imm0)
         __(str(imm1,tcr.unwinding(rcontext)))
@@ -202,7 +202,7 @@ local_label(_nthrowv_nextframe):
 	__(str(imm3,tcr.catch_top(rcontext)))
 	__(ldr(temp1,catch_frame.catch_tag(temp0)))
 	__(cmpri(cr7,temp1,unbound_marker)) OLD CODE*/		/* unwind-protect ?  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(first_nvr,catch_frame.xframe(temp0)))
 	__(str(first_nvr,tcr.xframe(rcontext)))
         __(ldr(first_nvr,catch_frame.nfp(temp0)))
@@ -215,11 +215,11 @@ local_label(_nthrowv_nextframe):
 local_label(_nthrowv_dont_unbind):
 	__(beq cr7,local_label(_nthrowv_do_unwind))
 /* A catch frame.  If the last one, restore context from there.  */
-/* OLD CODE
+/* PPC CODE
 	__(bne cr1,local_label(_nthrowv_skip))
 	__(ldr(imm0,lisp_frame.savevsp(sp)))
 	__(str(rzero,lisp_frame.savevsp(sp)))	/* marker for stack overflow code  */
-/* OLD CODE
+/* PPC CODE
 	__(add imm1,vsp,nargs)
 	__(mr imm2,nargs)
 	__(b local_label(_nthrowv_push_test))
@@ -244,7 +244,7 @@ local_label(_nthrowv_do_unwind):
         /* (also a fixnum) as well.  */
         /* Save our caller's LR and FN in the csp frame created by the unwind-  */
         /* protect.  (Clever, eh ?)  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(first_nvr,catch_frame.xframe(temp0)))
 	__(str(first_nvr,tcr.xframe(rcontext)))
         __(ldr(first_nvr,catch_frame.nfp(temp0)))
@@ -255,13 +255,13 @@ local_label(_nthrowv_do_unwind):
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(nfn,lisp_frame.savefn(sp)))
 	__(mtctr loc_pc)	/* cleanup code address.  */
-/* OLD CODE
+/* PPC CODE
 	__(str(fn,lisp_frame.savefn(sp)))
 	__(mflr loc_pc)
 	__(mr fn,nfn)
 	__(str(loc_pc,lisp_frame.savelr(sp)))
 	__(dnode_align(imm0,nargs,tsp_frame.fixed_overhead+(2*node_size))) /* tsp overhead, nargs, throw count  */
-/* OLD CODE
+/* PPC CODE
 	__(TSP_Alloc_Var_Boxed_nz(imm0,imm1))
 	__(mr imm2,nargs)
 	__(add imm1,nargs,vsp)
@@ -280,7 +280,7 @@ local_label(_nthrowv_tpushtest):
         /* Interrupts should be disabled here (we're calling and returning */
         /* from the cleanup form.  Clear the tcr.unwinding flag, so that */
         /* interrupts can be taken if they're enabled in the cleanup form.  */
-/* OLD CODE
+/* PPC CODE
         __(str(rzero,tcr.unwinding(rcontext)))        
 	__(bctrl)
         __(li imm1,1)
@@ -308,7 +308,7 @@ local_label(_nthrowv_done):
         /* Poll for a deferred interrupt.  That clobbers nargs (which we've */
         /* just expended a lot of effort to preserve), so expend a little *
         /* more effort. */
-/* OLD CODE
+/* PPC CODE
         __(mr imm4,nargs)
         __(check_pending_interrupt())
         __(mr nargs,imm4)
@@ -320,7 +320,7 @@ local_label(_nthrowv_done):
 /* save the single value and the throw count in the tstack frame. */
 /* Note that this takes a single value in arg_z.  */
 _spentry(nthrow1value)
-/* OLD CODE
+/* PPC CODE
         __(li imm1,1)
 	__(mr imm4,imm0)
         __(str(imm1,tcr.unwinding(rcontext)))
@@ -339,7 +339,7 @@ local_label(_nthrow1v_nextframe):
 	__(ldr(temp1,catch_frame.catch_tag(temp0)))
         __(ldr(temp2,catch_frame.nfp(temp0)))
 	__(cmpri(cr7,temp1,unbound_marker))		/* unwind-protect ?  */
-/* OLD CODE
+/* PPC CODE
         __(str(imm3,tcr.xframe(rcontext)))
         __(str(temp2,tcr.nfp(rcontext)))
 	__(ldr(sp,catch_frame.csp(temp0)))
@@ -350,7 +350,7 @@ local_label(_nthrow1v_nextframe):
 local_label(_nthrow1v_dont_unbind):
 	__(beq cr7,local_label(_nthrow1v_do_unwind))
         /* A catch frame.  If the last one, restore context from there.  */
-/* OLD CODE
+/* PPC CODE
 	__(bne cr1,local_label(_nthrow1v_skip))
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
         __(restore_catch_nvrs(temp0))
@@ -364,20 +364,20 @@ local_label(_nthrow1v_do_unwind):
         /* multiple-value case.  */
         /* Save our caller's LR and FN in the csp frame created by the unwind-  */
         /* protect.  (Clever, eh ?)  */
-/* OLD CODE
+/* PPC CODE
         __(restore_catch_nvrs(temp0))	
         __(la tsp,-(tsp_frame.fixed_overhead+fulltag_misc)(temp0))
 	__(unlink(tsp))
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(nfn,lisp_frame.savefn(sp)))
 	__(mtctr loc_pc)		/* cleanup code address.  */
-/* OLD CODE
+/* PPC CODE
 	__(str(fn,lisp_frame.savefn(sp)))
 	__(mflr loc_pc)
 	__(mr fn,nfn)
 	__(str(loc_pc,lisp_frame.savelr(sp)))
 	__(TSP_Alloc_Fixed_Boxed(2*node_size)) /* tsp overhead, value, throw count  */
-/* OLD CODE
+/* PPC CODE
 	__(str(arg_z,tsp_frame.data_offset(tsp)))
 	__(str(imm4,tsp_frame.data_offset+node_size(tsp)))
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
@@ -397,7 +397,7 @@ local_label(_nthrow1v_done):
         __(str(rzero,tcr.unwinding(rcontext)))
         /* nargs has an undefined value here, so we can clobber it while */
         /* polling for a deferred interrupt  */
-/* OLD CODE
+/* PPC CODE
         __(check_pending_interrupt())
         __(blr)
 */
@@ -406,12 +406,12 @@ local_label(_nthrow1v_done):
 /* This never affects the symbol's vcell  */
 /* Non-null symbol in arg_y, new value in arg_z          */
 _spentry(bind)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm3,symbol.binding_index(arg_y)))
         __(ldr(imm0,tcr.tlb_limit(rcontext)))
         __(cmpri(imm3,0))
         __(trlle(imm0,imm3))           /* tlb too small  */
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))
         __(ldr(imm1,tcr.db_link(rcontext)))
         __(ldrx(temp1,imm2,imm3))
@@ -432,12 +432,12 @@ _spentry(bind)
 
 /* arg_z = symbol: bind it to its current value          */
 _spentry(bind_self)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm3,symbol.binding_index(arg_z)))
         __(ldr(imm0,tcr.tlb_limit(rcontext)))
         __(cmpri(imm3,0))
         __(trlle(imm0,imm3))           /* tlb too small  */
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))
         __(ldr(imm1,tcr.db_link(rcontext)))
         __(ldrx(temp1,imm2,imm3))
@@ -461,13 +461,13 @@ _spentry(bind_self)
 
 /* Bind symbol in arg_z to NIL                 */
 _spentry(bind_nil)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm3,symbol.binding_index(arg_z)))
         __(ldr(imm0,tcr.tlb_limit(rcontext)))
         __(cmpri(imm3,0))
         __(beq- 9f)
         __(trlle(imm0,imm3))           /* tlb too small  */
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))
         __(ldrx(temp1,imm2,imm3))
         __(ldr(imm1,tcr.db_link(rcontext)))
@@ -487,17 +487,17 @@ _spentry(bind_nil)
        
 /* Bind symbol in arg_z to its current value;  trap if symbol is unbound */
 _spentry(bind_self_boundp_check)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm3,symbol.binding_index(arg_z)))
         __(ldr(imm0,tcr.tlb_limit(rcontext)))
         __(cmpri(imm3,0))
         __(trlle(imm0,imm3))           /* tlb too small  */
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))
         __(ldrx(temp1,imm2,imm3))
         __(ldr(imm1,tcr.db_link(rcontext)))
         __(beq 9f)              /* no real tlb index  */
-/* OLD CODE
+/* PPC CODE
         __(cmpri(temp1,no_thread_local_binding_marker))
         __(mr temp0,temp1)
         __(bne 1f)
@@ -539,12 +539,12 @@ _spentry(bind_self_boundp_check)
         .globl C(egc_rplaca_did_store)
 _spentry(rplaca)
 C(egc_write_barrier_start):
-/* OLD CODE
+/* PPC CODE
         __(cmplr(cr2,arg_z,arg_y))
         __(_rplaca(arg_y,arg_z))
 */
 C(egc_rplaca_did_store):            
-/* OLD CODE    
+/* PPC CODE    
         __(blelr cr2)
         __(ref_global(imm2,ref_base))
         __(sub imm0,arg_y,imm2)
@@ -586,12 +586,12 @@ C(egc_rplaca_did_store):
         .globl C(egc_rplacd_did_store)
 _spentry(rplacd)
 C(egc_rplacd):
-/* OLD CODE
+/* PPC CODE
         __(cmplr(cr2,arg_z,arg_y))
 	__(_rplacd(arg_y,arg_z))
 */
 C(egc_rplacd_did_store):       
-/* OLD CODE 
+/* PPC CODE 
         __(blelr cr2)
         __(ref_global(imm2,ref_base))
         __(sub imm0,arg_y,imm2)
@@ -635,13 +635,13 @@ C(egc_rplacd_did_store):
         .globl C(egc_gvset_did_store)
 _spentry(gvset)
 C(egc_gvset):
-/* OLD CODE
+/* PPC CODE
         __(cmplr(cr2,arg_z,arg_x))
         __(la imm0,misc_data_offset(arg_y))
         __(strx(arg_z,arg_x,imm0))
 */
 C(egc_gvset_did_store): 
-/* OLD CODE
+/* PPC CODE
         __(blelr cr2)
         __(add imm0,imm0,arg_x)
         __(ref_global(imm2,ref_base))
@@ -687,13 +687,13 @@ C(egc_gvset_did_store):
         .globl C(egc_set_hash_key_did_store)  
 _spentry(set_hash_key)
 C(egc_set_hash_key):
-/* OLD CODE
+/* PPC CODE
         __(cmplr(cr2,arg_z,arg_x))
         __(la imm0,misc_data_offset(arg_y))
         __(strx(arg_z,arg_x,imm0))
 */
 C(egc_set_hash_key_did_store):
-/* OLD CODE          
+/* PPC CODE          
         __(blelr cr2)
         __(add imm0,imm0,arg_x)
         __(ref_global(imm2,ref_base))
@@ -782,7 +782,7 @@ C(egc_set_hash_key_did_store):
         .globl C(egc_write_barrier_end)
 _spentry(store_node_conditional)
 C(egc_store_node_conditional):
-/* OLD CODE
+/* PPC CODE
         __(cmplr(cr2,arg_z,arg_x))
         __(vpop(temp0))
         __(unbox_fixnum(imm4,temp0))
@@ -793,7 +793,7 @@ C(egc_store_node_conditional):
 */
 	.globl C(egc_store_node_conditional_test)
 C(egc_store_node_conditional_test):	
-/* OLD CODE
+/* PPC CODE
         __(bne 1b)
         __(isync)
         __(add imm0,imm4,arg_x)
@@ -837,7 +837,7 @@ C(egc_store_node_conditional_test):
 _spentry(set_hash_key_conditional)
 	.globl C(egc_set_hash_key_conditional)
 C(egc_set_hash_key_conditional):
-/* OLD CODE
+/* PPC CODE
 	__(cmplr(cr2,arg_z,arg_x))
 	__(vpop(temp0))
 	__(unbox_fixnum(imm4,temp0))
@@ -848,7 +848,7 @@ C(egc_set_hash_key_conditional):
 */
 	.globl C(egc_set_hash_key_conditional_test)
 C(egc_set_hash_key_conditional_test):	
-/* OLD CODE
+/* PPC CODE
 	__(bne 1b)
 	__(isync)
 	__(add imm0,imm4,arg_x)
@@ -883,7 +883,7 @@ C(egc_set_hash_key_conditional_test):
         __(isync)        
         
 	/* Memoize hash table header */	
-/* OLD CODE
+/* PPC CODE
         __(ref_global(temp1,refbits))	
         __(ref_global(imm1,ref_base))
         __(sub imm0,arg_x,imm1)
@@ -915,7 +915,7 @@ C(egc_set_hash_key_conditional_test):
         __(isync)
 */
 C(egc_write_barrier_end):
-/* OLD CODE
+/* PPC CODE
 8:	__(li arg_z,t_value)
 	__(blr)
 9:      __(li imm0,RESERVATION_DISCHARGE)
@@ -928,7 +928,7 @@ C(egc_write_barrier_end):
 	
 	       
 _spentry(conslist)
-/* OLD CODE
+/* PPC CODE
 	__(li arg_z,nil_value)
 	__(cmpri(nargs,0))
 	__(b 2f)	
@@ -947,7 +947,7 @@ _spentry(conslist)
 /* do list*: last arg in arg_z, all others vpushed, nargs set to #args vpushed.  */
 /* Cons, one cons cell at at time.  Maybe optimize this later.  */
 _spentry(conslist_star)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(nargs,0))
 	__(b 2f)	
 1:
@@ -965,7 +965,7 @@ _spentry(conslist_star)
 /* We always have to create a tsp frame (even if nargs is 0), so the compiler  */
 /* doesn't get confused.  */
 _spentry(stkconslist)
-/* OLD CODE
+/* PPC CODE
 	__(li arg_z,nil_value)
 	__(cmpri(cr1,nargs,0))
 	__(add imm1,nargs,nargs)
@@ -990,7 +990,7 @@ _spentry(stkconslist)
 /* do list*: last arg in arg_z, all others vpushed,  */
 /* nargs set to #args vpushed.  */
 _spentry(stkconslist_star)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr1,nargs,0))
 	__(add imm1,nargs,nargs)
 	__(addi imm1,imm1,tsp_frame.fixed_overhead)
@@ -1015,7 +1015,7 @@ _spentry(stkconslist_star)
 /* Make a stack-consed simple-vector out of the NARGS objects  */
 /* on top of the vstack; return it in arg_z.  */
 _spentry(mkstackv)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr1,nargs,0))
 	__(dnode_align(imm1,nargs,tsp_frame.fixed_overhead+node_size))
 	__(TSP_Alloc_Var_Boxed_nz(imm1,imm2))
@@ -1042,7 +1042,7 @@ _spentry(mkstackv)
         
 
 _spentry(setqsym)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(imm0,symbol.flags(arg_y)))
 	__(andi. imm0,imm0,sym_vbit_const_mask)
 	__(beq _SPspecset)
@@ -1058,18 +1058,18 @@ _spentry(setqsym)
 _spentry(progvsave)
 	/* Error if arg_z isn't a proper list.  That's unlikely, */
 	/* but it's better to check now than to crash later. */
-/* OLD CODE	
+/* PPC CODE	
 	__(cmpri(arg_z,nil_value))
 	__(mr arg_x,arg_z)	/* fast  */
-/* OLD CODE
+/* PPC CODE
 	__(mr temp1,arg_z)	/* slow  */
-/* OLD CODE
+/* PPC CODE
 	__(beq 9f)		/* Null list is proper  */
-/* OLD CODE
+/* PPC CODE
 0:	
 	__(trap_unless_list(arg_x,imm0))
 	__(_cdr(temp2,arg_x))	/* (null (cdr fast)) ?  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr3,temp2,nil_value))
 	__(trap_unless_list(temp2,imm0,cr0))
 	__(_cdr(arg_x,temp2))
@@ -1084,7 +1084,7 @@ _spentry(progvsave)
 	
         /* Next, determine the length of arg_y.  We  */
         /* know that it's a proper list.  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm0,-node_size)
 	__(mr arg_x,arg_y)
 1:
@@ -1095,7 +1095,7 @@ _spentry(progvsave)
 	/* imm0 is now (boxed) triplet count.  */
 	/* Determine word count, add 1 (to align), and make room.  */
 	/* if count is 0, make an empty tsp frame and exit  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,imm0,0))
 	__(add imm1,imm0,imm0)
 	__(add imm1,imm1,imm0)
@@ -1105,7 +1105,7 @@ _spentry(progvsave)
 	 __(blr)
 2:
 	__(la imm1,tsp_frame.fixed_overhead(imm1))	/* tsp header  */
-/* OLD CODE
+/* PPC CODE
 	__(TSP_Alloc_Var_Boxed_nz(imm1,imm2))
 	__(str(imm0,tsp_frame.data_offset(tsp)))
 	__(ldr(imm2,tsp_frame.backlink(tsp)))
@@ -1119,7 +1119,7 @@ _spentry(progvsave)
 	__(_cdr(arg_x,arg_x))
         __(trlle(imm3,imm0))
         __(ldr(imm4,tcr.tlb_pointer(rcontext))) /* Need to reload after trap  */
-/* OLD CODE
+/* PPC CODE
         __(ldrx(temp3,imm4,imm0))
 	__(cmpri(cr0,arg_x,nil_value))
         __(li temp2,unbound_marker)
@@ -1141,7 +1141,7 @@ _spentry(progvsave)
 /* Allocate a miscobj on the temp stack.  (Push a frame on the tsp and  */
 /* heap-cons the object if there's no room on the tstack.)  */
 _spentry(stack_misc_alloc)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
          __(extract_unsigned_byte_bits_(imm2,arg_y,56))
          __(unbox_fixnum(imm0,arg_z))
@@ -1162,39 +1162,39 @@ _spentry(stack_misc_alloc)
          __(beq cr4,2f)
          __(beq cr2,0f)
          /* 2 bytes per element  */
-/* OLD CODE
+/* PPC CODE
          __(srdi imm2,imm2,2)
          __(b 3f)
-/* OLD CODE
+/* PPC CODE
 0:       /* bit-vector case  */
-/* OLD CODE
+/* PPC CODE
          __(addi imm2,imm2,7<<fixnumshift)
          __(srdi imm2,imm2,3+fixnumshift)
          __(b 3f)        
          /* 4 bytes per element  */
-/* OLD CODE
+/* PPC CODE
 1:       __(srdi imm2,imm2,1)
          __(b 3f)
 2:       /* 1 byte per element  */
-/* OLD CODE
+/* PPC CODE
          __(srdi imm2,imm2,3)
 3:       /* 8 bytes per element  */
-/* OLD CODE
+/* PPC CODE
          __(or imm0,imm1,imm0)   /* imm0 = header, imm2 = byte count  */
-/* OLD CODE
+/* PPC CODE
          __(dnode_align(imm3,imm2,tsp_frame.fixed_overhead+node_size))
 	 __(cmplri cr0,imm3,tstack_alloc_limit) /* more than limit ?  */
-/* OLD CODE
+/* PPC CODE
 	 __(bgt- cr0,4f)
 	 __(TSP_Alloc_Var_Boxed_nz(imm3,imm4))
         /* Slap the header on the vector, then return.  */
-/* OLD CODE
+/* PPC CODE
 	 __(str(imm0,tsp_frame.data_offset(tsp)))
 	 __(la arg_z,tsp_frame.data_offset+fulltag_misc(tsp))
 	__(blr)
         /* Too large to safely fit on tstack.  Heap-cons the vector, but make  */
         /* sure that there's an empty tsp frame to keep the compiler happy.  */
-/* OLD CODE
+/* PPC CODE
 4:       __(TSP_Alloc_Fixed_Unboxed(0))
 	 __(b _SPmisc_alloc)
         __else
@@ -1206,14 +1206,14 @@ _spentry(stack_misc_alloc)
 	 __(mr imm3,imm0)
 	 __(cmplri(cr1,imm0,max_32_bit_ivector_subtag))
 	 __(rlwimi imm0,arg_y,num_subtag_bits-fixnum_shift,0,31-num_subtag_bits) /* imm0 now = header  */
-/* OLD CODE
+/* PPC CODE
 	 __(mr imm2,arg_y)
 	 __(beq cr0,1f)	/* do probe if node object  */
         		/* (fixnum element count = byte count).  */
-/* OLD CODE
+/* PPC CODE
 	 __(cmplri(cr0,imm3,max_16_bit_ivector_subtag))
 	 __(bng cr1,1f) /* do probe if 32-bit imm object  */
-/* OLD CODE
+/* PPC CODE
 	 __(cmplri(cr1,imm3,max_8_bit_ivector_subtag))
 	 __(srwi imm2,imm2,1)
 	 __(bgt cr0,3f)
@@ -1221,16 +1221,16 @@ _spentry(stack_misc_alloc)
 	 __(srwi imm2,imm2,1)
 /* imm2 now = byte count.  Add 4 for header, 7 to align, then  */
 /*	clear low three bits.  */
-/* OLD CODE
+/* PPC CODE
 1:
          __(dnode_align(imm3,imm2,tsp_frame.fixed_overhead+node_size))
 	 __(cmplri(cr0,imm3,tstack_alloc_limit)) /* more than limit ?  */
-/* OLD CODE
+/* PPC CODE
 	 __(bgt- cr0,0f)
 	 __(TSP_Alloc_Var_Boxed_nz(imm3,imm4))
 
 /* Slap the header on the vector, then return.  */
-/* OLD CODE
+/* PPC CODE
 	 __(str(imm0,tsp_frame.data_offset(tsp)))
 	 __(la arg_z,tsp_frame.data_offset+fulltag_misc(tsp))
 	 __(blr)
@@ -1240,7 +1240,7 @@ _spentry(stack_misc_alloc)
 
 /* Too large to safely fit on tstack.  Heap-cons the vector, but make  */
 /* sure that there's an empty tsp frame to keep the compiler happy.  */
-/* OLD CODE
+/* PPC CODE
 0:
 	 __(TSP_Alloc_Fixed_Unboxed(0))
 	 __(b _SPmisc_alloc)
@@ -1262,7 +1262,7 @@ _spentry(stack_misc_alloc)
 /* Note that we're guaranteed to win (or force GC, or run out of memory)  */
 /* because nargs < 32K.  */
 _spentry(gvector)
-/* OLD CODE
+/* PPC CODE
         __(subi nargs,nargs,node_size)
 	__(ldrx(arg_z,vsp,nargs))
 	__(unbox_fixnum(imm0,arg_z))
@@ -1285,7 +1285,7 @@ _spentry(gvector)
 	__(subi imm2,imm2,node_size)
 	__(vpop(temp0))         /* Note the intentional fencepost: */
 				/* discard the subtype as well.  */
-/* OLD CODE
+/* PPC CODE
 	__(bge cr0,1b)
 	__(blr)
 */
@@ -1294,7 +1294,7 @@ _spentry(gvector)
 	
 /* funcall temp0, returning multiple values if it does.  */
 _spentry(mvpass)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,nargs,node_size*nargregs))
 	__(mflr loc_pc)
 	__(mr imm0,vsp)
@@ -1315,7 +1315,7 @@ _spentry(mvpass)
 /* identifies the stack frame to code which returns multiple values.  */
 
 _exportfn(C(ret1valn))
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
 	__(mtlr loc_pc)
@@ -1328,7 +1328,7 @@ _exportfn(C(ret1valn))
 	__(ret)
 	
 _spentry(fitvals)
-/* OLD CODE
+/* PPC CODE
 	__(subf. imm0,nargs,imm0)
 	__(li imm1,nil_value)
 	__(bge 2f)
@@ -1345,11 +1345,11 @@ _spentry(fitvals)
 	__(ret)
 
 _spentry(nthvalue)
-/* OLD CODE
+/* PPC CODE
 	__(add imm0,vsp,nargs)
 	__(ldr(imm1,0(imm0)))
 	__(cmplr(imm1,nargs))	/*  do unsigned compare:	 if (n < 0) => nil.  */
-/* OLD CODE
+/* PPC CODE
 	__(li arg_z,nil_value)
 	__(neg imm1,imm1)
 	__(subi imm1,imm1,node_size)
@@ -1367,14 +1367,14 @@ _spentry(nthvalue)
 /* lr, fn valid; temp0 = entry vsp  */
 
 _spentry(values)
-/* OLD CODE
+/* PPC CODE
 	__(mflr loc_pc)
 local_label(return_values):  
 	__(ref_global(imm0,ret1val_addr))
 	__(li arg_z,nil_value)
 	/* max tsp frame is 4K. 8+8 is overhead for save_values_to_tsp below  */
 	/* and @do_unwind in nthrowvalues in "sp_catch.s".  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr2,nargs,4096-(dnode_size+dnode_size)))
 	__(cmpr(cr1,imm0,loc_pc))
 	__(cmpri(cr0,nargs,fixnum_one))
@@ -1393,20 +1393,20 @@ local_label(return_values):
 	__(b 2b)
 
 /* Return multiple values to real caller.  */
-/* OLD CODE
+/* PPC CODE
 3:
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(add imm1,nargs,vsp)
 	__(ldr(imm0,lisp_frame.savevsp(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
 	__(cmpr(cr0,imm1,imm0)) /* a fairly common case  */
-/* OLD CODE
+/* PPC CODE
 	__(mtlr loc_pc)
 	__(cmpri(cr1,nargs,fixnum_one)) /* sadly, a very common case  */
-/* OLD CODE
+/* PPC CODE
 	__(discard_lisp_frame())
 	__(beqlr cr0) /* already in the right place  */
-/* OLD CODE
+/* PPC CODE
 	__(bne cr1,4f)
 	 __(ldr(arg_z,0(vsp)))
 	 __(mr vsp,imm0)
@@ -1432,7 +1432,7 @@ local_label(return_values):
 /* Come here with saved context on top of stack.  */
 _spentry(nvalret)
 C(nvalret):	
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(temp0,lisp_frame.savevsp(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
@@ -1446,7 +1446,7 @@ C(nvalret):
 /* arguments.  nargs is preserved, all arguments wind up on the  */
 /* vstack.  */
 _spentry(default_optional_args)
-/* OLD CODE
+/* PPC CODE
 	__(cmplr( cr7,nargs,imm0))
 	__(li imm5,nil_value)
 	__(vpush_argregs())
@@ -1466,11 +1466,11 @@ _spentry(default_optional_args)
 /* imm0 contains the number of &optional args in the lambda list.  */
 /* Note that nargs may be > imm0 if &rest/&key is involved.  */
 _spentry(opt_supplied_p)
-/* OLD CODE
+/* PPC CODE
 	__(li imm1,0)
 1:
 	/* (vpush (< imm1 nargs))  */
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
 	 __(xor imm2,imm1,nargs)
 	 __(sradi imm2,imm2,63)
@@ -1507,7 +1507,7 @@ _spentry(opt_supplied_p)
 /* (- nargs imm0) and vpush it.  */
 /* Use this entry point to heap-cons a simple &rest arg.  */
 _spentry(heap_rest_arg)
-/* OLD CODE
+/* PPC CODE
 	__(li imm0,0)
 	__(vpush_argregs())
  	__(sub imm1,nargs,imm0)
@@ -1532,7 +1532,7 @@ _spentry(heap_rest_arg)
 /* vpushed (as is typically the case when required/&rest but no  */
 /* &optional/&key.)  */
 _spentry(req_heap_rest_arg)
-/* OLD CODE
+/* PPC CODE
 	__(vpush_argregs())
  	__(sub imm1,nargs,imm0)
 	__(cmpri(imm1,0))
@@ -1553,7 +1553,7 @@ _spentry(req_heap_rest_arg)
 
 
 _spentry(heap_cons_rest_arg)
-/* OLD CODE
+/* PPC CODE
  	__(sub imm1,nargs,imm0)
 	__(cmpri(imm1,0))
 	__(li arg_z,nil_value)
@@ -1573,7 +1573,7 @@ _spentry(heap_cons_rest_arg)
 
 	
 _spentry(simple_keywords)
-/* OLD CODE
+/* PPC CODE
 	__(li imm0,0)
         __(vpush_argregs())
         __(b _SPkeyword_bind)
@@ -1581,7 +1581,7 @@ _spentry(simple_keywords)
 	__(ret)
                 
 _spentry(keyword_args)
-/* OLD CODE
+/* PPC CODE
 	__(vpush_argregs())
         __(b _SPkeyword_bind)
 */
@@ -1617,7 +1617,7 @@ _spentry(keyword_bind)
 	/* if we had to default any &optionals.  */
 	/* So, the number of args pushed so far is the larger of nargs  */
 	/* and the (canonical) total of required/&optional args received.  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpr(cr0,nargs,imm0))
 	__(add arg_z,vsp,nargs)
 	__(bge+ cr0,1f)
@@ -1631,12 +1631,12 @@ _spentry(keyword_bind)
 	/* of NILs.  */
 	/* If there aren't any such pairs, the first step is the last  */
 	/* step.  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,imm3,0))
 	__(li arg_z,0)
 	__(sub imm1,nargs,imm0)
 	__(mr imm4,vsp)	/* in case odd keywords error  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr1,imm1,0))
 	__(b 3f)
 2:
@@ -1649,22 +1649,22 @@ _spentry(keyword_bind)
 	__(bne cr0,2b)
 	__(andi. arg_z,imm1,fixnum_one)
 	__(blelr cr1)	/* no keyword/value pairs to consider.  */
-/* OLD CODE
+/* PPC CODE
 	__(bne cr0,odd_keywords)
 	/* We have key/value pairs.  Move them to the top of the vstack,  */
 	/* then set the value/supplied-p vars to NIL.  */
 	/* Have to use some save regs to do this.  */
-/* OLD CODE
+/* PPC CODE
 	__(vpush(limit))
 	__(vpush(valptr))
 	__(vpush(varptr))
 	/* recompute ptr to user args in case stack overflowed  */
-/* OLD CODE
+/* PPC CODE
 	__(add imm4,vsp,imm3)
 	__(add imm4,imm4,imm3)
 	__(addi imm4,imm4,3*node_size)
 	/* error if odd number of keyword/value args  */
-/* OLD CODE
+/* PPC CODE
 	__(mr varptr,imm4)
 	__(la limit,3*node_size(vsp))
 	__(mr valptr,limit)
@@ -1693,22 +1693,22 @@ _spentry(keyword_bind)
         /* supply it.  */
         /* When done, complain if any unknown keywords were found and that  */
         /* situation was unexpected.  */
-/* OLD CODE
+/* PPC CODE
 	__(mr imm4,valptr)
 5:
         __(cmpri(cr0,keyword_flags,16<<fixnumshift)) /* seen :a-o-k yet ?  */
-/* OLD CODE
+/* PPC CODE
 	__(ldru(arg_z,-node_size(valptr)))
 	__(ldru(arg_y,-node_size(valptr)))
 	__(cmpri(cr1,arg_y,nil_value))
 	__(li arg_x,nrs.kallowotherkeys)
         /* cr6_eq <- (eq current-keyword :allow-other-keys)  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpr(cr6,arg_x,arg_z))
 	__(cmpr(cr7,valptr,limit))
 	__(bne cr6,6f)
         __(bge cr0,6f) /* Already seen :allow-other-keys  */
-/* OLD CODE
+/* PPC CODE
         __(ori keyword_flags,keyword_flags,16<<fixnumshift)
 	__(beq cr1,6f)
 	__(ori keyword_flags,keyword_flags,fixnum_one)
@@ -1737,7 +1737,7 @@ _spentry(keyword_bind)
 	__(bne cr1,7b)
 	/* Unknown keyword. If it was :allow-other-keys, cr6_eq will still */
         /* be set.  */
-/* OLD CODE
+/* PPC CODE
         __(beq cr6,9f)
 	__(ori keyword_flags,keyword_flags,2<<fixnumshift)
 9:
@@ -1749,7 +1749,7 @@ _spentry(keyword_bind)
 	/* If we saw an unknown keyword and didn't expect to, error.  */
 	/* Unless bit 2 is set in the fixnum in keyword_flags, discard the  */
 	/* keyword/value pairs from the vstack.  */
-/* OLD CODE
+/* PPC CODE
 	__(andi. imm0,keyword_flags,(fixnum_one)|(2<<fixnumshift))
 	__(cmpri(cr0,imm0,2<<fixnumshift))
 	__(beq- cr0,badkeys)
@@ -1768,7 +1768,7 @@ _spentry(keyword_bind)
 /* For now, just cons a list out of the keyword/value pairs */
 /* that were actually provided, and signal an "invalid keywords" */
 /* error with that list as an operand.  */
-/* OLD CODE
+/* PPC CODE
 odd_keywords:
 	__(mr vsp,imm4)
 	__(mr nargs,imm1)
@@ -1798,19 +1798,19 @@ badkeys:
 
         
 _spentry(poweropen_ffcall)
-/* OLD CODE
+/* PPC CODE
 LocalLabelPrefix`'ffcall:                
 	__(mflr loc_pc)
 	__(vpush_saveregs())		/* Now we can use save0-save7 to point to stacks  */
-/* OLD CODE
+/* PPC CODE
 	__(mr save0,rcontext)	/* or address globals.  */
-/* OLD CODE
+/* PPC CODE
 	__(extract_typecode(imm0,arg_z))
 	__(cmpri(cr7,imm0,subtag_macptr))
 	__(ldr(save1,0(sp)))	/* bottom of reserved lisp frame  */
-/* OLD CODE
+/* PPC CODE
 	__(la save2,-lisp_frame.size(save1))	/* top of lisp frame */
-/* OLD CODE
+/* PPC CODE
         __(zero_doublewords save2,0,lisp_frame.size)
 	__(str(save1,lisp_frame.backlink(save2)))
 	__(str(save2,c_frame.backlink(sp)))
@@ -1830,9 +1830,9 @@ LocalLabelPrefix`'ffcall:
 	__(str(rzero,tcr.ffi_exception(rcontext)))
 	__(mffs f0)
 	__(stfd f0,tcr.lisp_fpscr(rcontext))	/* remember lisp's fpscr  */
-/* OLD CODE
+/* PPC CODE
 	__(mtfsf 0xff,fp_zero)	/* zero foreign fpscr  */
-/* OLD CODE
+/* PPC CODE
 	__(li r4,TCR_STATE_FOREIGN)
 	__(str(r4,tcr.valence(rcontext)))
         __ifdef(`rTOC')
@@ -1853,14 +1853,14 @@ LocalLabelPrefix`'ffcall_setup:
 	__(ldr(r10,c_frame.param7(sp)))
 	/* Darwin is allegedly very picky about what register points */
 	/* to the function on entry.  */
-/* OLD CODE
+/* PPC CODE
 	__(mr r12,nargs)
 LocalLabelPrefix`'ffcall_setup_end: 
 LocalLabelPrefix`'ffcall_call:
 	__(bctrl)
 LocalLabelPrefix`'ffcall_call_end:
 	/* C should have preserved save0 (= rcontext) for us.  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(sp,0(sp)))
 	__(mr imm2,save0)
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
@@ -1897,7 +1897,7 @@ LocalLabelPrefix`'ffcall_call_end:
 	__(mffs f0)
 	__(stfd f0,8(sp))
 	__(lwz imm3,12(sp))	/* imm3 = FPSCR after call  */
-/* OLD CODE
+/* PPC CODE
         __(clrrwi imm2,imm3,8)
 	__(discard_lisp_frame())
 	__(str(imm2,tcr.ffi_exception(rcontext)))
@@ -1919,12 +1919,12 @@ LocalLabelPrefix`'ffcall_call_end:
          __ifdef(`DARWIN')
 0:        /* Got here because TCR_FLAG_BIT_FOREIGN_EXCEPTION */
           /* was set in tcr.flags.  Clear that bit. */
-/* OLD CODE
+/* PPC CODE
           __(andc imm4,imm4,imm3)
           __(std imm4,tcr.flags(rcontext))
  	  /* Unboxed foreign exception (likely an NSException) in %imm0. */
 	  /* Box it, then signal a lisp error. */
-/* OLD CODE
+/* PPC CODE
           __(li imm1,macptr_header)
           __(Misc_Alloc_Fixed(arg_z,imm1,macptr.size))
           __(std imm0,macptr.address(arg_z))
@@ -1932,7 +1932,7 @@ LocalLabelPrefix`'ffcall_call_end:
           __(set_nargs(2))
           __(b _SPksignalerr)
         /* Handle exceptions, for ObjC 2.0 */
-/* OLD CODE
+/* PPC CODE
 LocalLabelPrefix`'ffcallLandingPad:      
           __(mr save1,r3)
           __(cmpdi r4,1)
@@ -1949,7 +1949,7 @@ LocalLabelPrefix`'ffcallBeginCatch:
           __(bctrl)
 LocalLabelPrefix`'ffcallBeginCatch_end:          
           __(ld save1,0(r3)) /* indirection is necessary because we don't provide type info in lsda */
-/* OLD CODE
+/* PPC CODE
 LocalLabelPrefix`'ffcallEndCatch:  
           __(ref_global(r12,objc2_end_catch))
           __(mtctr r12)
@@ -1970,60 +1970,60 @@ LocalLabelPrefix`'ffcall_end:
 	  .align 3
 LLSDA1:
 	  .byte	0xff	/* @LPStart format (omit) */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* @TType format (absolute) */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x4d	/* uleb128 0x4d; @TType base offset */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x3	/* call-site format (udata4) */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x41	/* uleb128 0x41; Call-site table length */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_setup-Lffcall	/* region 0 start */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_setup_end-Lffcall_setup	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long	0x0	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* uleb128 0x0; action */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_call-Lffcall	/* region 1 start */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_call_end-Lffcall_call	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long LffcallLandingPad-Lffcall	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x1	/* uleb128 0x1; action */
-/* OLD CODE
+/* PPC CODE
 	  .long LffcallUnwindResume-Lffcall	/* region 2 start */
-/* OLD CODE
+/* PPC CODE
 	  .long LffcallUnwindResume_end-LffcallUnwindResume	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long	0x0	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* uleb128 0x0; action */
-/* OLD CODE
+/* PPC CODE
 	  .long LffcallBeginCatch-Lffcall	/* region 3 start */
-/* OLD CODE
+/* PPC CODE
 	  .long LffcallBeginCatch_end-LffcallBeginCatch	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long 0	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* uleb128 0x0; action */
-/* OLD CODE
+/* PPC CODE
 	  .long LffcallEndCatch-Lffcall
 	  .long LffcallEndCatch_end-LffcallEndCatch	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long	0x0	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* uleb128 0x0; action */
-/* OLD CODE  
+/* PPC CODE  
 	  .byte	0x1	/* Action record table */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0
 	  .align 3
 	  .quad	0       /* _OBJC_EHTYPE_$_NSException */
-/* OLD CODE
+/* PPC CODE
           .text
          __endif
         __endif
@@ -2035,20 +2035,20 @@ LLSDA1:
    to lisp.  (We have to do this in the ffcall glue here, because
    r9 and r10 - at least - are overloaded as dedicated lisp registers */
 _spentry(poweropen_ffcall_return_registers)
-/* OLD CODE
+/* PPC CODE
 LocalLabelPrefix`'ffcall_return_registers:                
 	__(mflr loc_pc)
 	__(vpush_saveregs())		/* Now we can use save0-save7 to point to stacks  */
-/* OLD CODE
+/* PPC CODE
         __(ldr(save7,macptr.address(arg_y)))
 	__(mr save0,rcontext)	/* or address globals.  */
-/* OLD CODE
+/* PPC CODE
 	__(extract_typecode(imm0,arg_z))
 	__(cmpri(cr7,imm0,subtag_macptr))
 	__(ldr(save1,0(sp)))	/* bottom of reserved lisp frame  */
-/* OLD CODE
+/* PPC CODE
 	__(la save2,-lisp_frame.size(save1))	/* top of lisp frame */
-/* OLD CODE
+/* PPC CODE
         __(zero_doublewords save2,0,lisp_frame.size)
 	__(str(save1,lisp_frame.backlink(save2)))
 	__(str(save2,c_frame.backlink(sp)))
@@ -2068,9 +2068,9 @@ LocalLabelPrefix`'ffcall_return_registers:
 	__(str(rzero,tcr.ffi_exception(rcontext)))
 	__(mffs f0)
 	__(stfd f0,tcr.lisp_fpscr(rcontext))	/* remember lisp's fpscr  */
-/* OLD CODE
+/* PPC CODE
 	__(mtfsf 0xff,fp_zero)	/* zero foreign fpscr  */
-/* OLD CODE
+/* PPC CODE
 	__(li r4,TCR_STATE_FOREIGN)
 	__(str(r4,tcr.valence(rcontext)))
         __ifdef(`rTOC')
@@ -2091,7 +2091,7 @@ LocalLabelPrefix`'ffcall_return_registers_setup:
 	__(ldr(r10,c_frame.param7(sp)))
 	/* Darwin is allegedly very picky about what register points */
 	/* to the function on entry.  */
-/* OLD CODE
+/* PPC CODE
 	__(mr r12,nargs)
 LocalLabelPrefix`'ffcall_return_registers_setup_end: 
 LocalLabelPrefix`'ffcall_return_registers_call:
@@ -2119,7 +2119,7 @@ LocalLabelPrefix`'ffcall_return_registers_call_end:
         __(stfd f12,((8*node_size)+(11*8))(save7))
         __(stfd f13,((8*node_size)+(12*8))(save7))
 	/* C should have preserved save0 (= rcontext) for us.  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(sp,0(sp)))
 	__(mr imm2,save0)
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
@@ -2156,7 +2156,7 @@ LocalLabelPrefix`'ffcall_return_registers_call_end:
 	__(mffs f0)
 	__(stfd f0,8(sp))
 	__(lwz imm3,12(sp))	/* imm3 = FPSCR after call  */
-/* OLD CODE
+/* PPC CODE
         __(clrrwi imm2,imm3,8)
 	__(discard_lisp_frame())
 	__(str(imm2,tcr.ffi_exception(rcontext)))
@@ -2179,12 +2179,12 @@ LocalLabelPrefix`'ffcall_return_registers_call_end:
          __ifdef(`PPC64')
 0:        /* Got here because TCR_FLAG_BIT_FOREIGN_EXCEPTION */
           /* was set in tcr.flags.  Clear that bit. */
-/* OLD CODE
+/* PPC CODE
           __(andc imm4,imm4,imm3)
           __(std imm4,tcr.flags(rcontext))
  	  /* Unboxed foreign exception (likely an NSException) in %imm0. */
 	  /* Box it, then signal a lisp error. */
-/* OLD CODE
+/* PPC CODE
           __(li imm1,macptr_header)
           __(Misc_Alloc_Fixed(arg_z,imm1,macptr.size))
           __(std imm0,macptr.address(arg_z))
@@ -2192,7 +2192,7 @@ LocalLabelPrefix`'ffcall_return_registers_call_end:
           __(set_nargs(2))
           __(b _SPksignalerr)
         /* Handle exceptions, for ObjC 2.0 */
-/* OLD CODE
+/* PPC CODE
 LocalLabelPrefix`'ffcall_return_registersLandingPad:      
           __(mr save1,r3)
           __(cmpdi r4,1)
@@ -2209,7 +2209,7 @@ LocalLabelPrefix`'ffcall_return_registersBeginCatch:
           __(bctrl)
 LocalLabelPrefix`'ffcall_return_registersBeginCatch_end:          
           __(ld save1,0(r3)) /* indirection is necessary because we don't provide type info in lsda */
-/* OLD CODE
+/* PPC CODE
 LocalLabelPrefix`'ffcall_return_registersEndCatch:  
           __(ref_global(r12,objc2_end_catch))
           __(mtctr r12)
@@ -2229,61 +2229,61 @@ LocalLabelPrefix`'ffcall_return_registers_end:
 	  .align 3
 LLSDA2:
 	  .byte	0xff	/* @LPStart format (omit) */
-/* OLD CODE
+/* PPC CODE
   	  .byte	0x0	/* @TType format (absolute) */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x4d	/* uleb128 0x4d; @TType base offset */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x3	/* call-site format (udata4) */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x41	/* uleb128 0x41; Call-site table length */
-/* OLD CODE
+/* PPC CODE
 	
 	  .long Lffcall_return_registers_setup-Lffcall_return_registers	/* region 0 start */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_return_registers_setup_end-Lffcall_return_registers_setup	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long	0x0	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* uleb128 0x0; action */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_return_registers_call-Lffcall_return_registers	/* region 1 start */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_return_registers_call_end-Lffcall_return_registers_call	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_return_registersLandingPad-Lffcall_return_registers	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x1	/* uleb128 0x1; action */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_return_registersUnwindResume-Lffcall_return_registers	/* region 2 start */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_return_registersUnwindResume_end-Lffcall_return_registersUnwindResume	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long	0x0	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* uleb128 0x0; action */
-/* OLD CODE	
+/* PPC CODE	
 	  .long Lffcall_return_registersBeginCatch-Lffcall_return_registers	/* region 3 start */
-/* OLD CODE
+/* PPC CODE
 	  .long Lffcall_return_registersBeginCatch_end-Lffcall_return_registersBeginCatch	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long 0	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* uleb128 0x0; action */
-/* OLD CODE        
+/* PPC CODE        
 	  .long Lffcall_return_registersEndCatch-Lffcall_return_registers
 	  .long Lffcall_return_registersEndCatch_end-Lffcall_return_registersEndCatch	/* length */
-/* OLD CODE
+/* PPC CODE
 	  .long	0x0	/* landing pad */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0	/* uleb128 0x0; action */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x1	/* Action record table */
-/* OLD CODE
+/* PPC CODE
 	  .byte	0x0
 	  .align 3
 	  .quad	0       /* _OBJC_EHTYPE_$_NSException */
-/* OLD CODE
+/* PPC CODE
           .text
          __endif
         __endif
@@ -2296,7 +2296,7 @@ LLSDA2:
 /* on the C runtime stderr.  */
 
 _spentry(ksignalerr)
-/* OLD CODE
+/* PPC CODE
 	__(li fname,nrs.errdisp)
 	__(jump_fname)
 */
@@ -2304,7 +2304,7 @@ _spentry(ksignalerr)
         
 /* As in the heap-consed cases, only stack-cons the &rest arg  */
 _spentry(stack_rest_arg)
-/* OLD CODE
+/* PPC CODE
 	__(li imm0,0)
 	__(vpush_argregs())
         __(b _SPstack_cons_rest_arg)
@@ -2313,20 +2313,20 @@ _spentry(stack_rest_arg)
 
 	
 _spentry(req_stack_rest_arg)
-/* OLD CODE
+/* PPC CODE
 	__(vpush_argregs())
         __(b _SPstack_cons_rest_arg)
 */
 		__(ret)
 	
 _spentry(stack_cons_rest_arg)
-/* OLD CODE
+/* PPC CODE
 	__(sub imm1,nargs,imm0)
 	__(cmpri(cr0,imm1,0))
 	__(cmpri(cr1,imm1,(4096-dnode_size)/2))
 	__(li arg_z,nil_value)
 	__(ble cr0,2f)		/* always temp-push something.  */
-/* OLD CODE
+/* PPC CODE
 	__(bge cr1,3f)
 	__(add imm1,imm1,imm1)
 	__(dnode_align(imm2,imm1,tsp_frame.fixed_overhead))
@@ -2334,7 +2334,7 @@ _spentry(stack_cons_rest_arg)
 	__(la imm0,tsp_frame.data_offset+fulltag_cons(tsp))
 1:
 	__(cmpri(cr0,imm1,cons.size))	/* last time through ?  */
-/* OLD CODE
+/* PPC CODE
 	__(subi imm1,imm1,cons.size)
 	__(vpop(arg_x))
 	__(_rplacd(imm0,arg_z))
@@ -2358,7 +2358,7 @@ _spentry(stack_cons_rest_arg)
    It's tended to bitrot, and we have another way to do that now.
 */        
 _spentry(poweropen_callbackX)
-/* OLD CODE
+/* PPC CODE
         .long 0x7c800008        /* debug trap */
 		__(ret)
 	
@@ -2368,21 +2368,21 @@ _spentry(poweropen_callbackX)
 /* functions which take "inherited arguments" work consistently  */
 /* even in cases where no closure object is created.  */
 _spentry(call_closure)    
-/* OLD CODE    
+/* PPC CODE    
 	__(cmpri(cr0,nargs,nargregs<<fixnumshift))
 	__(cmpri(cr1,nargs,fixnum_one))
 	__(vector_length(imm0,nfn,imm0))
 	__(subi imm0,imm0,4<<fixnumshift) /* imm0 = inherited arg count  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm1,misc_data_offset+(2<<fixnumshift)) /* point to 1st arg  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm4,nil_value)
 	__(ble+ cr0,local_label(no_insert))
 	/* Some arguments have already been vpushed.  Vpush imm0's worth  */
 	/* of NILs, copy those arguments that have already been vpushed from  */
 	/* the old TOS to the new, then insert all of the inerited args  */
 	/* and go to the function.  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm2,0)
 local_label(push_nil_loop):
 	__(addi imm2,imm2,fixnum_one)
@@ -2414,7 +2414,7 @@ local_label(insert_loop):
 local_label(no_insert):
 	/* nargregs or fewer args were already vpushed.  */
 	/* if exactly nargregs, vpush remaining inherited vars.  */
-/* OLD CODE
+/* PPC CODE
 	__(add imm2,imm1,imm0)
 	__(bne cr0,local_label(set_regs))
 local_label(vpush_remaining):
@@ -2429,7 +2429,7 @@ local_label(vpush_remaining):
 local_label(set_regs):
 	/* if nargs was > 1 (and we know that it was < 3), it must have  */
 	/* been 2.  Set arg_x, then vpush the remaining args.  */
-/* OLD CODE
+/* PPC CODE
 	__(ble cr1,local_label(set_y_z))
 local_label(set_arg_x):
 	__(subi imm0,imm0,fixnum_one)
@@ -2440,11 +2440,11 @@ local_label(set_arg_x):
 	__(bne cr0,local_label(vpush_remaining))
 	__(b local_label(go))
 	/* Maybe set arg_y or arg_z, preceding args  */
-/* OLD CODE
+/* PPC CODE
 local_label(set_y_z):
 	__(bne cr1,local_label(set_arg_z))
 	/* Set arg_y, maybe arg_x, preceding args  */
-/* OLD CODE
+/* PPC CODE
 local_label(set_arg_y):
 	__(subi imm0,imm0,fixnum_one)
 	__(cmpri(cr0,imm0,0))
@@ -2475,7 +2475,7 @@ local_label(go):
 /* as if it denoted a "natural-sized" value.  */
 /* Argument in arg_z, result in imm0.  May use temp0.  */
 _spentry(getxlong)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
         __else
         __(extract_typecode(imm0,arg_z))
@@ -2494,10 +2494,10 @@ local_label(error):
 	__(uuo_interr(error_object_not_integer,arg_z)) /* not quite right but what 68K MCL said  */
 
 
-/* OLD CODE
+/* PPC CODE
 local_label(big2):
 	__(vrefr(imm0,temp0,1)) /* sign digit must be 0  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(imm0,0))
 	__(bne local_label(error))
 local_label(big1):
@@ -2513,7 +2513,7 @@ local_label(big1):
 /* function call (this may require vpopping a few things.)  */
 /* ppc2-invoke-fn assumes that temp1 is preserved here.  */
 _spentry(spreadargz)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
 	 __(extract_fulltag(imm1,arg_z))
 	 __(cmpri(cr1,imm1,fulltag_cons))
@@ -2524,7 +2524,7 @@ _spentry(spreadargz)
 	__(cmpri(cr0,arg_z,nil_value))
 	__(li imm0,0)
 	__(mr arg_y,arg_z)		/*  save in case of error  */
-/* OLD CODE
+/* PPC CODE
 	__(beq cr0,2f)
 1:
 	__(bne- cr1,3f)
@@ -2552,11 +2552,11 @@ _spentry(spreadargz)
 	__(vpop(arg_x))
 	__(blr)
         /*  Discard whatever's been vpushed already, complain.  */
-/* OLD CODE
+/* PPC CODE
 3:	
 	__(add vsp,vsp,imm0)
 	__(mr arg_z,arg_y)		/* recover original arg_z  */
-/* OLD CODE
+/* PPC CODE
 	__(li arg_y,XNOSPREAD)
 	__(set_nargs(2))
 	__(b _SPksignalerr)
@@ -2566,7 +2566,7 @@ _spentry(spreadargz)
 /* Tail-recursively funcall temp0.  */
 /* Pretty much the same as the tcallsym* cases above.  */
 _spentry(tfuncallgen)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,nargs,nargregs<<fixnumshift))
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
@@ -2575,7 +2575,7 @@ _spentry(tfuncallgen)
 	__(ldr(imm0,lisp_frame.savevsp(sp)))
 	__(discard_lisp_frame())
 	/* can use nfn (= temp2) as a temporary  */
-/* OLD CODE
+/* PPC CODE
 	__(subi imm1,nargs,nargregs<<fixnumshift)
 	__(add imm1,imm1,vsp)
 1:
@@ -2596,13 +2596,13 @@ _spentry(tfuncallgen)
 /* Some args were vpushed.  Slide them down to the base of  */
 /* the current frame, then do funcall.  */
 _spentry(tfuncallslide)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
 	__(ldr(imm0,lisp_frame.savevsp(sp)))
 	__(discard_lisp_frame())
 	/* can use nfn (= temp2) as a temporary  */
-/* OLD CODE
+/* PPC CODE
 	__(subi imm1,nargs,nargregs<<fixnumshift)
 	__(add imm1,imm1,vsp)
 	__(mtlr loc_pc)
@@ -2618,7 +2618,7 @@ _spentry(tfuncallslide)
 
 /* No args were vpushed; recover saved context & do funcall  */
 _spentry(tfuncallvsp)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
@@ -2634,7 +2634,7 @@ _spentry(tfuncallvsp)
 /* to the base of the frame.  If not, we can just restore  */
 /* vsp, lr, fn from the saved lisp frame on the control stack.  */
 _spentry(tcallsymgen)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,nargs,nargregs<<fixnumshift))
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
@@ -2644,7 +2644,7 @@ _spentry(tcallsymgen)
 	__(ldr(imm0,lisp_frame.savevsp(sp)))
 	__(discard_lisp_frame())
 	/* can use nfn (= temp2) as a temporary  */
-/* OLD CODE
+/* PPC CODE
 	__(subi imm1,nargs,nargregs<<fixnumshift)
 	__(add imm1,imm1,vsp)
 1:
@@ -2666,14 +2666,14 @@ _spentry(tcallsymgen)
 /* Some args were vpushed.  Slide them down to the base of  */
 /* the current frame, then do funcall.  */
 _spentry(tcallsymslide)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
 	__(ldr(imm0,lisp_frame.savevsp(sp)))
 	__(discard_lisp_frame())
 	__(mtlr loc_pc)
 	/* can use nfn (= temp2) as a temporary  */
-/* OLD CODE
+/* PPC CODE
 	__(subi imm1,nargs,nargregs<<fixnumshift)
 	__(add imm1,imm1,vsp)
 1:
@@ -2688,7 +2688,7 @@ _spentry(tcallsymslide)
 
 /* No args were vpushed; recover saved context & call symbol  */
 _spentry(tcallsymvsp)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
@@ -2701,7 +2701,7 @@ _spentry(tcallsymvsp)
 /* Tail-recursively call the function in nfn.  */
 /* Pretty much the same as the tcallsym* cases above.  */
 _spentry(tcallnfngen)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,nargs,nargregs<<fixnumshift))
 	__(ble cr0,_SPtcallnfnvsp)
         __(b _SPtcallnfnslide)
@@ -2711,14 +2711,14 @@ _spentry(tcallnfngen)
 /* Some args were vpushed.  Slide them down to the base of  */
 /* the current frame, then do funcall.  */
 _spentry(tcallnfnslide)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
 	__(ldr(imm0,lisp_frame.savevsp(sp)))
 	__(discard_lisp_frame())
 	__(mtlr loc_pc)
 	/* Since we have a known function, can use fname as a temporary.  */
-/* OLD CODE
+/* PPC CODE
 	__(subi imm1,nargs,nargregs<<fixnumshift)
 	__(add imm1,imm1,vsp)
 1:
@@ -2732,7 +2732,7 @@ _spentry(tcallnfnslide)
 	__(ret)
         
 _spentry(tcallnfnvsp)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
@@ -2747,13 +2747,13 @@ _spentry(tcallnfnvsp)
 /* lisp object in arg_z.  Do type and bounds-checking.  */
 	
 _spentry(misc_ref)
-/* OLD CODE
+/* PPC CODE
 	__(trap_unless_fulltag_equal(arg_y,fulltag_misc,imm0))
 	__(trap_unless_lisptag_equal(arg_z,tag_fixnum,imm0))
 	__(vector_length(imm0,arg_y,imm1))
 	__(trlge(arg_z,imm0))
 	__(extract_lowbyte(imm1,imm1))	/* imm1 = subtag  */
-/* OLD CODE	
+/* PPC CODE	
 local_label(misc_ref_common):   
         __ifdef(`PPC64')
          __(slwi imm1,imm1,3)
@@ -2765,280 +2765,280 @@ local_label(misc_ref_common):
 
 local_label(misc_ref_jmp):              
         /* 00-0f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 00 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 01 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 02 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 03 function  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 04 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 05 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 06 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 07 catch_frame  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 08 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 09 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_u32) /* 0a code_vector  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 0b slot_vector  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 0c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 0d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 0e immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 0f ratio  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 00 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 01 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 02 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 03 function  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 04 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 05 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 06 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 07 catch_frame  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 08 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 09 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_u32) /* 0a code_vector  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 0b slot_vector  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 0c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 0d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 0e immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 0f ratio  */
         /* 10-1f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 10 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 11 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 12 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 13 symbol_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 14 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 15 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 16 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 17 lisp_tread  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 18 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 19 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_u32) /* 1a xcode_vector  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 1b instance  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 1c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 1d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_u64) /* 1e macptr  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 1f complex  */
-/* OLD CODE        /* 20-2f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 20 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 21 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 22 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 23 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 24 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 25 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 26 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 27 lock  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 28 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 29 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_u32) /* 2a bignum  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 2b struct  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 2c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 2d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_u64) /* 2e dead_macptr  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 2f nodeheader_3  */
-/* OLD CODE        /* 30-3f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 30 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 31 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 32 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 33 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 34 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 35 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 36 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 37 hash_vector  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 38 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 39 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_u32) /* 3a double_float  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 3b istruct  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 3c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 3d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 3e immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 3f nodeheader_3  */
-/* OLD CODE        /* 40-4f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 40 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 41 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 42 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 43 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 44 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 45 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 46 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 47 pool  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 48 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 49 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_u32) /* 4a complex_single_float  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 4b value_cell_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 4c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 4d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 4e immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 4f nodeheader_3  */
-/* OLD CODE        /* 50-5f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 50 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 51 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 52 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 53 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 54 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 55 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 56 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 57 weak  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 58 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 59 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_u32) /* 5a complex_double_float  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 5b xfunction  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 5c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 5d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 5e immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 5f nodeheader_3  */
-/* OLD CODE        /* 60-6f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 60 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 61 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 62 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 63 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 64 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 65 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 66 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 67 package  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 68 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 69 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 6a immheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 6b nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 6c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 6d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 6e immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 6f nodeheader_3  */
-/* OLD CODE        /* 70-7f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 70 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 71 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 72 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 73 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 74 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 75 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 76 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 77 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 78 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 79 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 7a immheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 7b nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 7c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 7d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 7e immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 7f nodeheader_3  */
-/* OLD CODE        /* 80-8f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 80 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 81 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 82 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 83 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 84 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 85 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 86 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_node)    /* 87 arrayH  */ 
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 88 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 89 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 8a immheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_node)    /* 8b vectorH  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 8c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 8d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 8e immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_node) /* 8f simple_vector  */
-/* OLD CODE        /* 90-9f  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 90 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 91 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_s8) /* 92 s8  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 93 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 94 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 95 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_s16) /* 96 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 97 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 98 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 99 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_s32) /* 9a s32  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 9b nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 9c misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 9d imm3  */
-/* OLD CODE         .quad local_label(misc_ref_s64) /* 9e s64  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* 9f nodeheader_3  */
-/* OLD CODE        /* a0-af  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* a0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* a1 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_u8) /* a2 u8  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* a3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* a4 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* a5 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_u16) /* a6 u16  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* a7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* a8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* a9 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_u32) /* aa u32  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ab nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ac misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ad imm3  */
-/* OLD CODE         .quad local_label(misc_ref_u64) /* ae u64  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* af nodeheader_3  */
-/* OLD CODE        /* b0-bf  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b1 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b2 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b4 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b5 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_complex_double_float_vector) /* b6 complex_double_float_vector  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* b9 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_single_float_vector) /* ba sf vector  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* bb nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* bc misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* bd imm3  */
-/* OLD CODE         .quad local_label(misc_ref_fixnum_vector) /* be fixnum_vector  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* bf nodeheader_3  */
-/* OLD CODE        /* c0-cf  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c1 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c2 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c4 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c5 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c6 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* c9 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ca immheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* cb nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* cc misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* cd imm3  */
-/* OLD CODE         .quad local_label(misc_ref_double_float_vector) /* ce double-float vector  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* cf nodeheader_3  */
-/* OLD CODE        /* d0-df  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d1 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_string) /* d2 string  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d4 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d5 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d6 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* d9 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_new_string) /* da new_string  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* db nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* dc misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* dd imm3  */
-/* OLD CODE         .quad local_label(misc_ref_complex_single_float_vector) /* de complex_single_float_vector  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* df nodeheader_3  */
-/* OLD CODE        /* e0-ef  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e1 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e2 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e4 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e5 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e6 immheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* e9 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ea immheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* eb nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ec misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ed imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ee immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ef nodeheader_3  */
-/* OLD CODE        /* f0-ff  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f1 imm_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f2 immheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f4 cons  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f5 imm_1  */
-/* OLD CODE         .quad local_label(misc_ref_bit_vector) /* f6 bit_vector  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* f9 imm_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* fa immheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* fb nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* fc misc  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* fd imm3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* fe immheader_3  */
-/* OLD CODE         .quad local_label(misc_ref_invalid) /* ff nodeheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 10 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 11 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 12 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 13 symbol_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 14 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 15 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 16 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 17 lisp_tread  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 18 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 19 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_u32) /* 1a xcode_vector  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 1b instance  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 1c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 1d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_u64) /* 1e macptr  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 1f complex  */
+/* PPC CODE        /* 20-2f  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 20 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 21 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 22 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 23 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 24 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 25 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 26 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 27 lock  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 28 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 29 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_u32) /* 2a bignum  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 2b struct  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 2c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 2d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_u64) /* 2e dead_macptr  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 2f nodeheader_3  */
+/* PPC CODE        /* 30-3f  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 30 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 31 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 32 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 33 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 34 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 35 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 36 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 37 hash_vector  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 38 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 39 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_u32) /* 3a double_float  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 3b istruct  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 3c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 3d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 3e immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 3f nodeheader_3  */
+/* PPC CODE        /* 40-4f  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 40 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 41 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 42 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 43 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 44 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 45 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 46 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 47 pool  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 48 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 49 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_u32) /* 4a complex_single_float  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 4b value_cell_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 4c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 4d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 4e immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 4f nodeheader_3  */
+/* PPC CODE        /* 50-5f  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 50 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 51 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 52 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 53 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 54 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 55 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 56 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 57 weak  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 58 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 59 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_u32) /* 5a complex_double_float  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 5b xfunction  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 5c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 5d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 5e immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 5f nodeheader_3  */
+/* PPC CODE        /* 60-6f  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 60 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 61 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 62 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 63 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 64 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 65 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 66 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 67 package  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 68 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 69 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 6a immheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 6b nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 6c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 6d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 6e immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 6f nodeheader_3  */
+/* PPC CODE        /* 70-7f  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 70 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 71 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 72 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 73 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 74 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 75 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 76 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 77 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 78 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 79 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 7a immheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 7b nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 7c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 7d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 7e immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 7f nodeheader_3  */
+/* PPC CODE        /* 80-8f  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 80 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 81 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 82 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 83 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 84 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 85 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 86 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_node)    /* 87 arrayH  */ 
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 88 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 89 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 8a immheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_node)    /* 8b vectorH  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 8c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 8d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 8e immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_node) /* 8f simple_vector  */
+/* PPC CODE        /* 90-9f  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 90 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 91 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_s8) /* 92 s8  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 93 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 94 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 95 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_s16) /* 96 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 97 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 98 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 99 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_s32) /* 9a s32  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 9b nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 9c misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 9d imm3  */
+/* PPC CODE         .quad local_label(misc_ref_s64) /* 9e s64  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* 9f nodeheader_3  */
+/* PPC CODE        /* a0-af  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* a0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* a1 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_u8) /* a2 u8  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* a3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* a4 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* a5 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_u16) /* a6 u16  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* a7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* a8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* a9 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_u32) /* aa u32  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ab nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ac misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ad imm3  */
+/* PPC CODE         .quad local_label(misc_ref_u64) /* ae u64  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* af nodeheader_3  */
+/* PPC CODE        /* b0-bf  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b1 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b2 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b4 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b5 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_complex_double_float_vector) /* b6 complex_double_float_vector  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* b9 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_single_float_vector) /* ba sf vector  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* bb nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* bc misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* bd imm3  */
+/* PPC CODE         .quad local_label(misc_ref_fixnum_vector) /* be fixnum_vector  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* bf nodeheader_3  */
+/* PPC CODE        /* c0-cf  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c1 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c2 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c4 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c5 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c6 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* c9 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ca immheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* cb nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* cc misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* cd imm3  */
+/* PPC CODE         .quad local_label(misc_ref_double_float_vector) /* ce double-float vector  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* cf nodeheader_3  */
+/* PPC CODE        /* d0-df  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d1 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_string) /* d2 string  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d4 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d5 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d6 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* d9 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_new_string) /* da new_string  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* db nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* dc misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* dd imm3  */
+/* PPC CODE         .quad local_label(misc_ref_complex_single_float_vector) /* de complex_single_float_vector  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* df nodeheader_3  */
+/* PPC CODE        /* e0-ef  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e1 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e2 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e4 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e5 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e6 immheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* e9 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ea immheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* eb nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ec misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ed imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ee immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ef nodeheader_3  */
+/* PPC CODE        /* f0-ff  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f1 imm_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f2 immheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f4 cons  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f5 imm_1  */
+/* PPC CODE         .quad local_label(misc_ref_bit_vector) /* f6 bit_vector  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* f9 imm_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* fa immheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* fb nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* fc misc  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* fd imm3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* fe immheader_3  */
+/* PPC CODE         .quad local_label(misc_ref_invalid) /* ff nodeheader_3  */
 	
          /* A node vector  */
-/* OLD CODE
+/* PPC CODE
 local_label(misc_ref_node):        
          __(la imm0,misc_data_offset(arg_z))
          __(ldx arg_z,arg_y,imm0)
@@ -3141,7 +3141,7 @@ local_label(misc_ref_string):
          __(blr)
 local_label(misc_ref_bit_vector):               
 	 __(extrwi imm1,arg_z,5,32-(fixnumshift+5))	/* imm1 = bitnum  */
-/* OLD CODE
+/* PPC CODE
          __(la imm1,1+fixnumshift(imm1))
          __(srdi imm0,arg_z,5+fixnumshift)
          __(sldi imm0,imm0,2)
@@ -3163,284 +3163,284 @@ local_label(misc_ref_invalid):
 
 local_label(misc_ref_jmp):           
         /* 00-0f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 00 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 01 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 02 nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 03 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 04 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 05 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 06 misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* 07 bignum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 08 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 09 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 0a ratio  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 0b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 0c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 0d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 0e misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* 0f single_float  */
-/* OLD CODE        /* 10-1f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 10 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 11 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 12 nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 13 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 14 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 15 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 16 misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* 17 double_float  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 18 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 19 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 1a complex  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 1b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 1c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 1d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 1e misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* 1f macptr  */
-/* OLD CODE        /* 20-2f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 20 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 21 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 22 catch_frame  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 23 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 24 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 25 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 26 misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* 27 dead_macptr  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 28 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 29 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 2a function  */
-/* OLD CODE	
-/* OLD CODE
-/* OLD CODE
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 2b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 2c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 2d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 2e misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* 2f code_vector  */
-/* OLD CODE        /* 30-3f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 30 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 31 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 32 lisp_thread  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 33 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 34 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 35 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 36 misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* 37 creole  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 38 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 39 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 3a symbol  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 3b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 3c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 3d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 3e misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* 3f xcode_vector  */
-/* OLD CODE        /* 40-4f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 40 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 41 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 42 lock  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 43 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 44 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 45 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 46 misc  */
-/* OLD CODE         .long local_label(misc_ref_u32)     /* 47 complex_single_float  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 48 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 49 cons  */
-/* OLD CODE         .long local_label(misc_ref_node)    /* 4a hash_vector  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 4b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 4c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 4d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 4e misc  */
-/* OLD CODE         .long local_label(misc_ref_u32)     /* 4f complex_double_float  */
-/* OLD CODE        /* 50-5f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 50 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 51 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 52 pool  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 53 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 54 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 55 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 56 misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 57 immheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 58 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 59 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 5a weak  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 5b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 5c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 5d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 5e misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 5f immheader  */
-/* OLD CODE        /* 60-6f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 60 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 61 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 62 package  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 63 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 64 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 65 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 66 misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 67 immheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 68 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 69 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 6a slot_vector  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 6b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 6c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 6d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 6e misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 6f immheader  */
-/* OLD CODE        /* 70-7f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 70 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 71 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 72 instance  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 73 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 74 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 75 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 76 misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 77 immheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 78 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 79 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 7a struct  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 7b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 7c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 7d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 7e misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 7f immheader  */
-/* OLD CODE        /* 80-8f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 80 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 81 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 82 istruct  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 83 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 84 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 85 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 86 misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 87 immheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 88 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 89 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 8a value_cell  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 8b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 8c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 8d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 8e misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 8f immheader  */
-/* OLD CODE        /* 90-9f  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 90 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 91 cons  */
-/* OLD CODE         .long local_label(misc_ref_node) /* 92 xfunction  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 93 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 94 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 95 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 96 misc  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 97 immheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 98 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 99 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 9a nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 9b imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 9c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 9d nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* 9e misc  */
-/* OLD CODE         .long local_label(misc_ref_single_float_vector) /* 9f sf vector  */
-/* OLD CODE        /* a0-af  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a1 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a2 nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a3 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a5 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a6 misc  */
-/* OLD CODE         .long local_label(misc_ref_u32) /* a7 u32  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* a9 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* aa simple_vector  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ab imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ac odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ad nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ae misc  */
-/* OLD CODE         .long local_label(misc_ref_s32) /* af s32  */
-/* OLD CODE        /* b0-bf  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b1 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b2 nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b3 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b5 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b6 misc  */
-/* OLD CODE         .long local_label(misc_ref_fixnum_vector) /* b7 fixnum_vector  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* b9 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ba nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* bb imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* bc odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* bd nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* be misc  */
-/* OLD CODE         .long local_label(misc_ref_new_string) /* bf string  */
-/* OLD CODE        /* c0-cf  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c1 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c2 nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c3 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c5 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c6 misc  */
-/* OLD CODE         .long local_label(misc_ref_u8) /* c7 u8  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* c9 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ca nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* cb imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* cc odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* cd nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ce misc  */
-/* OLD CODE         .long local_label(misc_ref_s8) /* cf s8  */
-/* OLD CODE        /* d0-df  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d1 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d2 nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d3 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d5 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d6 misc  */
-/* OLD CODE         .long local_label(misc_ref_u16)      /* d7 u16  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* d9 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* da nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* db imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* dc odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* dd nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* de misc  */
-/* OLD CODE         .long local_label(misc_ref_s16) /* df s16  */
-/* OLD CODE        /* e0-ef  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e1 cons  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e2 nodeheader  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e3 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e5 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e6 misc  */
-/* OLD CODE         .long local_label(misc_ref_double_float_vector) /* e7 double_float  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* e9 cons  */
-/* OLD CODE         .long local_label(misc_ref_node)    /* ea arrayH  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* eb imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ec odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ed nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* ee misc  */
-/* OLD CODE         .long local_label(misc_ref_complex_single_float_vector) /* ef complex sf vector  */
-/* OLD CODE        /* f0-ff  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* f0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* f1 cons  */
-/* OLD CODE         .long local_label(misc_ref_node)    /* f2 vectorH  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* f3 imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* f4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* f5 nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* f6 misc  */
-/* OLD CODE         .long local_label(misc_ref_complex_double_float_vector) /* f7 complex df vector  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* f8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* f9 cons  */
-/* OLD CODE         .long local_label(misc_ref_node)    /* fa simple_vector  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* fb imm  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* fc odd_fixnum  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* fd nil  */
-/* OLD CODE         .long local_label(misc_ref_invalid) /* fe misc  */
-/* OLD CODE         .long local_label(misc_ref_bit_vector) /* ff bit_vector  */
-/* OLD CODE                
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 00 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 01 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 02 nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 03 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 04 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 05 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 06 misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* 07 bignum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 08 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 09 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 0a ratio  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 0b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 0c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 0d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 0e misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* 0f single_float  */
+/* PPC CODE        /* 10-1f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 10 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 11 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 12 nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 13 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 14 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 15 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 16 misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* 17 double_float  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 18 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 19 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 1a complex  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 1b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 1c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 1d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 1e misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* 1f macptr  */
+/* PPC CODE        /* 20-2f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 20 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 21 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 22 catch_frame  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 23 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 24 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 25 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 26 misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* 27 dead_macptr  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 28 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 29 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 2a function  */
+/* PPC CODE	
+/* PPC CODE
+/* PPC CODE
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 2b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 2c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 2d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 2e misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* 2f code_vector  */
+/* PPC CODE        /* 30-3f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 30 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 31 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 32 lisp_thread  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 33 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 34 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 35 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 36 misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* 37 creole  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 38 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 39 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 3a symbol  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 3b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 3c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 3d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 3e misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* 3f xcode_vector  */
+/* PPC CODE        /* 40-4f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 40 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 41 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 42 lock  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 43 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 44 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 45 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 46 misc  */
+/* PPC CODE         .long local_label(misc_ref_u32)     /* 47 complex_single_float  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 48 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 49 cons  */
+/* PPC CODE         .long local_label(misc_ref_node)    /* 4a hash_vector  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 4b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 4c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 4d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 4e misc  */
+/* PPC CODE         .long local_label(misc_ref_u32)     /* 4f complex_double_float  */
+/* PPC CODE        /* 50-5f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 50 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 51 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 52 pool  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 53 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 54 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 55 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 56 misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 57 immheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 58 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 59 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 5a weak  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 5b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 5c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 5d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 5e misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 5f immheader  */
+/* PPC CODE        /* 60-6f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 60 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 61 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 62 package  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 63 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 64 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 65 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 66 misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 67 immheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 68 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 69 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 6a slot_vector  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 6b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 6c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 6d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 6e misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 6f immheader  */
+/* PPC CODE        /* 70-7f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 70 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 71 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 72 instance  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 73 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 74 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 75 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 76 misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 77 immheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 78 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 79 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 7a struct  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 7b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 7c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 7d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 7e misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 7f immheader  */
+/* PPC CODE        /* 80-8f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 80 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 81 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 82 istruct  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 83 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 84 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 85 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 86 misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 87 immheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 88 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 89 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 8a value_cell  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 8b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 8c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 8d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 8e misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 8f immheader  */
+/* PPC CODE        /* 90-9f  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 90 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 91 cons  */
+/* PPC CODE         .long local_label(misc_ref_node) /* 92 xfunction  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 93 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 94 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 95 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 96 misc  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 97 immheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 98 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 99 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 9a nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 9b imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 9c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 9d nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* 9e misc  */
+/* PPC CODE         .long local_label(misc_ref_single_float_vector) /* 9f sf vector  */
+/* PPC CODE        /* a0-af  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a1 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a2 nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a3 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a5 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a6 misc  */
+/* PPC CODE         .long local_label(misc_ref_u32) /* a7 u32  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* a9 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* aa simple_vector  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ab imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ac odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ad nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ae misc  */
+/* PPC CODE         .long local_label(misc_ref_s32) /* af s32  */
+/* PPC CODE        /* b0-bf  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b1 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b2 nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b3 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b5 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b6 misc  */
+/* PPC CODE         .long local_label(misc_ref_fixnum_vector) /* b7 fixnum_vector  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* b9 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ba nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* bb imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* bc odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* bd nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* be misc  */
+/* PPC CODE         .long local_label(misc_ref_new_string) /* bf string  */
+/* PPC CODE        /* c0-cf  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c1 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c2 nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c3 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c5 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c6 misc  */
+/* PPC CODE         .long local_label(misc_ref_u8) /* c7 u8  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* c9 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ca nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* cb imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* cc odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* cd nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ce misc  */
+/* PPC CODE         .long local_label(misc_ref_s8) /* cf s8  */
+/* PPC CODE        /* d0-df  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d1 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d2 nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d3 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d5 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d6 misc  */
+/* PPC CODE         .long local_label(misc_ref_u16)      /* d7 u16  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* d9 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* da nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* db imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* dc odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* dd nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* de misc  */
+/* PPC CODE         .long local_label(misc_ref_s16) /* df s16  */
+/* PPC CODE        /* e0-ef  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e1 cons  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e2 nodeheader  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e3 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e5 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e6 misc  */
+/* PPC CODE         .long local_label(misc_ref_double_float_vector) /* e7 double_float  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* e9 cons  */
+/* PPC CODE         .long local_label(misc_ref_node)    /* ea arrayH  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* eb imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ec odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ed nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* ee misc  */
+/* PPC CODE         .long local_label(misc_ref_complex_single_float_vector) /* ef complex sf vector  */
+/* PPC CODE        /* f0-ff  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* f0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* f1 cons  */
+/* PPC CODE         .long local_label(misc_ref_node)    /* f2 vectorH  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* f3 imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* f4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* f5 nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* f6 misc  */
+/* PPC CODE         .long local_label(misc_ref_complex_double_float_vector) /* f7 complex df vector  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* f8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* f9 cons  */
+/* PPC CODE         .long local_label(misc_ref_node)    /* fa simple_vector  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* fb imm  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* fc odd_fixnum  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* fd nil  */
+/* PPC CODE         .long local_label(misc_ref_invalid) /* fe misc  */
+/* PPC CODE         .long local_label(misc_ref_bit_vector) /* ff bit_vector  */
+/* PPC CODE                
 local_label(misc_ref_node):         
 	 /* A node vector.  */
-/* OLD CODE
+/* PPC CODE
 	 __(addi imm0,arg_z,misc_data_offset)
 	 __(ldrx(arg_z,arg_y,imm0))
 	 __(blr)
@@ -3503,7 +3503,7 @@ local_label(misc_ref_complex_double_float_vector):
         
 local_label(misc_ref_bit_vector):       
 	 __(extrwi imm1,arg_z,5,32-(fixnumshift+5))	/* imm1 = bitnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(la imm1,1+fixnumshift(imm1))
 	 __(rlwinm imm0,arg_z,32-5,5,31-fixnumshift)
 	 __(la imm0,misc_data_offset(imm0))
@@ -3553,7 +3553,7 @@ local_label(misc_ref_invalid):
 /* like misc_ref, only the boxed subtag is in arg_x.  */
 
 _spentry(subtag_misc_ref)
-/* OLD CODE	__(trap_unless_fulltag_equal(arg_y,fulltag_misc,imm0))
+/* PPC CODE	__(trap_unless_fulltag_equal(arg_y,fulltag_misc,imm0))
         __(trap_unless_lisptag_equal(arg_z,tag_fixnum,imm0))
 	__(vector_length(imm0,arg_y,imm1))
 	__(trlge(arg_z,imm0))
@@ -3563,7 +3563,7 @@ _spentry(subtag_misc_ref)
 		__(ret)
 
 _spentry(builtin_aref1)
-/* OLD CODE
+/* PPC CODE
 	__(extract_typecode(imm0,arg_y))
 	__(cmpri(cr0,imm0,subtag_simple_vector))
 	__(box_fixnum(arg_x,imm0))
@@ -3579,23 +3579,23 @@ _spentry(builtin_aref1)
 /* Make a cons cell on the vstack.  Always push 3 words, 'cause we're   */
 /* not sure how the vstack will be aligned.  */
 _spentry(stkconsyz)
-/* OLD CODE
+/* PPC CODE
 	__(li imm0,nil_value)
 	__(vpush(imm0))
 	__(vpush(imm0))
 	__(vpush(imm0))
 	__(andi. imm0,vsp,1<<word_shift) /* (oddp vsp ?)  */
-/* OLD CODE
+/* PPC CODE
 	__(beq cr0,1f)
 	__(str(arg_y,node_size*2(vsp))) /* car  */
-/* OLD CODE
+/* PPC CODE
 	__(str(arg_z,node_size(vsp))) /* cdr  */
-/* OLD CODE
+/* PPC CODE
 	__(la arg_z,fulltag_cons+node_size(vsp))
 	__(blr)
 1:
 	__(str(arg_y,node_size(vsp))) /* car, again  */
-/* OLD CODE
+/* PPC CODE
 	__(str(arg_z,0(vsp)))
 	__(la arg_z,fulltag_cons(vsp))
 	__(blr)
@@ -3606,18 +3606,18 @@ _spentry(stkconsyz)
 /* stack-allocating a cons cell.  Imm0 points to the closed-over value */
 /* (already vpushed).  Replace that locative with the vcell.  */
 _spentry(stkvcell0)
-/* OLD CODE
+/* PPC CODE
 	__(sub imm1,imm0,vsp) /* imm1 = delta from vsp to value cell loc  */
-/* OLD CODE
+/* PPC CODE
 	__(li arg_z,nil_value)
 	__(vpush(arg_z))
 	__(vpush(arg_z))
 	__(vpush(arg_z))
 	__(addi imm1,imm1,node_size*3)
 	__(add imm0,vsp,imm1) /* in case stack overflowed  */
-/* OLD CODE
+/* PPC CODE
 	__(andi. imm1,vsp,1<<word_shift) /* (oddp vsp) ?  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm1,value_cell_header)
 	__(ldr(arg_z,0(imm0)))
 	__(beq cr0,1f)
@@ -3636,16 +3636,16 @@ _spentry(stkvcell0)
 	__(ret)
         
 _spentry(stkvcellvsp)      
-/* OLD CODE
+/* PPC CODE
 	__(li arg_z,nil_value)
 	__(vpush(arg_z))
 	__(vpush(arg_z))
 	__(vpush(arg_z))
 	__(li imm1,node_size*3)
 	__(add imm0,vsp,imm1) /* in case stack overflowed  */
-/* OLD CODE
+/* PPC CODE
 	__(andi. imm1,vsp,1<<word_shift) /* (oddp vsp) ?  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm1,value_cell_header)
 	__(ldr(arg_z,0(imm0)))
 	__(beq cr0,1f)
@@ -3667,7 +3667,7 @@ _spentry(stkvcellvsp)
 /* and return the macptr.  Size (in bytes, boxed) is in arg_z on entry; macptr */
 /* in arg_z on exit.  */
 _spentry(makestackblock)
-/* OLD CODE
+/* PPC CODE
 	__(unbox_fixnum(imm0,arg_z))
         __(dnode_align(imm0,imm0,tsp_frame.fixed_overhead+macptr.size))
 	__(cmplri(cr0,imm0,tstack_alloc_limit))
@@ -3687,7 +3687,7 @@ _spentry(makestackblock)
 	__(blr)
 
         /* Too big. Heap cons a gcable macptr  */
-/* OLD CODE		
+/* PPC CODE		
 1:
 	__(TSP_Alloc_Fixed_Unboxed(0))
 	__(set_nargs(1))
@@ -3698,7 +3698,7 @@ _spentry(makestackblock)
 
 /* As above, only set the block's contents to 0.  */
 _spentry(makestackblock0)
-/* OLD CODE
+/* PPC CODE
 	__(unbox_fixnum(imm0,arg_z))
         __(dnode_align(imm0,imm0,tsp_frame.fixed_overhead+macptr.size))
 	__(cmplri(cr0,imm0,tstack_alloc_limit))
@@ -3710,19 +3710,19 @@ _spentry(makestackblock0)
 	__(str(imm0,tsp_frame.data_offset(tsp)))
 	__(la arg_z,tsp_frame.data_offset+fulltag_misc(tsp))
 	__(str(imm1,macptr.address(arg_z))) /* makestackblock0 expects the address to be in imm1  */
-/* OLD CODE
+/* PPC CODE
 	__(stfd fp_zero,macptr.domain(arg_z))
 	__(blr)
 
         /* Too big. Heap cons a gcable macptr  */
-/* OLD CODE
+/* PPC CODE
 3:
 	__(TSP_Alloc_Fixed_Unboxed(0)) /* "raw" block to make the compiler happy  */
-/* OLD CODE
+/* PPC CODE
 	__(mr arg_y,arg_z) /* save block size  */
-/* OLD CODE
+/* PPC CODE
 	__(li arg_z,t_value) /* clear-p arg to %new-gcable-ptr  */
-/* OLD CODE
+/* PPC CODE
 	__(set_nargs(2))
 	__(li fname,nrs.new_gcable_ptr)
 	__(jump_fname())
@@ -3732,7 +3732,7 @@ _spentry(makestackblock0)
 /* Make a list of length arg_y (boxed), initial-element arg_z (boxed) on  */
 /* the tstack.  Return the list in arg_z.  */
 _spentry(makestacklist)
-/* OLD CODE
+/* PPC CODE
 	__(add imm0,arg_y,arg_y)
 	__(cmplri(cr1,imm0,((tstack_alloc_limit+1)-cons.size)))
 	__(addi imm0,imm0,tsp_frame.fixed_overhead)
@@ -3759,13 +3759,13 @@ _spentry(makestacklist)
 3:
 	__(cmpri(cr1,arg_y,0))
 	__(TSP_Alloc_Fixed_Boxed(0))  /* make the compiler happy  */
-/* OLD CODE
+/* PPC CODE
 	__(mr imm1,arg_y) /* count  */
-/* OLD CODE
+/* PPC CODE
 	__(mr arg_y,arg_z) /* initial value  */
-/* OLD CODE
+/* PPC CODE
 	__(li arg_z,nil_value) /* result  */
-/* OLD CODE
+/* PPC CODE
 	__(b 5f)
 4:
 	__(subi imm1,imm1,fixnum1)
@@ -3781,7 +3781,7 @@ _spentry(makestacklist)
 /* node header subtag.) Nargs set to count of things vpushed.  */
 
 _spentry(stkgvector)
-/* OLD CODE
+/* PPC CODE
 	__(la imm0,-fixnum_one(nargs))
 	__(cmpri(cr1,imm0,0))
 	__(add imm1,vsp,nargs)
@@ -3829,7 +3829,7 @@ _spentry(stkgvector)
 
 
 _spentry(misc_alloc)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
          __(extract_unsigned_byte_bits_(imm2,arg_y,56))
          __(unbox_fixnum(imm0,arg_z))
@@ -3856,19 +3856,19 @@ _spentry(misc_alloc)
          __(srdi imm2,imm2,1)
 /* imm2 now = byte count.  Add 8 for header, 15 to align, then clear */
 /* low four bits. */
-/* OLD CODE
+/* PPC CODE
 1:
          __(dnode_align(imm2,imm2,node_size))
 
 	 __(Misc_Alloc(arg_z,imm0,imm2))
 	 __(blr)
 2:      /* bit-vector case  */
-/* OLD CODE
+/* PPC CODE
          __(addi imm2,arg_y,7<<fixnumshift)
          __(srdi imm2,imm2,3+fixnumshift)
          __(b 1b)
         /* complex double-float-vector case */
-/* OLD CODE
+/* PPC CODE
 3:       __(add imm2,arg_y,arg_y)
          __(b 1b)
 9:                      
@@ -3884,13 +3884,13 @@ _spentry(misc_alloc)
 	 __(mr imm3,imm0)
 	 __(cmplri(cr1,imm0,max_32_bit_ivector_subtag))
 	 __(rlwimi imm0,arg_y,num_subtag_bits-fixnum_shift,0,31-num_subtag_bits	)/* imm0 now = header  */
-/* OLD CODE
+/* PPC CODE
 	 __(mr imm2,arg_y)
 	 __(beq cr0,1f)	/* do probe if node object (fixnum element count = byte count).  */
-/* OLD CODE
+/* PPC CODE
 	 __(cmplri(cr0,imm3,max_16_bit_ivector_subtag))
 	 __(bng cr1,1f)	/* do probe if 32-bit imm object  */
-/* OLD CODE
+/* PPC CODE
 	 __(cmplri(cr1,imm3,max_8_bit_ivector_subtag))
 	 __(srwi imm2,imm2,1)
 	 __(bgt cr0,2f)
@@ -3898,7 +3898,7 @@ _spentry(misc_alloc)
 	 __(srwi imm2,imm2,1)
         /* imm2 now = byte count.  Add 4 for header, 7 to align, then clear */
         /* low three bits.  */
-/* OLD CODE
+/* PPC CODE
 1:
          __(dnode_align(imm2,imm2,node_size))
 
@@ -3927,7 +3927,7 @@ _spentry(misc_alloc)
 /* on exit and return  */
 /* Deprecated */        
 _spentry(poweropen_ffcallX)
-/* OLD CODE
+/* PPC CODE
         .long 0x7c800008        /* debug trap */
 		__(ret)
 
@@ -3948,7 +3948,7 @@ _spentry(poweropen_ffcallX)
 /* length key count.  */
 
 _spentry(macro_bind)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
  	 __(mr whole_reg,arg_reg)
 	 __(extract_fulltag(imm0,arg_reg))
@@ -3977,19 +3977,19 @@ _spentry(macro_bind)
 
 
 _spentry(destructuring_bind)
-/* OLD CODE
+/* PPC CODE
 	__(mr whole_reg,arg_reg)
         __(b local_label(destbind1))
 */
 		__(ret)
 	
 _spentry(destructuring_bind_inner)
-/* OLD CODE
+/* PPC CODE
 	__(mr whole_reg,arg_z)
 local_label(destbind1): 
 	/* Extract required arg count.  */
 	/* A bug in gas: can't handle shift count of "32" (= 0  */
-/* OLD CODE
+/* PPC CODE
 	ifelse(eval(mask_req_width+mask_req_start),eval(32),`
 	__(clrlwi. imm0,nargs,mask_req_start)
 	',`
@@ -4004,7 +4004,7 @@ local_label(destbind1):
 	__(cmpri(cr1,imm1,0))
 	__(cmpri(cr2,imm2,0))
 	/* Save entry vsp in case of error.  */
-/* OLD CODE
+/* PPC CODE
 	__(mr imm4,vsp)
 	__(beq cr0,2f)
 1:
@@ -4028,7 +4028,7 @@ local_label(destbind1):
 	__(beq cr1,rest_keys)
 	__(bne cr2,opt_supp)
 	/* 'simple' &optionals:	 no supplied-p, default to nil.  */
-/* OLD CODE
+/* PPC CODE
 simple_opt_loop:
 	__(cmpri(cr0,arg_reg,nil_value))
         __ifdef(`PPC64')
@@ -4056,7 +4056,7 @@ default_simple_opt:
 	__(bne cr1,default_simple_opt_loop)
 	__(b rest_keys)
 	/* Provide supplied-p vars for the &optionals.  */
-/* OLD CODE
+/* PPC CODE
 opt_supp:
 	__(li arg_y,t_value)
 opt_supp_loop:
@@ -4097,7 +4097,7 @@ have_rest:
 have_keys:
 	/* Ensure that arg_reg contains a proper,even-length list.  */
 	/* Insist that its length is <= 512 (as a cheap circularity check.)  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm0,256)
 	__(mr arg_x,arg_reg)
 count_keys_loop:
@@ -4131,10 +4131,10 @@ counted_keys:
 	/* We've got a proper, even-length list of key/value pairs in */
 	/* arg_reg. For each keyword var in the lambda-list, push a pair */
 	/* of NILs on the vstack.  */
-/* OLD CODE
+/* PPC CODE
 	__(extrwi. imm0,nargs,mask_key_width,mask_key_start )
 	__(mr imm2,imm0) 	/* save number of keys  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm5,nil_value)
 	__(b push_pair_test)
 push_pair_loop:
@@ -4145,13 +4145,13 @@ push_pair_loop:
 push_pair_test:
 	__(bne cr0,push_pair_loop)
 	__(slwi imm2,imm2,dnode_shift)  /* pairs -> bytes  */
-/* OLD CODE
+/* PPC CODE
 	__(add imm2,vsp,imm2)		/* imm2 points below pairs  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm0,0)			/* count unknown keywords so far  */
-/* OLD CODE
+/* PPC CODE
 	__(extrwi imm1,nargs,1,mask_aok) /* unknown keywords allowed  */
-/* OLD CODE
+/* PPC CODE
 	__(extrwi nargs,nargs,mask_key_width,mask_key_start)
 	/* Now, for each keyword/value pair in the list  */
 	/*  a) if the keyword is found in the keyword vector, set the  */
@@ -4166,7 +4166,7 @@ push_pair_test:
 	/*     the count of unknown keywords in the high bits of imm1*/
 	/* At the end of the list, signal an error if any unknown keywords were seen  */
 	/* but not allowed.  Otherwise, return.  */
-/* OLD CODE
+/* PPC CODE
 match_keys_loop:
 	__(cmpri(cr0,arg_reg,nil_value))
 	__(li imm0,0)
@@ -4175,7 +4175,7 @@ match_keys_loop:
 	__(ldr(arg_x,cons.car(arg_reg)))
 	__(li arg_y,nrs.kallowotherkeys)
 	__(cmpr(cr3,arg_x,arg_y))	/* :ALLOW-OTHER-KEYS ?  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(arg_reg,cons.cdr(arg_reg)))
 	__(ldr(arg_y,cons.car(arg_reg)))
 	__(cmpr(cr4,imm0,nargs))
@@ -4189,14 +4189,14 @@ match_loop:
 	__(addi imm3,imm3,node_size)
 	__(bne cr0,match_test)
 	/* Got a hit.  Unless this keyword's been seen already, set it.  */
-/* OLD CODE
+/* PPC CODE
 	__(slwi imm0,imm0,dnode_shift)
 	__(subf imm0,imm0,imm2)
 	__(ldr(temp0,0(imm0)))
 	__(cmpri(cr0,temp0,nil_value))
 	__(li temp0,t_value)
 	__(bne cr0,match_keys_loop)	/* already saw this  */
-/* OLD CODE
+/* PPC CODE
 	__(str(arg_y,node_size*1(imm0)))
 	__(str(temp0,node_size*0(imm0)))
         __(bne cr3,match_keys_loop)
@@ -4208,12 +4208,12 @@ match_test:
         __(b match_keys_loop)
 match_keys_check_aok:
         __(andi. imm0,imm1,2)  /* check "seen-aok" bit in imm1 */
-/* OLD CODE
+/* PPC CODE
         __(cmpri cr1,arg_y,nil_value) /* check value */
-/* OLD CODE
+/* PPC CODE
         __(ori imm1,imm1,2)
         __(bne cr0,match_keys_loop) /* duplicate aok */
-/* OLD CODE
+/* PPC CODE
         __(beq cr1,match_keys_loop)
         __(ori imm1,imm1,1)
 	__(b match_keys_loop)
@@ -4224,7 +4224,7 @@ matched_keys:
         __(bnelr)
 	/* Some unrecognized keywords.  Complain generically about  */
 	/* invalid keywords.  */
-/* OLD CODE
+/* PPC CODE
 db_badkeys:
 	__(li arg_y,XBADKEYS)
 	__(b destructure_error)
@@ -4237,10 +4237,10 @@ toofew:
 badlist:
 	__(li arg_y,XCALLNOMATCH)
 	/* b destructure_error  */
-/* OLD CODE
+/* PPC CODE
 destructure_error:
 	__(mr vsp,imm4)		/* undo everything done to the stack  */
-/* OLD CODE
+/* PPC CODE
 	__(mr arg_z,whole_reg)
 	__(set_nargs(2))
 	__(b _SPksignalerr)
@@ -4254,27 +4254,27 @@ _spentry(recover_values)
 
 /* First, walk the segments reversing the pointer to previous segment pointers  */
 /* Can tell the end because that previous segment pointer is the prev tsp pointer  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(imm0,tsp_frame.backlink(tsp))) /* previous tsp  */
-/* OLD CODE
+/* PPC CODE
 	__(mr imm1,tsp) /* current segment  */
-/* OLD CODE	__(mr imm2,tsp) /* last segment  */
-/* OLD CODE
+/* PPC CODE	__(mr imm2,tsp) /* last segment  */
+/* PPC CODE
 local_label(walkloop):
 	__(ldr(imm3,tsp_frame.fixed_overhead+node_size(imm1))) /* next segment  */
-/* OLD CODE	__(cmpr(cr0,imm0,imm3)) /* last segment?  */
-/* OLD CODE	__(str(imm2,tsp_frame.fixed_overhead+node_size(imm1))) /* reverse pointer  */
-/* OLD CODE	__(mr imm2,imm1) /* last segment <- current segment  */
-/* OLD CODE	__(mr imm1,imm3) /* current segment <- next segment  */
-/* OLD CODE
+/* PPC CODE	__(cmpr(cr0,imm0,imm3)) /* last segment?  */
+/* PPC CODE	__(str(imm2,tsp_frame.fixed_overhead+node_size(imm1))) /* reverse pointer  */
+/* PPC CODE	__(mr imm2,imm1) /* last segment <- current segment  */
+/* PPC CODE	__(mr imm1,imm3) /* current segment <- next segment  */
+/* PPC CODE
 	__(bne cr0,local_label(walkloop))
 
         /* the final segment ptr is now in imm2  */
         /* walk backwards, pushing values on VSP and incrementing NARGS  */
-/* OLD CODE
+/* PPC CODE
 local_label(pushloop):
 	__(ldr(imm0,tsp_frame.data_offset(imm2))) /* nargs in segment  */
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,imm0,0))
 	__(cmpr(cr1,imm2,tsp))
 	__(la imm3,tsp_frame.data_offset+(2*node_size)(imm2))
@@ -4289,7 +4289,7 @@ local_label(pushloop):
 2:
 	__(bne cr0,1b)
 	__(ldr(imm2,tsp_frame.data_offset+node_size(imm2))) /* previous segment  */
-/* OLD CODE
+/* PPC CODE
 	__(bne cr1,local_label(pushloop))
 	__(unlink(tsp))
 	__(blr)
@@ -4300,7 +4300,7 @@ local_label(pushloop):
 /* Go out of line to do this.  Sheesh.  */
 
 _spentry(vpopargregs)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,nargs,0))
 	__(cmpri(cr1,nargs,2<<fixnumshift))
 	__(beqlr cr0)
@@ -4326,7 +4326,7 @@ local_label(z):
 /* If arg_z is an integer, return in imm0 something whose sign  */
 /* is the same as arg_z's.  If not an integer, error.  */
 _spentry(integer_sign)
-/* OLD CODE
+/* PPC CODE
 	__(extract_typecode(imm0,arg_z))
 	__(cmpri(cr1,imm0,tag_fixnum))
 	__(cmpri(cr0,imm0,subtag_bignum))
@@ -4339,10 +4339,10 @@ _spentry(integer_sign)
          __(sldi imm0,imm0,2)
         __else
          __(header_length(imm0,imm0)) /* boxed length = scaled size  */
-/* OLD CODE
+/* PPC CODE
         __endif
         __(addi imm0,imm0,misc_data_offset-4) /* bias, less 1 element  */
-/* OLD CODE
+/* PPC CODE
 	__(lwzx imm0,arg_z,imm0)
 	__(cmpwi cr0,imm0,0)
 	__(li imm0,1)
@@ -4356,7 +4356,7 @@ _spentry(integer_sign)
 
 /* like misc_set, only pass the (boxed) subtag in temp0  */
 _spentry(subtag_misc_set)
-/* OLD CODE
+/* PPC CODE
 	__(trap_unless_fulltag_equal(arg_x,fulltag_misc,imm0))
 	__(trap_unless_lisptag_equal(arg_y,tag_fixnum,imm0))
 	__(vector_length(imm0,arg_x,imm1))
@@ -4372,283 +4372,283 @@ local_label(misc_set_common):
          __(bctr)
 local_label(misc_set_jmp):              
         /* 00-0f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 00 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 01 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 02 immheader_0  */
-/* OLD CODE         .quad _SPgvset /* 03 function  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 04 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 05 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 06 immheader_1  */
-/* OLD CODE         .quad _SPgvset /* 07 catch_frame  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 08 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 09 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_u32) /* 0a code_vector  */
-/* OLD CODE         .quad _SPgvset /* 0b slot_vector  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 0c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 0d imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 0e immheader_3  */
-/* OLD CODE         .quad _SPgvset /* 0f ratio  */
-/* OLD CODE        /* 10-1f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 10 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 11 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 12 immheader_0  */
-/* OLD CODE         .quad _SPgvset /* 13 symbol_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 14 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 15 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 16 immheader_1  */
-/* OLD CODE         .quad _SPgvset /* 17 lisp_tread  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 18 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 19 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_u32) /* 1a xcode_vector  */
-/* OLD CODE         .quad _SPgvset /* 1b instance  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 1c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 1d imm3  */
-/* OLD CODE         .quad local_label(misc_set_u64) /* 1e macptr  */
-/* OLD CODE         .quad _SPgvset /* 1f complex  */
-/* OLD CODE        /* 20-2f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 20 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 21 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 22 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 23 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 24 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 25 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 26 immheader_1  */
-/* OLD CODE         .quad _SPgvset /* 27 lock  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 28 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 29 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_u32) /* 2a bignum  */
-/* OLD CODE         .quad _SPgvset /* 2b struct  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 2c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 2d imm3  */
-/* OLD CODE         .quad local_label(misc_set_u64) /* 2e dead_macptr  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 2f nodeheader_3  */
-/* OLD CODE        /* 30-3f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 30 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 31 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 32 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 33 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 34 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 35 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 36 immheader_1  */
-/* OLD CODE         .quad _SPgvset /* 37 hash_vector  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 38 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 39 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_u32) /* 3a double_float  */
-/* OLD CODE         .quad _SPgvset /* 3b istruct  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 3c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 3d imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 3e immheader_3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 3f nodeheader_3  */
-/* OLD CODE        /* 40-4f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 40 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 41 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 42 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 43 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 44 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 45 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 46 immheader_1  */
-/* OLD CODE         .quad _SPgvset /* 47 pool  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 48 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 49 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_u32) /* 4a complex_single_float  */
-/* OLD CODE         .quad _SPgvset /* 4b value_cell_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 4c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 4d imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 4e immheader_3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 4f nodeheader_3  */
-/* OLD CODE        /* 50-5f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 50 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 51 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 52 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 53 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 54 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 55 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 56 immheader_1  */
-/* OLD CODE         .quad _SPgvset /* 57 weak  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 58 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 59 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_u32) /* 5a complex_double_float  */
-/* OLD CODE         .quad _SPgvset /* 5b xfunction  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 5c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 5d imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 5e immheader_3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 5f nodeheader_3  */
-/* OLD CODE        /* 60-6f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 60 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 61 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 62 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 63 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 64 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 65 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 66 immheader_1  */
-/* OLD CODE         .quad _SPgvset /* 67 package  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 68 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 69 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 6a immheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 6b nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 6c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 6d imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 6e immheader_3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 6f nodeheader_3  */
-/* OLD CODE        /* 70-7f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 70 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 71 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 72 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 73 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 74 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 75 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 76 immheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 77 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 78 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 79 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 7a immheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 7b nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 7c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 7d imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 7e immheader_3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 7f nodeheader_3  */
-/* OLD CODE        /* 80-8f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 80 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 81 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 82 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 83 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 84 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 85 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 86 immheader_1  */
-/* OLD CODE         .quad _SPgvset /* 87 arrayH  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 88 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 89 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 8a immheader_2  */
-/* OLD CODE         .quad _SPgvset /* 8b vectorH  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 8c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 8d imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 8e immheader_3  */
-/* OLD CODE         .quad _SPgvset /* 8f simple_vector  */
-/* OLD CODE        /* 90-9f  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 90 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 91 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_s8) /* 92 s8  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 93 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 94 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 95 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_s16) /* 96 immheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 97 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 98 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 99 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_s32) /* 9a s32  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 9b nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 9c misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 9d imm3  */
-/* OLD CODE         .quad local_label(misc_set_s64) /* 9e s64  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* 9f nodeheader_3  */
-/* OLD CODE        /* a0-af  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* a0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* a1 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_u8) /* a2 u8  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* a3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* a4 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* a5 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_u16) /* a6 u16  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* a7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* a8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* a9 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_u32) /* aa u32  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ab nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ac misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ad imm3  */
-/* OLD CODE         .quad local_label(misc_set_u64) /* ae u64  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* af nodeheader_3  */
-/* OLD CODE        /* b0-bf  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b1 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b2 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b4 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b5 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_complex_double_float_vector) /* b6 complex_double_float_vector  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* b9 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_single_float_vector) /* ba sf vector  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* bb nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* bc misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* bd imm3  */
-/* OLD CODE         .quad local_label(misc_set_fixnum_vector) /* be fixnum_vector  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* bf nodeheader_3  */
-/* OLD CODE        /* c0-cf  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c1 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c2 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c4 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c5 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c6 immheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* c9 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ca immheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* cb nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* cc misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* cd imm3  */
-/* OLD CODE         .quad local_label(misc_set_double_float_vector) /* ce double-float vector  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* cf nodeheader_3  */
-/* OLD CODE        /* d0-df  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d1 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_string) /* d2 string  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d4 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d5 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d6 immheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* d9 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_new_string) /* da new_string  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* db nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* dc misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* dd imm3  */
-/* OLD CODE         .quad local_label(misc_set_complex_single_float_vector) /* de complex_single_float_vector  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* df nodeheader_3  */
-/* OLD CODE        /* e0-ef  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e1 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e2 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e4 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e5 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e6 immheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* e9 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ea immheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* eb nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ec misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ed imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ee immheader_3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ef nodeheader_3  */
-/* OLD CODE        /* f0-ff  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f0 even_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f1 imm_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f2 immheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f3 nodeheader_0  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f4 cons  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f5 imm_1  */
-/* OLD CODE         .quad local_label(misc_set_bit_vector) /* f6 bit_vector  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f7 nodeheader_1  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f8 odd_fixnum  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* f9 imm_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* fa immheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* fb nodeheader_2  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* fc misc  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* fd imm3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* fe immheader_3  */
-/* OLD CODE         .quad local_label(misc_set_invalid) /* ff nodeheader_3  */
-/* OLD CODE
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 00 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 01 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 02 immheader_0  */
+/* PPC CODE         .quad _SPgvset /* 03 function  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 04 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 05 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 06 immheader_1  */
+/* PPC CODE         .quad _SPgvset /* 07 catch_frame  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 08 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 09 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_u32) /* 0a code_vector  */
+/* PPC CODE         .quad _SPgvset /* 0b slot_vector  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 0c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 0d imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 0e immheader_3  */
+/* PPC CODE         .quad _SPgvset /* 0f ratio  */
+/* PPC CODE        /* 10-1f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 10 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 11 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 12 immheader_0  */
+/* PPC CODE         .quad _SPgvset /* 13 symbol_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 14 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 15 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 16 immheader_1  */
+/* PPC CODE         .quad _SPgvset /* 17 lisp_tread  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 18 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 19 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_u32) /* 1a xcode_vector  */
+/* PPC CODE         .quad _SPgvset /* 1b instance  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 1c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 1d imm3  */
+/* PPC CODE         .quad local_label(misc_set_u64) /* 1e macptr  */
+/* PPC CODE         .quad _SPgvset /* 1f complex  */
+/* PPC CODE        /* 20-2f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 20 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 21 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 22 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 23 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 24 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 25 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 26 immheader_1  */
+/* PPC CODE         .quad _SPgvset /* 27 lock  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 28 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 29 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_u32) /* 2a bignum  */
+/* PPC CODE         .quad _SPgvset /* 2b struct  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 2c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 2d imm3  */
+/* PPC CODE         .quad local_label(misc_set_u64) /* 2e dead_macptr  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 2f nodeheader_3  */
+/* PPC CODE        /* 30-3f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 30 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 31 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 32 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 33 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 34 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 35 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 36 immheader_1  */
+/* PPC CODE         .quad _SPgvset /* 37 hash_vector  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 38 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 39 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_u32) /* 3a double_float  */
+/* PPC CODE         .quad _SPgvset /* 3b istruct  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 3c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 3d imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 3e immheader_3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 3f nodeheader_3  */
+/* PPC CODE        /* 40-4f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 40 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 41 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 42 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 43 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 44 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 45 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 46 immheader_1  */
+/* PPC CODE         .quad _SPgvset /* 47 pool  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 48 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 49 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_u32) /* 4a complex_single_float  */
+/* PPC CODE         .quad _SPgvset /* 4b value_cell_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 4c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 4d imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 4e immheader_3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 4f nodeheader_3  */
+/* PPC CODE        /* 50-5f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 50 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 51 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 52 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 53 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 54 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 55 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 56 immheader_1  */
+/* PPC CODE         .quad _SPgvset /* 57 weak  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 58 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 59 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_u32) /* 5a complex_double_float  */
+/* PPC CODE         .quad _SPgvset /* 5b xfunction  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 5c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 5d imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 5e immheader_3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 5f nodeheader_3  */
+/* PPC CODE        /* 60-6f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 60 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 61 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 62 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 63 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 64 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 65 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 66 immheader_1  */
+/* PPC CODE         .quad _SPgvset /* 67 package  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 68 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 69 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 6a immheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 6b nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 6c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 6d imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 6e immheader_3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 6f nodeheader_3  */
+/* PPC CODE        /* 70-7f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 70 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 71 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 72 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 73 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 74 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 75 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 76 immheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 77 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 78 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 79 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 7a immheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 7b nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 7c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 7d imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 7e immheader_3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 7f nodeheader_3  */
+/* PPC CODE        /* 80-8f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 80 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 81 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 82 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 83 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 84 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 85 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 86 immheader_1  */
+/* PPC CODE         .quad _SPgvset /* 87 arrayH  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 88 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 89 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 8a immheader_2  */
+/* PPC CODE         .quad _SPgvset /* 8b vectorH  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 8c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 8d imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 8e immheader_3  */
+/* PPC CODE         .quad _SPgvset /* 8f simple_vector  */
+/* PPC CODE        /* 90-9f  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 90 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 91 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_s8) /* 92 s8  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 93 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 94 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 95 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_s16) /* 96 immheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 97 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 98 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 99 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_s32) /* 9a s32  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 9b nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 9c misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 9d imm3  */
+/* PPC CODE         .quad local_label(misc_set_s64) /* 9e s64  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* 9f nodeheader_3  */
+/* PPC CODE        /* a0-af  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* a0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* a1 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_u8) /* a2 u8  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* a3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* a4 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* a5 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_u16) /* a6 u16  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* a7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* a8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* a9 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_u32) /* aa u32  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ab nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ac misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ad imm3  */
+/* PPC CODE         .quad local_label(misc_set_u64) /* ae u64  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* af nodeheader_3  */
+/* PPC CODE        /* b0-bf  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b1 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b2 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b4 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b5 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_complex_double_float_vector) /* b6 complex_double_float_vector  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* b9 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_single_float_vector) /* ba sf vector  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* bb nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* bc misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* bd imm3  */
+/* PPC CODE         .quad local_label(misc_set_fixnum_vector) /* be fixnum_vector  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* bf nodeheader_3  */
+/* PPC CODE        /* c0-cf  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c1 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c2 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c4 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c5 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c6 immheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* c9 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ca immheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* cb nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* cc misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* cd imm3  */
+/* PPC CODE         .quad local_label(misc_set_double_float_vector) /* ce double-float vector  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* cf nodeheader_3  */
+/* PPC CODE        /* d0-df  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d1 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_string) /* d2 string  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d4 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d5 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d6 immheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* d9 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_new_string) /* da new_string  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* db nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* dc misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* dd imm3  */
+/* PPC CODE         .quad local_label(misc_set_complex_single_float_vector) /* de complex_single_float_vector  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* df nodeheader_3  */
+/* PPC CODE        /* e0-ef  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e1 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e2 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e4 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e5 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e6 immheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* e9 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ea immheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* eb nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ec misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ed imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ee immheader_3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ef nodeheader_3  */
+/* PPC CODE        /* f0-ff  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f0 even_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f1 imm_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f2 immheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f3 nodeheader_0  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f4 cons  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f5 imm_1  */
+/* PPC CODE         .quad local_label(misc_set_bit_vector) /* f6 bit_vector  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f7 nodeheader_1  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f8 odd_fixnum  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* f9 imm_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* fa immheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* fb nodeheader_2  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* fc misc  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* fd imm3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* fe immheader_3  */
+/* PPC CODE         .quad local_label(misc_set_invalid) /* ff nodeheader_3  */
+/* PPC CODE
 local_label(misc_set_bit_vector):               
          __(lis imm3,0x8000)
          __(extract_unsigned_byte_bits_(imm0,arg_z,1))
 	 __(extrwi imm1,arg_y,5,32-(fixnumshift+5))	/* imm1 = bitnum  */
-/* OLD CODE
+/* PPC CODE
          __(srdi imm0,arg_y,5+fixnumshift)
 	 __(srw imm3,imm3,imm1)
          __(bne local_label(misc_set_bad))
@@ -4858,282 +4858,282 @@ local_label(misc_set_invalid):
          __(bctr)
 local_label(misc_set_jmp):             
         /* 00-0f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 00 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 01 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 02 nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 03 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 04 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 05 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 06 misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* 07 bignum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 08 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 09 cons  */
-/* OLD CODE         .long _SPgvset /* 0a ratio  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 0b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 0c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 0d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 0e misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* 0f single_float  */
-/* OLD CODE        /* 10-1f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 10 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 11 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 12 nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 13 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 14 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 15 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 16 misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* 17 double_float  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 18 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 19 cons  */
-/* OLD CODE         .long _SPgvset /* 1a complex  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 1b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 1c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 1d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 1e misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* 1f macptr  */
-/* OLD CODE        /* 20-2f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 20 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 21 cons  */
-/* OLD CODE         .long _SPgvset /* 22 catch_frame  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 23 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 24 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 25 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 26 misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* 27 dead_macptr  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 28 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 29 cons  */
-/* OLD CODE         .long _SPgvset /* 2a function  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 2b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 2c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 2d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 2e misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* 2f code_vector  */
-/* OLD CODE        /* 30-3f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 30 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 31 cons  */
-/* OLD CODE         .long _SPgvset /* 32 lisp_thread  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 33 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 34 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 35 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 36 misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* 37 creole  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 38 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 39 cons  */
-/* OLD CODE         .long _SPgvset /* 3a symbol  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 3b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 3c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 3d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 3e misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* 3f xcode_vector  */
-/* OLD CODE        /* 40-4f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 40 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 41 cons  */
-/* OLD CODE         .long _SPgvset /* 42 lock  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 43 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 44 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 45 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 46 misc  */
-/* OLD CODE         .long local_label(misc_set_u32)     /* 47 complex_single_float  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 48 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 49 cons  */
-/* OLD CODE         .long _SPgvset /* 4a hash_vector  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 4b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 4c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 4d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 4e misc  */
-/* OLD CODE         .long local_label(misc_set_u32)     /* 4f complex_double_float  */
-/* OLD CODE        /* 50-5f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 50 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 51 cons  */
-/* OLD CODE         .long _SPgvset /* 52 pool  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 53 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 54 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 55 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 56 misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 57 immheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 58 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 59 cons  */
-/* OLD CODE         .long _SPgvset /* 5a weak  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 5b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 5c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 5d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 5e misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 5f immheader  */
-/* OLD CODE        /* 60-6f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 60 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 61 cons  */
-/* OLD CODE         .long _SPgvset /* 62 package  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 63 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 64 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 65 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 66 misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 67 immheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 68 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 69 cons  */
-/* OLD CODE         .long _SPgvset /* 6a slot_vector  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 6b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 6c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 6d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 6e misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 6f immheader  */
-/* OLD CODE        /* 70-7f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 70 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 71 cons  */
-/* OLD CODE         .long _SPgvset /* 72 instance  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 73 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 74 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 75 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 76 misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 77 immheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 78 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 79 cons  */
-/* OLD CODE         .long _SPgvset /* 7a struct  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 7b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 7c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 7d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 7e misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 7f immheader  */
-/* OLD CODE        /* 80-8f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 80 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 81 cons  */
-/* OLD CODE         .long _SPgvset /* 82 istruct  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 83 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 84 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 85 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 86 misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 87 immheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 88 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 89 cons  */
-/* OLD CODE         .long _SPgvset /* 8a value_cell  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 8b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 8c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 8d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 8e misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 8f immheader  */
-/* OLD CODE        /* 90-9f  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 90 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 91 cons  */
-/* OLD CODE         .long _SPgvset /* 92 xfunction  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 93 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 94 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 95 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 96 misc  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 97 immheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 98 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 99 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 9a arrayH  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 9b imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 9c odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 9d nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* 9e misc  */
-/* OLD CODE         .long local_label(misc_set_single_float_vector) /* 9f sf vector  */
-/* OLD CODE        /* a0-af  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a1 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a2 nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a3 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a5 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a6 misc  */
-/* OLD CODE         .long local_label(misc_set_u32) /* a7 sf u32  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* a9 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* aa nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ab imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ac odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ad nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ae misc  */
-/* OLD CODE         .long local_label(misc_set_s32) /* af s32  */
-/* OLD CODE        /* b0-bf  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b1 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b2 node  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b3 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b5 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b6 misc  */
-/* OLD CODE         .long local_label(misc_set_fixnum_vector) /* b7 fixnum_vector  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* b9 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ba nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* bb imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* bc odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* bd nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* be misc  */
-/* OLD CODE         .long local_label(misc_set_new_string) /* bf string  */
-/* OLD CODE        /* c0-cf  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c1 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c2 nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c3 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c5 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c6 misc  */
-/* OLD CODE         .long local_label(misc_set_u8) /* c7 u8  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* c9 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ca nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* cb imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* cc odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* cd nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ce misc  */
-/* OLD CODE         .long local_label(misc_set_s8) /* cf s8  */
-/* OLD CODE        /* d0-df  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d1 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d2 nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d3 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d5 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d6 misc  */
-/* OLD CODE         .long local_label(misc_set_u16) /* d7 u16  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* d9 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* da nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* db imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* dc odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* dd nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* de misc  */
-/* OLD CODE         .long local_label(misc_set_s16) /* df s16  */
-/* OLD CODE        /* e0-ef  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e1 cons  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e2 nodeheader  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e3 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e5 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e6 misc  */
-/* OLD CODE         .long local_label(misc_set_double_float_vector) /* e7 df vector  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* e9 cons  */
-/* OLD CODE         .long _SPgvset                      /* ea arrayH  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* eb imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ec odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ed nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* ee misc  */
-/* OLD CODE         .long local_label(misc_set_complex_single_float_vector) /* ef complex sf  */
-/* OLD CODE        /* f0-ff  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* f0 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* f1 cons  */
-/* OLD CODE         .long _SPgvset                      /* f2 vectorH  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* f3 imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* f4 odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* f5 nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* f6 misc  */
-/* OLD CODE         .long local_label(misc_set_complex_double_float_vector) /* f7 complex df vector  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* f8 even_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* f9 cons  */
-/* OLD CODE         .long _SPgvset                      /* fa simple-vector  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* fb imm  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* fc odd_fixnum  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* fd nil  */
-/* OLD CODE         .long local_label(misc_set_invalid) /* fe misc  */
-/* OLD CODE         .long local_label(misc_set_bit_vector) /* ff bit_vector  */
-/* OLD CODE
+/* PPC CODE         .long local_label(misc_set_invalid) /* 00 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 01 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 02 nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 03 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 04 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 05 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 06 misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* 07 bignum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 08 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 09 cons  */
+/* PPC CODE         .long _SPgvset /* 0a ratio  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 0b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 0c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 0d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 0e misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* 0f single_float  */
+/* PPC CODE        /* 10-1f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 10 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 11 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 12 nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 13 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 14 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 15 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 16 misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* 17 double_float  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 18 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 19 cons  */
+/* PPC CODE         .long _SPgvset /* 1a complex  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 1b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 1c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 1d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 1e misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* 1f macptr  */
+/* PPC CODE        /* 20-2f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 20 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 21 cons  */
+/* PPC CODE         .long _SPgvset /* 22 catch_frame  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 23 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 24 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 25 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 26 misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* 27 dead_macptr  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 28 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 29 cons  */
+/* PPC CODE         .long _SPgvset /* 2a function  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 2b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 2c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 2d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 2e misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* 2f code_vector  */
+/* PPC CODE        /* 30-3f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 30 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 31 cons  */
+/* PPC CODE         .long _SPgvset /* 32 lisp_thread  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 33 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 34 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 35 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 36 misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* 37 creole  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 38 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 39 cons  */
+/* PPC CODE         .long _SPgvset /* 3a symbol  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 3b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 3c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 3d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 3e misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* 3f xcode_vector  */
+/* PPC CODE        /* 40-4f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 40 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 41 cons  */
+/* PPC CODE         .long _SPgvset /* 42 lock  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 43 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 44 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 45 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 46 misc  */
+/* PPC CODE         .long local_label(misc_set_u32)     /* 47 complex_single_float  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 48 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 49 cons  */
+/* PPC CODE         .long _SPgvset /* 4a hash_vector  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 4b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 4c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 4d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 4e misc  */
+/* PPC CODE         .long local_label(misc_set_u32)     /* 4f complex_double_float  */
+/* PPC CODE        /* 50-5f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 50 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 51 cons  */
+/* PPC CODE         .long _SPgvset /* 52 pool  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 53 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 54 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 55 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 56 misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 57 immheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 58 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 59 cons  */
+/* PPC CODE         .long _SPgvset /* 5a weak  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 5b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 5c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 5d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 5e misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 5f immheader  */
+/* PPC CODE        /* 60-6f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 60 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 61 cons  */
+/* PPC CODE         .long _SPgvset /* 62 package  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 63 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 64 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 65 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 66 misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 67 immheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 68 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 69 cons  */
+/* PPC CODE         .long _SPgvset /* 6a slot_vector  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 6b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 6c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 6d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 6e misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 6f immheader  */
+/* PPC CODE        /* 70-7f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 70 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 71 cons  */
+/* PPC CODE         .long _SPgvset /* 72 instance  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 73 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 74 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 75 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 76 misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 77 immheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 78 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 79 cons  */
+/* PPC CODE         .long _SPgvset /* 7a struct  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 7b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 7c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 7d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 7e misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 7f immheader  */
+/* PPC CODE        /* 80-8f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 80 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 81 cons  */
+/* PPC CODE         .long _SPgvset /* 82 istruct  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 83 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 84 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 85 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 86 misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 87 immheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 88 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 89 cons  */
+/* PPC CODE         .long _SPgvset /* 8a value_cell  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 8b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 8c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 8d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 8e misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 8f immheader  */
+/* PPC CODE        /* 90-9f  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 90 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 91 cons  */
+/* PPC CODE         .long _SPgvset /* 92 xfunction  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 93 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 94 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 95 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 96 misc  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 97 immheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 98 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 99 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 9a arrayH  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 9b imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 9c odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 9d nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* 9e misc  */
+/* PPC CODE         .long local_label(misc_set_single_float_vector) /* 9f sf vector  */
+/* PPC CODE        /* a0-af  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a1 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a2 nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a3 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a5 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a6 misc  */
+/* PPC CODE         .long local_label(misc_set_u32) /* a7 sf u32  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* a9 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* aa nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ab imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ac odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ad nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ae misc  */
+/* PPC CODE         .long local_label(misc_set_s32) /* af s32  */
+/* PPC CODE        /* b0-bf  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b1 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b2 node  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b3 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b5 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b6 misc  */
+/* PPC CODE         .long local_label(misc_set_fixnum_vector) /* b7 fixnum_vector  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* b9 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ba nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* bb imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* bc odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* bd nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* be misc  */
+/* PPC CODE         .long local_label(misc_set_new_string) /* bf string  */
+/* PPC CODE        /* c0-cf  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c1 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c2 nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c3 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c5 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c6 misc  */
+/* PPC CODE         .long local_label(misc_set_u8) /* c7 u8  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* c9 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ca nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* cb imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* cc odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* cd nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ce misc  */
+/* PPC CODE         .long local_label(misc_set_s8) /* cf s8  */
+/* PPC CODE        /* d0-df  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d1 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d2 nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d3 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d5 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d6 misc  */
+/* PPC CODE         .long local_label(misc_set_u16) /* d7 u16  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* d9 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* da nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* db imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* dc odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* dd nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* de misc  */
+/* PPC CODE         .long local_label(misc_set_s16) /* df s16  */
+/* PPC CODE        /* e0-ef  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e1 cons  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e2 nodeheader  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e3 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e5 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e6 misc  */
+/* PPC CODE         .long local_label(misc_set_double_float_vector) /* e7 df vector  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* e9 cons  */
+/* PPC CODE         .long _SPgvset                      /* ea arrayH  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* eb imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ec odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ed nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* ee misc  */
+/* PPC CODE         .long local_label(misc_set_complex_single_float_vector) /* ef complex sf  */
+/* PPC CODE        /* f0-ff  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* f0 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* f1 cons  */
+/* PPC CODE         .long _SPgvset                      /* f2 vectorH  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* f3 imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* f4 odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* f5 nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* f6 misc  */
+/* PPC CODE         .long local_label(misc_set_complex_double_float_vector) /* f7 complex df vector  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* f8 even_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* f9 cons  */
+/* PPC CODE         .long _SPgvset                      /* fa simple-vector  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* fb imm  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* fc odd_fixnum  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* fd nil  */
+/* PPC CODE         .long local_label(misc_set_invalid) /* fe misc  */
+/* PPC CODE         .long local_label(misc_set_bit_vector) /* ff bit_vector  */
+/* PPC CODE
 local_label(misc_set_u32):        
 	/* Either a non-negative fixnum, a positiveone-digit bignum, */
 	/* or a two-digit bignum whose sign-digit is 0 is ok.  */
-/* OLD CODE
+/* PPC CODE
 	 __(extract_lisptag(imm2,arg_z))
 	 __(srawi. imm1,arg_z,fixnum_shift)
          __(cmpwi cr5,imm2,tag_fixnum)         
@@ -5162,7 +5162,7 @@ local_label(set_not_1_digit_u32):
 	 __(beq cr0,local_label(set_set32))
 local_label(set_bad):
 	/* arg_z does not match the array-element-type of arg_x.  */
-/* OLD CODE
+/* PPC CODE
 	 __(mr arg_y,arg_z)
 	 __(mr arg_z,arg_x)
 	 __(li arg_x,XNOTELT)
@@ -5261,8 +5261,8 @@ local_label(misc_set_s16):
 	 __(blr)
 local_label(misc_set_bit_vector):	
 	 __(cmplwi cr2,arg_z,fixnumone)   /* nothing not a (boxed) bit   */
-/* OLD CODE	 __(extrwi imm1,arg_y,5,32-(fixnumshift+5))	/* imm1 = bitnum  */
-/* OLD CODE
+/* PPC CODE	 __(extrwi imm1,arg_y,5,32-(fixnumshift+5))	/* imm1 = bitnum  */
+/* PPC CODE
 	 __(extlwi imm2,arg_z,1,31-fixnumshift)
 	 __(srw imm2,imm2,imm1)
 	 __(lis imm3,0x8000)
@@ -5329,7 +5329,7 @@ local_label(misc_set_invalid):
 /* misc_ref, as one might imagine.  */
 
 _spentry(misc_set)
-/* OLD CODE
+/* PPC CODE
 	__(trap_unless_fulltag_equal(arg_x,fulltag_misc,imm0))
 	__(trap_unless_lisptag_equal(arg_y,tag_fixnum,imm0))
 	__(vector_length(imm0,arg_x,imm1))
@@ -5342,7 +5342,7 @@ _spentry(misc_set)
 /* "spread" the lexpr in arg_z.  */
 /* ppc2-invoke-fn assumes that temp1 is preserved here.  */
 _spentry(spread_lexprz)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(imm0,0(arg_z)))
 	__(cmpri(cr3,imm0,3<<fixnumshift))
 	__(cmpri(cr4,imm0,2<<fixnumshift))
@@ -5357,7 +5357,7 @@ _spentry(spread_lexprz)
 	__(bne cr0,1f)
 	/* lexpr count was 0; vpop the arg regs that  */
 	/* were vpushed by the caller  */
-/* OLD CODE
+/* PPC CODE
 	__(beqlr cr1)
 	__(vpop(arg_z))
 	__(bltlr cr2)
@@ -5369,7 +5369,7 @@ _spentry(spread_lexprz)
 	/* vpush args from the lexpr until we have only  */
 	/* three left, then assign them to arg_x, arg_y,  */
 	/* and arg_z.  */
-/* OLD CODE
+/* PPC CODE
 8:
 	__(cmpri(cr3,imm0,4<<fixnumshift))
 	__(subi imm0,imm0,fixnumone)
@@ -5384,25 +5384,25 @@ _spentry(spread_lexprz)
 
 	/* lexpr count is two: set arg_y, arg_z from the  */
 	/* lexpr, maybe vpop arg_x  */
-/* OLD CODE
+/* PPC CODE
 2:	
 	__(ldr(arg_y,-node_size*1(imm1)))
 	__(ldr(arg_z,-node_size*2(imm1)))
 	__(beqlr cr2)		/* return if (new) nargs = 2  */
-/* OLD CODE
+/* PPC CODE
 	__(vpop(arg_x))
 	__(blr)
 
 	/* lexpr count is one: set arg_z from the lexpr,  */
 	/* maybe vpop arg_y, arg_x  */
-/* OLD CODE
+/* PPC CODE
 1:	
 	__(ldr(arg_z,-node_size(imm1)))
 	__(bltlr cr2)		/* return if (new) nargs < 2  */
-/* OLD CODE
+/* PPC CODE
 	__(vpop(arg_y))
 	__(beqlr cr2)		/* return if (new) nargs = 2  */
-/* OLD CODE
+/* PPC CODE
 	__(vpop(arg_x))
 	__(blr)
 */
@@ -5411,7 +5411,7 @@ _spentry(spread_lexprz)
 		
 _spentry(reset)
 	.globl _SPthrow
-/* OLD CODE
+/* PPC CODE
 	__(nop)
 	__(ref_nrs_value(temp0,toplcatch))
 	__(li temp1,XSTKOVER)
@@ -5426,7 +5426,7 @@ _spentry(reset)
 /* "slide" nargs worth of values up the vstack.  IMM0 contains  */
 /* the difference between the current VSP and the target.  */
 _spentry(mvslide)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,nargs,0))
 	__(mr imm3,nargs)
 	__(add imm2,vsp,nargs)
@@ -5462,22 +5462,22 @@ _spentry(mvslide)
 /* .SPrecover_values is therefore pretty simple.  */
 
 _spentry(save_values)
-/* OLD CODE
+/* PPC CODE
 	__(mr imm1,tsp)
 
         /* common exit: nargs = values in this set, imm1 = ptr to tsp before  */
         /* call to save_values  */
-/* OLD CODE
+/* PPC CODE
 local_label(save_values_to_tsp):
 	__(mr imm2,tsp)
 	__(dnode_align(imm0,nargs,tsp_frame.fixed_overhead+(2*node_size))) /* count, link  */
-/* OLD CODE
+/* PPC CODE
 	__(TSP_Alloc_Var_Boxed_nz(imm0,imm3))
 	__(str(imm1,tsp_frame.backlink(tsp))) /* keep one tsp "frame" as far as rest of lisp is concerned  */
-/* OLD CODE
+/* PPC CODE
 	__(str(nargs,tsp_frame.data_offset(tsp)))
 	__(str(imm2,tsp_frame.data_offset+node_size(tsp))) /* previous tsp  */
-/* OLD CODE
+/* PPC CODE
 	__(la imm3,tsp_frame.data_offset+node_size*2(tsp))
 	__(add imm3,imm3,nargs)
 	__(add imm0,vsp,nargs)
@@ -5490,7 +5490,7 @@ local_label(save_values_to_tsp):
 2:
 	__(bne cr0,1b)
 	__(add vsp,vsp,nargs) /*  discard values  */
-/* OLD CODE	__(blr)
+/* PPC CODE	__(blr)
 */
 	__(ret)
 	
@@ -5504,7 +5504,7 @@ local_label(save_values_to_tsp):
 /* values. This makes recover_values harder.  */
 
 _spentry(add_values)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,nargs,0))
 	__(ldr(imm1,0(tsp)))
 	__(bne cr0,local_label(save_values_to_tsp))
@@ -5516,12 +5516,12 @@ _spentry(add_values)
 /* Restore lisp context, then funcall #'%pascal-functions% with  */
 /* two args: callback-index, args-ptr (a macptr pointing to the args on the stack)  */
 _spentry(poweropen_callback)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`rTOC')
          __(mr r11,rTOC)
         __endif
 	/* Save C argument registers  */
-/* OLD CODE
+/* PPC CODE
 	__(str(r3,c_frame.param0(sp)))
 	__(str(r4,c_frame.param1(sp)))
 	__(str(r5,c_frame.param2(sp)))
@@ -5538,7 +5538,7 @@ _spentry(poweropen_callback)
 	/* Save the non-volatile registers on the sp stack  */
 	/* This is a non-standard stack frame, but noone will ever see it,  */
         /* so it doesn't matter. It will look like more of the stack frame pushed below.  */
-/* OLD CODE
+/* PPC CODE
 	__(stru(sp,-(stack_align(c_reg_save.size))(sp)))
         __(str(r13,c_reg_save.save_gprs+(0*node_size)(sp)))
         __(str(r14,c_reg_save.save_gprs+(1*node_size)(sp)))
@@ -5576,7 +5576,7 @@ _spentry(poweropen_callback)
 	__(mffs f0)
 	__(stfd f0,c_reg_save.save_fp_zero(sp))
 	__(lwz r31,c_reg_save.save_fp_zero+4(sp))	/* recover FPSCR image  */
-/* OLD CODE
+/* PPC CODE
 	__(stw r31,c_reg_save.save_fpscr(sp))
 	__(lwi(r30,0x43300000))
 	__(lwi(r31,0x80000000))
@@ -5589,23 +5589,23 @@ _spentry(poweropen_callback)
 
 /* Restore rest of Lisp context.  */
 /* Could spread out the memory references here to gain a little speed  */
-/* OLD CODE
+/* PPC CODE
 	__(li loc_pc,0)
 	__(li fn,0)                     /* subprim, not a lisp function  */
-/* OLD CODE
+/* PPC CODE
 	__(li temp3,0)
 	__(li temp2,0)
 	__(li temp1,0)
 	__(li temp0,0)
 	__(li arg_x,0)
 	__(box_fixnum(arg_y,r11))	/* callback-index  */
-/* OLD CODE
+/* PPC CODE
         __(la arg_z,c_reg_save.save_fprs(sp))
         __(str(arg_z,stack_align(c_reg_save.size)+c_frame.unused(sp)))
 	__(la arg_z,stack_align(c_reg_save.size)+c_frame.param0(sp))	/* parameters (tagged as a fixnum)  */
 
 	/* Recover lisp thread context. Have to call C code to do so.  */
-/* OLD CODE
+/* PPC CODE
 	__(ref_global(r12,get_tcr))
         __ifdef(`rTOC')
          __(ld rTOC,8(r12))
@@ -5623,7 +5623,7 @@ _spentry(poweropen_callback)
 	__(li rzero,0)
 	__(li imm0,TCR_STATE_LISP)
 	__(mtxer rzero) /* lisp wants the overflow bit being clear  */
-/* OLD CODE
+/* PPC CODE
         __(mtctr rzero)
 	__(li save0,0)
 	__(li save1,0)
@@ -5644,14 +5644,14 @@ _spentry(poweropen_callback)
         __(restore_saveregs(vsp))
 
 	/* load nargs and callback to the lisp  */
-/* OLD CODE
+/* PPC CODE
 	__(set_nargs(2))
 	__(ldr(imm2,tcr.cs_area(rcontext)))
 	__(ldr(imm4,area.active(imm2)))
 	__(stru(imm4,-lisp_frame.size(sp)))
 	__(str(imm3,lisp_frame.savelr(sp)))
 	__(li fname,nrs.callbacks)	/* %pascal-functions%  */
-/* OLD CODE
+/* PPC CODE
 	__(call_fname)
 	__(ldr(imm2,lisp_frame.backlink(sp)))
 	__(ldr(imm3,tcr.cs_area(rcontext)))
@@ -5660,17 +5660,17 @@ _spentry(poweropen_callback)
 	/* save_vsp will be restored from ff_call's stack frame, but  */
 	/* I included it here for consistency.  */
 	/* save_tsp is set below after we exit Lisp context.  */
-/* OLD CODE
+/* PPC CODE
 	__(str(allocptr,tcr.save_allocptr(rcontext)))
 	__(str(allocbase,tcr.save_allocbase(rcontext)))
 	__(str(vsp,tcr.save_vsp(rcontext)))
 	__(str(tsp,tcr.save_tsp(rcontext)))
 	/* Exit lisp context  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm1,TCR_STATE_FOREIGN)
 	__(str(imm1,tcr.valence(rcontext)))
 	/* Restore the non-volatile registers & fpscr  */
-/* OLD CODE
+/* PPC CODE
 	__(lfd fp_zero,c_reg_save.save_fp_zero(sp))
 	__(lwz r31,c_reg_save.save_fpscr(sp))
 	__(stw r31,c_reg_save.save_fp_zero+4(sp))
@@ -5731,14 +5731,14 @@ _spentry(poweropen_callback)
 /* Calls out to %init-misc, which does the rest of the work.  */
 
 _spentry(misc_alloc_init)
-/* OLD CODE
+/* PPC CODE
 	__(mflr loc_pc)
 	__(build_lisp_frame(fn,loc_pc,vsp))
 	__(li fn,0)
 	__(mr temp0,arg_z)		/* initval  */
-/* OLD CODE	__(mr arg_z,arg_y)		/* subtag  */
-/* OLD CODE	__(mr arg_y,arg_x)		/* element-count  */
-/* OLD CODE
+/* PPC CODE	__(mr arg_z,arg_y)		/* subtag  */
+/* PPC CODE	__(mr arg_y,arg_x)		/* element-count  */
+/* PPC CODE
 	__(bl _SPmisc_alloc)
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(mtlr loc_pc)
@@ -5755,14 +5755,14 @@ _spentry(misc_alloc_init)
 /* As in stack_misc_alloc above, only with a non-default initial-value.  */
 
 _spentry(stack_misc_alloc_init)
-/* OLD CODE
+/* PPC CODE
 	__(mflr loc_pc)
 	__(build_lisp_frame(fn,loc_pc,vsp))
 	__(li fn,0)
 	__(mr temp0,arg_z) /* initval  */
-/* OLD CODE	__(mr arg_z,arg_y) /* subtag  */
-/* OLD CODE	__(mr arg_y,arg_x) /* element-count  */
-/* OLD CODE
+/* PPC CODE	__(mr arg_z,arg_y) /* subtag  */
+/* PPC CODE	__(mr arg_y,arg_x) /* element-count  */
+/* PPC CODE
 	__(bl _SPstack_misc_alloc)
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(mtlr loc_pc)
@@ -5778,7 +5778,7 @@ _spentry(stack_misc_alloc_init)
 
 	
 _spentry(callbuiltin)
-/* OLD CODE
+/* PPC CODE
 	__(ref_nrs_value(fname,builtin_functions))
 	__(la imm0,misc_data_offset(imm0))
 	__(ldrx(fname,fname,imm0))
@@ -5791,7 +5791,7 @@ _spentry(callbuiltin)
 /* return a single value.  */
 
 _spentry(callbuiltin0)
-/* OLD CODE
+/* PPC CODE
 	__(set_nargs(0))
 	__(ref_nrs_value(fname,builtin_functions))
 	__(la imm0,misc_data_offset(imm0))
@@ -5801,7 +5801,7 @@ _spentry(callbuiltin0)
 		__(ret)
 
 _spentry(callbuiltin1)
-/* OLD CODE
+/* PPC CODE
 	__(ref_nrs_value(fname,builtin_functions))
 	__(set_nargs(1))
 	__(la imm0,misc_data_offset(imm0))
@@ -5811,7 +5811,7 @@ _spentry(callbuiltin1)
 		__(ret)
 
 _spentry(callbuiltin2)
-/* OLD CODE
+/* PPC CODE
 	__(set_nargs(2))
 	__(ref_nrs_value(fname,builtin_functions))
 	__(la imm0,misc_data_offset(imm0))
@@ -5822,7 +5822,7 @@ _spentry(callbuiltin2)
 
 
 _spentry(callbuiltin3)
-/* OLD CODE
+/* PPC CODE
 	__(set_nargs(3))
 	__(ref_nrs_value(fname,builtin_functions))
 	__(la imm0,misc_data_offset(imm0))
@@ -5835,7 +5835,7 @@ _spentry(callbuiltin3)
 _spentry(popj)
 	.globl C(popj)
 C(popj):
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
 	__(mtlr loc_pc)
@@ -5846,7 +5846,7 @@ C(popj):
 		__(ret)
 
 _spentry(restorefullcontext)
-/* OLD CODE
+/* PPC CODE
 	__(mflr loc_pc)
 	__(mtctr loc_pc)
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
@@ -5859,7 +5859,7 @@ _spentry(restorefullcontext)
 		__(ret)
 
 _spentry(savecontextvsp)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(imm0,tcr.cs_limit(rcontext)))
 	__(build_lisp_frame(fn,loc_pc,vsp))
 	__(mr fn,nfn)
@@ -5869,7 +5869,7 @@ _spentry(savecontextvsp)
 		__(ret)
 
 _spentry(savecontext0)
-/* OLD CODE
+/* PPC CODE
 	__(add imm0,vsp,imm0)
 	__(build_lisp_frame(fn,loc_pc,imm0))
 	__(ldr(imm0,tcr.cs_limit(rcontext)))
@@ -5883,7 +5883,7 @@ _spentry(savecontext0)
 /* Like .SPrestorefullcontext, only the saved return address  */
 /* winds up in loc-pc instead of getting thrashed around ...  */
 _spentry(restorecontext)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(loc_pc,lisp_frame.savelr(sp)))
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
 	__(ldr(fn,lisp_frame.savefn(sp)))
@@ -5900,7 +5900,7 @@ _spentry(restorecontext)
 /* If we can detect that the caller's caller didn't expect  */
 /* multiple values, then things are even simpler.  */
 _spentry(lexpr_entry)
-/* OLD CODE
+/* PPC CODE
 	__(ref_global(imm1,ret1val_addr))
 	__(cmpr(cr0,imm1,loc_pc))
 	__(build_lisp_frame(fn,loc_pc,imm0))
@@ -5915,7 +5915,7 @@ _spentry(lexpr_entry)
 
         /* The single-value case just needs to return to something that'll pop  */
         /* the variable-length frame off of the vstack.  */
-/* OLD CODE
+/* PPC CODE
 1:
 	__(ref_global(loc_pc,lexpr_return1v))
 	__(ldr(imm0,tcr.cs_limit(rcontext)))
@@ -5944,7 +5944,7 @@ _spentry(lexpr_entry)
 
         
 _spentry(poweropen_syscall)
-/* OLD CODE
+/* PPC CODE
 	__(mflr loc_pc)
 	__(vpush_saveregs())
 	__(ldr(imm1,0(sp)))
@@ -5990,18 +5990,18 @@ _spentry(poweropen_syscall)
 	 __(cmpri(cr0,imm2,0))
 	 __(bne cr0,2f)
 	 /* 32-bit result  */
-/* OLD CODE
+/* PPC CODE
 	 __(neg r3,r3)
 	 __(b 9f)
 2:
 	 /* 64-bit result  */
-/* OLD CODE
+/* PPC CODE
 	 __(neg r4,r3)
 	 __(li r3,-1)
         __endif
 9:
 	__(mr imm2,save0)	/* recover context  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(sp,c_frame.backlink(sp)))
 	__(li imm4,TCR_STATE_LISP)
 	__(li rzero,0)
@@ -6040,7 +6040,7 @@ _spentry(poweropen_syscall)
         
         
 _spentry(builtin_plus)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6070,7 +6070,7 @@ _spentry(builtin_plus)
 	__(ret)
 
 _spentry(builtin_minus)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6100,7 +6100,7 @@ _spentry(builtin_minus)
 	__(ret)
 
 _spentry(builtin_times)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6114,26 +6114,26 @@ _spentry(builtin_times)
          __(mr arg_z,imm3)
          __(blr)
 	 /* Args are fixnums; result can't be  */
-/* OLD CODE
+/* PPC CODE
 2:	 __(mtxer rzero)
 	 __(unbox_fixnum(imm3,arg_z))
 	 __(mulld imm1,imm3,imm2) /* imm1 = low  64 bits  */
-/* OLD CODE	 __(mulhd imm0,imm3,imm2) /* imm0 = high 64 bits  */
-/* OLD CODE
+/* PPC CODE	 __(mulhd imm0,imm3,imm2) /* imm0 = high 64 bits  */
+/* PPC CODE
 	 __(b _SPmakes128)
         __else
 	 __(mullwo. imm3,arg_z,imm2)
 	 __(bso 2f)		/*  SO set if result would overflow a fixnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(mr arg_z,imm3)
 	 __(blr)
 	 /* Args are fixnums; result can't be  */
-/* OLD CODE
+/* PPC CODE
 2:	 __(mtxer rzero)
 	 __(unbox_fixnum(imm3,arg_z))
 	 __(mullw imm1,imm3,imm2) /* imm1 = low  32 bits  */
-/* OLD CODE	 __(mulhw imm0,imm3,imm2) /* imm0 = high 32 bits  */
-/* OLD CODE
+/* PPC CODE	 __(mulhw imm0,imm3,imm2) /* imm0 = high 32 bits  */
+/* PPC CODE
 	 __(b _SPmakes64)
         __endif
 
@@ -6142,11 +6142,11 @@ _spentry(builtin_times)
 	__(ret)
 
 _spentry(builtin_div)
-/* OLD CODE	__(jump_builtin(_builtin_div,2)) */
+/* PPC CODE	__(jump_builtin(_builtin_div,2)) */
 	__(ret)
 
 _spentry(builtin_eq)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6164,7 +6164,7 @@ _spentry(builtin_eq)
 	__(ret)
 
 _spentry(builtin_ne)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6182,7 +6182,7 @@ _spentry(builtin_ne)
 	__(ret)
 
 _spentry(builtin_gt)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6200,7 +6200,7 @@ _spentry(builtin_gt)
 	__(ret)
 
 _spentry(builtin_ge)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6218,7 +6218,7 @@ _spentry(builtin_ge)
 	__(ret)
 
 _spentry(builtin_lt)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6236,7 +6236,7 @@ _spentry(builtin_lt)
 	__(ret)
 
 _spentry(builtin_le)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6255,7 +6255,7 @@ _spentry(builtin_le)
 
 
 _spentry(builtin_eql)
-/* OLD CODE
+/* PPC CODE
         __(cmpr(cr1,arg_y,arg_z))
         __(extract_fulltag(imm2,arg_y))
         __(extract_fulltag(imm3,arg_z))
@@ -6277,7 +6277,7 @@ _spentry(builtin_eql)
 	__(ret)
         
 _spentry(builtin_length)
-/* OLD CODE
+/* PPC CODE
         __(cmpri(cr1,arg_z,nil_value))
 	__(extract_typecode(imm0,arg_z))
 	__(cmpri(cr0,imm0,subtag_simple_vector))
@@ -6297,7 +6297,7 @@ _spentry(builtin_length)
         __(b 8f)
 
 	/* (simple-array * (*))  */
-/* OLD CODE
+/* PPC CODE
 0:      __(vector_length(arg_z,arg_z,imm0))
 	__(blr)
 1:      __(li arg_z,0)
@@ -6308,9 +6308,9 @@ _spentry(builtin_length)
 3:
 	__(li temp2,-1<<fixnum_shift)
 	__(mr temp0,arg_z)	/* fast pointer  */
-/* OLD CODE
+/* PPC CODE
 	__(mr temp1,arg_z)	/* slow pointer  */
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
 4:       __(extract_fulltag(imm0,temp0))
          __(cmpdi cr7,temp0,nil_value)
@@ -6353,7 +6353,7 @@ _spentry(builtin_length)
 	__(ret)
         
 _spentry(builtin_seqtype)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
          __(cmpdi cr2,arg_z,nil_value)
          __(extract_typecode(imm0,arg_z))
@@ -6381,7 +6381,7 @@ _spentry(builtin_seqtype)
 	__(ret)
 
 _spentry(builtin_assq)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(arg_z,nil_value))
 	__(beqlr)
 1:	__(trap_unless_list(arg_z,imm0))
@@ -6402,7 +6402,7 @@ _spentry(builtin_assq)
 	__(ret)
 
 _spentry(builtin_memq)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr1,arg_z,nil_value))
 	__(b 2f)
 1:	__(trap_unless_list(arg_z,imm0))
@@ -6425,7 +6425,7 @@ logbitp_max_bit = 30
         
 _spentry(builtin_logbitp)
 	/* Call out unless both fixnums,0 <=  arg_y < logbitp_max_bit  */
-/* OLD CODE
+/* PPC CODE
         __(cmplri(cr2,arg_y,logbitp_max_bit<<fixnum_shift))
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
@@ -6451,7 +6451,7 @@ _spentry(builtin_logbitp)
 	__(ret)
 
 _spentry(builtin_logior)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6466,7 +6466,7 @@ _spentry(builtin_logior)
 	__(ret)
 	
 _spentry(builtin_logand)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6481,7 +6481,7 @@ _spentry(builtin_logand)
 	__(ret)
 	
 _spentry(builtin_ash)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
 	 __(cmpdi cr1,arg_z,0)
          __(extract_lisptag(imm0,arg_y))
@@ -6489,19 +6489,19 @@ _spentry(builtin_ash)
          __(cmpdi cr0,imm0,tag_fixnum)
          __(cmpdi cr3,imm1,tag_fixnum)
 	 __(cmpdi cr2,arg_z,-(63<<3))	/* !! 3 =  fixnumshift  */
-/* OLD CODE
+/* PPC CODE
 	 __(bne- cr0,9f)
          __(bne- cr3,9f)
 	 __(bne cr1,0f)
 	 __(mr arg_z,arg_y)	/* (ash n 0) => n  */
-/* OLD CODE
+/* PPC CODE
 	 __(blr)
 0:		
 	 __(unbox_fixnum(imm1,arg_y))
 	 __(unbox_fixnum(imm0,arg_z))
 	 __(bgt cr1,2f)
 	 /* (ash n -count) => fixnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(neg imm2,imm0)
 	 __(bgt cr2,1f)
 	 __(li imm2,63)
@@ -6510,17 +6510,17 @@ _spentry(builtin_ash)
 	 __(box_fixnum(arg_z,imm0))
 	 __(blr)
 	 /* Integer-length of arg_y/imm1 to imm2  */
-/* OLD CODE
+/* PPC CODE
 2:		
 	 __(cntlzd. imm2,imm1)
 	 __(bne 3f)		/* cr0`eq' set if negative  */
-/* OLD CODE
+/* PPC CODE
 	 __(not imm2,imm1)
 	 __(cntlzd imm2,imm2)
 3:
 	 __(subfic imm2,imm2,64)
 	 __(add imm2,imm2,imm0)	 /* imm2 <- integer-length(imm1) + count  */
-/* OLD CODE
+/* PPC CODE
 	 __(cmpdi cr1,imm2,63-fixnumshift)
 	 __(cmpdi cr2,imm0,64)
 	 __(sld imm2,imm1,imm0)
@@ -6531,14 +6531,14 @@ _spentry(builtin_ash)
 	 __(bgt cr2,9f)
 	 __(bne cr2,7f)
 	 /* Shift left by 64 bits exactly  */
-/* OLD CODE
+/* PPC CODE
 	 __(mr imm0,imm1)
 	 __(li imm1,0)
 	 __(beq _SPmakes128)
 	 __(b _SPmakeu128)
 7:
 	 /* Shift left by fewer than 64 bits, result not a fixnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(subfic imm0,imm0,64)
 	 __(beq 8f)
 	 __(srd imm0,imm1,imm0)
@@ -6555,19 +6555,19 @@ _spentry(builtin_ash)
          __(cmpri(cr0,imm0,tag_fixnum))
          __(cmpri(cr3,imm1,tag_fixnum))
 	 __(cmpri(cr2,arg_z,-(29<<2)))	/* !! 2 =  fixnumshift  */
-/* OLD CODE
+/* PPC CODE
 	 __(bne- cr0,9f)
          __(bne- cr3,9f)
 	 __(bne cr1,0f)
 	 __(mr arg_z,arg_y)	/* (ash n 0) => n  */
-/* OLD CODE
+/* PPC CODE
 	 __(blr)
 0:		
 	 __(unbox_fixnum(imm1,arg_y))
 	 __(unbox_fixnum(imm0,arg_z))
 	 __(bgt cr1,2f)
 	 /* (ash n -count) => fixnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(neg imm2,imm0)
 	 __(bgt cr2,1f)
 	 __(li imm2,31)
@@ -6576,17 +6576,17 @@ _spentry(builtin_ash)
 	 __(box_fixnum(arg_z,imm0))
 	 __(blr)
 	 /* Integer-length of arg_y/imm1 to imm2  */
-/* OLD CODE
+/* PPC CODE
 2:		
 	 __(cntlzw. imm2,imm1)
 	 __(bne 3f)		/* cr0`eq' set if negative  */
-/* OLD CODE
+/* PPC CODE
 	 __(not imm2,imm1)
 	 __(cntlzw imm2,imm2)
 3:
 	 __(subfic imm2,imm2,32)
 	 __(add imm2,imm2,imm0)	 /* imm2 <- integer-length(imm1) + count  */
-/* OLD CODE
+/* PPC CODE
 	 __(cmpri(cr1,imm2,31-fixnumshift))
 	 __(cmpri(cr2,imm0,32))
 	 __(slw imm2,imm1,imm0)
@@ -6597,14 +6597,14 @@ _spentry(builtin_ash)
 	 __(bgt cr2,9f)
 	 __(bne cr2,7f)
 	 /* Shift left by 32 bits exactly  */
-/* OLD CODE
+/* PPC CODE
 	 __(mr imm0,imm1)
 	 __(li imm1,0)
 	 __(beq _SPmakes64)
 	 __(b _SPmakeu64)
 7:
 	 /* Shift left by fewer than 32 bits, result not a fixnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(subfic imm0,imm0,32)
 	 __(beq 8f)
 	 __(srw imm0,imm1,imm0)
@@ -6621,7 +6621,7 @@ _spentry(builtin_ash)
 	__(ret)
 
 _spentry(builtin_negate)
-/* OLD CODE
+/* PPC CODE
 	__(extract_lisptag_(imm0,arg_z))
 	__(bne- cr0,1f)
 	__(nego. arg_z,arg_z)
@@ -6647,7 +6647,7 @@ _spentry(builtin_negate)
 	__(ret)
 
 _spentry(builtin_logxor)
-/* OLD CODE
+/* PPC CODE
         __(extract_lisptag(imm0,arg_y))
         __(extract_lisptag(imm1,arg_z))
         __(cmpri(cr0,imm0,tag_fixnum))
@@ -6665,7 +6665,7 @@ _spentry(builtin_logxor)
 
         
 _spentry(builtin_aset1)
-/* OLD CODE
+/* PPC CODE
 	__(extract_typecode(imm0,arg_x))
 	__(cmpri(cr0,imm0,subtag_simple_vector))
 	__(box_fixnum(temp0,imm0))
@@ -6681,10 +6681,10 @@ _spentry(builtin_aset1)
 
 /* Enter the debugger  */
 _spentry(breakpoint)
-/* OLD CODE
+/* PPC CODE
 	__(li r3,0)
 	__(tw 28,sp,sp)	/* 28 = lt|gt|eq (assembler bug for the latter)  */
-/* OLD CODE	__(blr)		/* if handler didn't  */
+/* PPC CODE	__(blr)		/* if handler didn't  */
 		__(ret)
 
 /* */
@@ -6695,17 +6695,17 @@ _spentry(breakpoint)
 /*  */
 	
 _spentry(eabi_ff_call)
-/* OLD CODE
+/* PPC CODE
 	__(mflr loc_pc)
 	__(str(sp,eabi_c_frame.savelr(sp)))
 	__(vpush_saveregs())		/* Now we can use save0-save7 to point to stacks  */
-/* OLD CODE	__(mr save0,rcontext)	/* or address globals.  */
-/* OLD CODE
+/* PPC CODE	__(mr save0,rcontext)	/* or address globals.  */
+/* PPC CODE
 	__(extract_typecode(imm0,arg_z))
 	__(cmpri(imm0,subtag_macptr))
 	__(ldr(save1,0(sp)))	/* bottom of reserved lisp frame  */
-/* OLD CODE	__(la save2,-lisp_frame.size(save1))	/* top of lisp frame */
-/* OLD CODE
+/* PPC CODE	__(la save2,-lisp_frame.size(save1))	/* top of lisp frame */
+/* PPC CODE
         __(zero_doublewords save2,0,lisp_frame.size)
 	__(str(save1,lisp_frame.backlink(save2)))
 	__(str(save2,c_frame.backlink(sp)))
@@ -6725,8 +6725,8 @@ _spentry(eabi_ff_call)
 	__(str(rzero,tcr.ffi_exception(rcontext)))
 	__(mffs f0)
 	__(stfd f0,tcr.lisp_fpscr(rcontext))	/* remember lisp's fpscr  */
-/* OLD CODE	__(mtfsf 0xff,fp_zero)	/* zero foreign fpscr  */
-/* OLD CODE
+/* PPC CODE	__(mtfsf 0xff,fp_zero)	/* zero foreign fpscr  */
+/* PPC CODE
 	__(li imm1,TCR_STATE_FOREIGN)
 	__(str(imm1,tcr.valence(rcontext)))
 	__(ldr(r2,tcr.native_thread_info(rcontext)))
@@ -6748,11 +6748,11 @@ _spentry(eabi_ff_call)
 	/* Better to say that we did (and force callee to save FP */
 	/* arg regs on entry) than to say that we didn't and get */
 	/* garbage results  */
-/* OLD CODE
+/* PPC CODE
 	__(crset 6)
 	__(bctrl)
 	/* C should have preserved save0 (= rcontext) for us.  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(sp,0(sp)))
 	__(mr imm2,save0)
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
@@ -6789,7 +6789,7 @@ _spentry(eabi_ff_call)
 	__(mffs f0)
 	__(stfd f0,8(sp))
 	__(lwz imm3,12(sp))	/* imm3 = FPSCR after call  */
-/* OLD CODE
+/* PPC CODE
         __(clrrwi imm2,imm3,8)
 	__(discard_lisp_frame())
 	__(str(imm2,tcr.ffi_exception(rcontext)))
@@ -6809,7 +6809,7 @@ _spentry(eabi_ff_call)
 _spentry(eabi_callback)
 	/* First, we extend the C frame so that it has room for */
         /* incoming arg regs.  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(r0,eabi_c_frame.backlink(sp)))
 	__(stru(r0,eabi_c_frame.param0-varargs_eabi_c_frame.incoming_stack_args(sp)))
 	__(mflr r0)
@@ -6823,7 +6823,7 @@ _spentry(eabi_callback)
 	__(str(r9,varargs_eabi_c_frame.gp_save+(6*4)(sp)))
 	__(str(r10,varargs_eabi_c_frame.gp_save+(7*4)(sp)))
 	/* Could check the appropriate CR bit and skip saving FP regs here  */
-/* OLD CODE
+/* PPC CODE
 	__(stfd f1,varargs_eabi_c_frame.fp_save+(0*8)(sp))
 	__(stfd f2,varargs_eabi_c_frame.fp_save+(1*8)(sp))
 	__(stfd f3,varargs_eabi_c_frame.fp_save+(2*8)(sp))
@@ -6842,7 +6842,7 @@ _spentry(eabi_callback)
 	/* Save the non-volatile registers on the sp stack  */
 	/* This is a non-standard stack frame, but noone will ever see it,  */
         /* so it doesn't matter. It will look like more of the stack frame pushed below.  */
-/* OLD CODE
+/* PPC CODE
 	__(stru(sp,-(c_reg_save.size)(sp)))
         __(str(r13,c_reg_save.save_gprs+(0*node_size)(sp)))
         __(str(r14,c_reg_save.save_gprs+(1*node_size)(sp)))
@@ -6866,7 +6866,7 @@ _spentry(eabi_callback)
 	__(mffs f0)
 	__(stfd f0,c_reg_save.save_fp_zero(sp))
 	__(ldr(r31,c_reg_save.save_fp_zero+4(sp)))	/* recover FPSCR image  */
-/* OLD CODE
+/* PPC CODE
 	__(str(r31,c_reg_save.save_fpscr(sp)))
 	__(lwi(r30,0x43300000))
 	__(lwi(r31,0x80000000))
@@ -6880,21 +6880,21 @@ _spentry(eabi_callback)
 	
 /* Restore rest of Lisp context.  */
 /* Could spread out the memory references here to gain a little speed  */
-/* OLD CODE
+/* PPC CODE
 	__(li loc_pc,0)
 	__(li fn,0)                     /* subprim, not a lisp function  */
-/* OLD CODE
+/* PPC CODE
 	__(li temp3,0)
 	__(li temp2,0)
 	__(li temp1,0)
 	__(li temp0,0)
 	__(li arg_x,0)
 	__(box_fixnum(arg_y,r11))	/* callback-index  */
-/* OLD CODE
+/* PPC CODE
 	__(la arg_z,c_reg_save.size+varargs_eabi_c_frame.gp_save(sp))	/* parameters (tagged as a fixnum)  */
 
 	/* Recover lisp thread context. Have to call C code to do so.  */
-/* OLD CODE
+/* PPC CODE
 	__(ref_global(r12,get_tcr))
 	__(mtctr r12)
         __(li r3,1)
@@ -6908,7 +6908,7 @@ _spentry(eabi_callback)
 	__(ldr(tsp,tcr.save_tsp(rcontext)))		
 	__(li rzero,0)
 	__(mtxer rzero) /* lisp wants the overflow bit clear  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm0,TCR_STATE_LISP)
 	__(li save0,0)
 	__(li save1,0)
@@ -6927,15 +6927,15 @@ _spentry(eabi_callback)
 
         __(restore_saveregs(vsp))        
 	/* load nargs and callback to the lisp  */
-/* OLD CODE
+/* PPC CODE
 	__(set_nargs(2))
 	__(ldr(imm2,tcr.cs_area(rcontext)))
 	__(ldr(imm4,area.active(imm2)))
 	__(stru(imm4,-lisp_frame.size(sp)))
 	__(str(imm3,lisp_frame.savelr(sp)))
 	__(str(vsp,lisp_frame.savevsp(sp)))	/* for stack overflow code  */
-/* OLD CODE	__(li fname,nrs.callbacks)	/* %pascal-functions%  */
-/* OLD CODE
+/* PPC CODE	__(li fname,nrs.callbacks)	/* %pascal-functions%  */
+/* PPC CODE
 	__(call_fname)
 	__(ldr(imm2,lisp_frame.backlink(sp)))
 	__(ldr(imm3,tcr.cs_area(rcontext)))
@@ -6944,18 +6944,18 @@ _spentry(eabi_callback)
 	/* save_vsp will be restored from ff_call's stack frame, but  */
 	/* I included it here for consistency.  */
 	/* save_tsp is set below after we exit Lisp context.  */
-/* OLD CODE
+/* PPC CODE
 	__(str(allocptr,tcr.save_allocptr(rcontext)))
 	__(str(allocbase,tcr.save_allocbase(rcontext)))
 	__(str(vsp,tcr.save_vsp(rcontext)))
 	__(str(tsp,tcr.save_tsp(rcontext)))
 	/* Exit lisp context  */
 	/* This is not necessary yet, but will be once we can be interrupted  */
-/* OLD CODE
+/* PPC CODE
 	__(li imm1,TCR_STATE_FOREIGN)
 	__(str(imm1,tcr.valence(rcontext)))
 	/* Restore the non-volatile registers & fpscr  */
-/* OLD CODE
+/* PPC CODE
 	__(lfd fp_zero,c_reg_save.save_fp_zero(sp))
 	__(ldr(r31,c_reg_save.save_fpscr(sp)))
 	__(str(r31,c_reg_save.save_fp_zero+4(sp)))
@@ -7015,15 +7015,15 @@ _spentry(eabi_syscall)
 /*	lisp_frame reserved underneath it; we'll link it in in a minute. */
 /*	Load the outgoing GPR arguments from eabi_c_frame.param`0-7', */
 /*	then shrink the eabi_c_frame. */
-/* OLD CODE
+/* PPC CODE
 	__(mflr loc_pc)
         __(vpush_saveregs())
 	__(str(sp,eabi_c_frame.savelr(sp)))
 	__(li arg_x,nil_value)
 	__(mr temp0,rcontext)
 	__(ldr(temp1,c_frame.backlink(sp)))	/* bottom of reserved lisp frame  */
-/* OLD CODE	__(la temp2,-lisp_frame.size(temp1))	/* top of lisp frame  */
-/* OLD CODE
+/* PPC CODE	__(la temp2,-lisp_frame.size(temp1))	/* top of lisp frame  */
+/* PPC CODE
         __(zero_doublewords temp2,0,lisp_frame.size)
 	__(str(temp1,lisp_frame.backlink(temp2)))
 	__(str(temp2,c_frame.backlink(sp)))
@@ -7056,7 +7056,7 @@ _spentry(eabi_syscall)
 	__(sc)
 	__(nop)
 	/* C should have preserved temp0 (= rcontext) for us.  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(sp,0(sp)))
 	__(mr imm2,temp0)
 	__(ldr(vsp,lisp_frame.savevsp(sp)))
@@ -7105,7 +7105,7 @@ _spentry(eabi_syscall)
 /* On PPC64, return unboxed value in imm0  */
 
 _spentry(getu64)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
         __(extract_typecode(imm0,arg_z))
         __(cmpdi cr0,imm0,tag_fixnum)
@@ -7174,7 +7174,7 @@ _spentry(getu64)
 /* PPC64:   return unboxed value in imm0  */
 
 _spentry(gets64)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
 	 __(extract_typecode(imm1,arg_z))
          __(unbox_fixnum(imm0,arg_z))
@@ -7213,13 +7213,13 @@ _spentry(gets64)
 /*        ppc32:    imm0 (high 32 bits) and imm1 (low 32 bits) */
 /*        ppc64:    imm0 (64 bits) .  */
 _spentry(makeu64)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
 	 __(clrrdi. imm1,imm0,63-nfixnumtagbits)
 	 __(cmpri(cr1,imm0,0))
 	 __(box_fixnum(arg_z,imm0))
 	 __(beqlr cr0) /* A fixnum  */
-/* OLD CODE
+/* PPC CODE
          __(rotldi imm1,imm0,32)
 	 __(li imm2,two_digit_bignum_header)
 	 __(blt cr1,2f)
@@ -7239,7 +7239,7 @@ _spentry(makeu64)
 	 __(blt cr1,3f)
 	 __(bne cr1,2f)
 	 __(beqlr cr0) /* A fixnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(blt cr0,2f)
 	 __(li imm2,one_digit_bignum_header)
 	 __(Misc_Alloc_Fixed(arg_z,imm2,aligned_bignum_size(1)))
@@ -7266,7 +7266,7 @@ _spentry(makeu64)
 /*        ppc32:    imm0 (high 32 bits) and imm1 (low 32 bits). */
 /*        ppc64:    imm0  */
 _spentry(makes64)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
 	 __(addo imm1,imm0,imm0)
          __(addo imm1,imm1,imm1)
@@ -7284,10 +7284,10 @@ _spentry(makes64)
 	 __(addo imm2,imm1,imm1)
 	 __(addo. arg_z,imm2,imm2)
 	 __(bne cr1,2f) /* High word is significant  */
-/* OLD CODE
+/* PPC CODE
 	 __(li imm2,one_digit_bignum_header)
 	 __(bnslr cr0) /* No overflow:	 fixnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(mtxer rzero)
 	 __(Misc_Alloc_Fixed(arg_z,imm2,aligned_bignum_size(1)))
 	 __(str(imm1,misc_data_offset(arg_z)))
@@ -7306,7 +7306,7 @@ _spentry(makes64)
 /* imm0:imm1 constitute an unsigned integer, almost certainly a bignum. */
 /* Make a lisp integer out of those 128 bits ..  */
 _spentry(makeu128)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
          __(cmpdi imm0,0)
          __(cmpdi cr1,imm1,0)
@@ -7322,7 +7322,7 @@ _spentry(makeu128)
          /* All 128 bits are significant, and the most significant */
          /* bit is set.  Allocate a 5-digit bignum (with a zero */
          /* sign digit  */
-/* OLD CODE
+/* PPC CODE
          __(Misc_Alloc_Fixed(arg_z,imm2,aligned_bignum_size(5)))
          __(rotldi imm0,imm0,32)
          __(rotldi imm1,imm1,32)
@@ -7331,12 +7331,12 @@ _spentry(makeu128)
          __(blr)
 1:       /* If the high word of imm0 is a zero-extension of the low */
          /* word, we only need 3 digits ; otherwise, we need 4.  */
-/* OLD CODE
+/* PPC CODE
          __(li imm2,three_digit_bignum_header)
          __(rotldi imm1,imm1,32)
          __(bne cr3,2f) /* high word of imm0 is non-zero  */
-/* OLD CODE         __(bne cr4,2f) /* sign bit is on in low word of imm0  */
-/* OLD CODE
+/* PPC CODE         __(bne cr4,2f) /* sign bit is on in low word of imm0  */
+/* PPC CODE
          __(Misc_Alloc_Fixed(arg_z,imm2,aligned_bignum_size(3)))
          __(std imm1,misc_data_offset(arg_z))
          __(stw imm0,misc_data_offset+8(arg_z))
@@ -7358,13 +7358,13 @@ _spentry(makeu128)
 /* imm0:imm1 constitute a signed integer, almost certainly a bignum. */
 /* Make a lisp integer out of those 128 bits ..  */
 _spentry(makes128)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
          /* Is imm0 just a sign-extension of imm1 ?  */
-/* OLD CODE
+/* PPC CODE
          __(sradi imm2,imm1,63)
          /* Is the high word of imm0 just a sign-extension of the low word ?  */
-/* OLD CODE
+/* PPC CODE
          __(extsw imm3,imm0)
          __(cmpd imm2,imm0)
          __(cmpd cr1,imm3,imm0)
@@ -7393,7 +7393,7 @@ _spentry(makes128)
 /* on entry: arg_z = symbol.  On exit, arg_z = value (possibly */
 /* unbound_marker), arg_y = symbol, imm3 = symbol.binding-index  */
 _spentry(specref)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm3,symbol.binding_index(arg_z)))
         __(ldr(imm0,tcr.tlb_limit(rcontext)))
         __(cmpr(imm3,imm0))
@@ -7409,7 +7409,7 @@ _spentry(specref)
 		__(ret)
 
 _spentry(specrefcheck)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm3,symbol.binding_index(arg_z)))
         __(ldr(imm0,tcr.tlb_limit(rcontext)))
         __(cmpr(imm3,imm0))
@@ -7427,7 +7427,7 @@ _spentry(specrefcheck)
 
 /* arg_y = special symbol, arg_z = new value.          */
 _spentry(specset)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm3,symbol.binding_index(arg_y)))
         __(ldr(imm0,tcr.tlb_limit(rcontext)))
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))
@@ -7447,7 +7447,7 @@ _spentry(specset)
 /* Restore current thread's interrupt level to arg_z, */
 /* noting whether the tcr's interrupt_pending flag was set.  */
 _spentry(restoreintlevel)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr1,arg_z,0))
 	__(ldr(imm0,tcr.interrupt_pending(rcontext)))
 	__(cmpri(cr0,imm0,0))
@@ -7469,7 +7469,7 @@ _spentry(restoreintlevel)
 
         
 _spentry(makes32)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
          __(box_fixnum(arg_z,imm0))
         __else
@@ -7490,7 +7490,7 @@ _spentry(makes32)
 
         
 _spentry(makeu32)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
          __(box_fixnum(arg_z,imm0))
          __(blr)
@@ -7499,7 +7499,7 @@ _spentry(makeu32)
 	 __(cmpri(cr1,imm0,0))
 	 __(box_fixnum(arg_z,imm0))
 	 __(beqlr cr0) /* A fixnum  */
-/* OLD CODE
+/* PPC CODE
 	 __(blt cr1,2f)
 	 __(li imm2,one_digit_bignum_header)
 	 __(Misc_Alloc_Fixed(arg_z,imm2,aligned_bignum_size(1)))
@@ -7518,7 +7518,7 @@ _spentry(makeu32)
 /* arg_z should be of type (SIGNED-BYTE 32); return unboxed result in imm0 */
 /*  */
 _spentry(gets32)
-/* OLD CODE
+/* PPC CODE
         __ifdef(`PPC64')
          __(sldi imm1,arg_z,32-fixnumshift)
          __(extract_lisptag_(imm0,arg_z))
@@ -7550,7 +7550,7 @@ _spentry(gets32)
 /*  */
 
 _spentry(getu32)
-/* OLD CODE
+/* PPC CODE
 	__(extract_typecode(imm1,arg_z))
 	__(cmpri(cr0,imm1,tag_fixnum))
 	__(cmpri(cr1,arg_z,0))
@@ -7583,7 +7583,7 @@ _spentry(getu32)
 /* Make a bignum out of it. */
 
 _spentry(fix_overflow)
-/* OLD CODE
+/* PPC CODE
 	__(mtxer rzero)
 	__(unbox_fixnum(imm1,arg_z))
         __ifdef(`PPC64')
@@ -7609,7 +7609,7 @@ _spentry(fix_overflow)
 /* symbol. */
 
 _spentry(mvpasssym)
-/* OLD CODE
+/* PPC CODE
 	__(cmpri(cr0,nargs,node_size*nargregs))
 	__(mflr loc_pc)
 	__(mr imm0,vsp)
@@ -7628,7 +7628,7 @@ _spentry(mvpasssym)
 
 
 _spentry(unbind)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm1,tcr.db_link(rcontext)))
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))   
         __(ldr(imm3,binding.sym(imm1)))
@@ -7641,7 +7641,7 @@ _spentry(unbind)
 	__(ret)
 
 _spentry(unbind_n)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm1,tcr.db_link(rcontext)))
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))   
 1:      __(subi imm0,imm0,1)
@@ -7660,7 +7660,7 @@ _spentry(unbind_n)
 /* Clobbers imm1,imm2,imm5,arg_x, arg_y */
 
 _spentry(unbind_to)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm1,tcr.db_link(rcontext)))
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))
 1:      __(ldr(imm5,binding.sym(imm1)))
@@ -7687,9 +7687,9 @@ _spentry(unbind_to)
 /*  */
                         
 _spentry(progvrestore)
-/* OLD CODE
+/* PPC CODE
 	__(ldr(imm0,tsp_frame.backlink(tsp)))	/* ignore .SPnthrowXXX values frame  */
-/* OLD CODE
+/* PPC CODE
 	__(ldr(imm0,tsp_frame.data_offset(imm0)))
 	__(cmpri(cr0,imm0,0))
 	__(unbox_fixnum(imm0,imm0))
@@ -7702,7 +7702,7 @@ _spentry(progvrestore)
 /* for pending interrupts after doing so.  "nargs" can be freely used for an */
 /* interrupt trap in this context.  */
 _spentry(bind_interrupt_level_0)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm4,tcr.tlb_pointer(rcontext)))
         __(ldr(temp0,INTERRUPT_LEVEL_BINDING_INDEX(imm4)))
         __(ldr(imm1,tcr.db_link(rcontext)))
@@ -7725,7 +7725,7 @@ _spentry(bind_interrupt_level_0)
 /* Bind CCL::*INTERRUPT-LEVEL* to the fixnum -1.  (This has the effect */
 /* of disabling interrupts.)  */
 _spentry(bind_interrupt_level_m1)
-/* OLD CODE
+/* PPC CODE
         __(li imm2,-fixnumone)
         __(li imm3,INTERRUPT_LEVEL_BINDING_INDEX)
         __(ldr(imm4,tcr.tlb_pointer(rcontext)))
@@ -7744,7 +7744,7 @@ _spentry(bind_interrupt_level_m1)
 /* Bind CCL::*INTERRUPT-LEVEL* to the value in arg_z.  If that value's 0, */
 /* do what _SPbind_interrupt_level_0 does  */
 _spentry(bind_interrupt_level)
-/* OLD CODE
+/* PPC CODE
         __(cmpri(arg_z,0))
         __(li imm3,INTERRUPT_LEVEL_BINDING_INDEX)
         __(ldr(imm4,tcr.tlb_pointer(rcontext)))
@@ -7766,7 +7766,7 @@ _spentry(bind_interrupt_level)
 /* any interrupt polling  */
         
 _spentry(unbind_interrupt_level)
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm0,tcr.flags(rcontext)))
         __(ldr(imm2,tcr.tlb_pointer(rcontext)))
         __(andi. imm0,imm0,1<<TCR_FLAG_BIT_PENDING_SUSPEND)
@@ -7787,7 +7787,7 @@ _spentry(unbind_interrupt_level)
         __(blr)
 5:       /* Missed a suspend request; force suspend now if we're restoring
           interrupt level to -1 or greater */
-/* OLD CODE
+/* PPC CODE
         __(cmpri(temp1,-2<<fixnumshift))
         __(bne 0b)
         __(ldr(imm0,binding.val(imm1)))
@@ -7805,7 +7805,7 @@ _spentry(unbind_interrupt_level)
    We don't know whether the array is alleged to be simple or
    not, and don't know anythng about the element type.  */
 _spentry(aref2)
-/* OLD CODE
+/* PPC CODE
         __(extract_typecode(imm2,arg_x))
         __(trap_unless_lisptag_equal(arg_y,tag_fixnum,imm0))
         __(cmpri(cr2,imm2,subtag_arrayH))
@@ -7815,7 +7815,7 @@ _spentry(aref2)
         __(cmpri(imm1,2<<fixnumshift))
         __(bne 1f)
         /* It's a 2-dimensional array.  Check bounds */
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm0,arrayH.dim0(arg_x)))
         __(trlge(arg_y,imm0))
         __(ldr(imm0,arrayH.dim0+node_size(arg_x)))
@@ -7825,7 +7825,7 @@ _spentry(aref2)
         __(add arg_z,arg_z,arg_y)
         /* arg_z is now row-major-index; get data vector and
            add in possible offset */
-/* OLD CODE
+/* PPC CODE
         __(mr arg_y,arg_x)
 0:      __(ldr(imm0,arrayH.displacement(arg_y)))
         __(ldr(arg_y,arrayH.data_vector(arg_y)))
@@ -7843,7 +7843,7 @@ _spentry(aref2)
 
 /* temp0 = array, arg_x = i, arg_y = j, arg_z = k */
 _spentry(aref3)
-/* OLD CODE
+/* PPC CODE
         __(extract_typecode(imm2,temp0))
         __(trap_unless_lisptag_equal(arg_x,tag_fixnum,imm0))
         __(cmpri(cr2,imm2,subtag_arrayH))
@@ -7854,7 +7854,7 @@ _spentry(aref3)
         __(cmpri(imm1,3<<fixnumshift))
         __(bne 1f)
         /* It's a 3-dimensional array.  Check bounds */
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm2,arrayH.dim0+(node_size*2)(temp0)))
         __(ldr(imm1,arrayH.dim0+node_size(temp0)))
         __(ldr(imm0,arrayH.dim0(temp0)))
@@ -7888,7 +7888,7 @@ _spentry(aref3)
 
 /* As for aref2 above, but temp = array, arg_x = i, arg_y = j, arg_z = newval */
 _spentry(aset2)
-/* OLD CODE
+/* PPC CODE
         __(extract_typecode(imm2,temp0))
         __(trap_unless_lisptag_equal(arg_x,tag_fixnum,imm0))
         __(cmpri(cr2,imm2,subtag_arrayH))
@@ -7898,7 +7898,7 @@ _spentry(aset2)
         __(cmpri(imm1,2<<fixnumshift))
         __(bne 1f)
         /* It's a 2-dimensional array.  Check bounds */
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm0,arrayH.dim0(temp0)))
         __(trlge(arg_x,imm0))
         __(ldr(imm0,arrayH.dim0+node_size(temp0)))
@@ -7908,7 +7908,7 @@ _spentry(aset2)
         __(add arg_y,arg_y,arg_x)
         /* arg_y is now row-major-index; get data vector and
            add in possible offset */
-/* OLD CODE
+/* PPC CODE
         __(mr arg_x,temp0)
 0:      __(ldr(imm0,arrayH.displacement(arg_x)))
         __(ldr(arg_x,arrayH.data_vector(arg_x)))
@@ -7926,7 +7926,7 @@ _spentry(aset2)
                 
 /* temp1 = array, temp0 = i, arg_x = j, arg_y = k, arg_z = new */        
 _spentry(aset3)
-/* OLD CODE
+/* PPC CODE
         __(extract_typecode(imm2,temp1))
         __(trap_unless_lisptag_equal(temp0,tag_fixnum,imm0))
         __(cmpri(cr2,imm2,subtag_arrayH))
@@ -7937,7 +7937,7 @@ _spentry(aset3)
         __(cmpri(imm1,3<<fixnumshift))
         __(bne 1f)
         /* It's a 3-dimensional array.  Check bounds */
-/* OLD CODE
+/* PPC CODE
         __(ldr(imm2,arrayH.dim0+(node_size*2)(temp1)))
         __(ldr(imm1,arrayH.dim0+node_size(temp1)))
         __(ldr(imm0,arrayH.dim0(temp1)))
@@ -7970,7 +7970,7 @@ _spentry(aset3)
         
 
 _spentry(nmkunwind)
-/* OLD CODE
+/* PPC CODE
         __(li imm2,-fixnumone)
         __(li imm3,INTERRUPT_LEVEL_BINDING_INDEX)
         __(ldr(imm4,tcr.tlb_pointer(rcontext)))

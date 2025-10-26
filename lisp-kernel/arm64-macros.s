@@ -35,7 +35,7 @@ $1:
 
 /* The assembler has to do the arithmetic here:	 the expression */
 /*   may not be evaluable by m4. */
-/* OLD CODE
+/* PPC CODE
 define(`lwi',`ifdef(`DARWIN',`
 	.if ((($2) & 0xffff8000) == 0xffff8000)
 	 li $1,($2)
@@ -141,7 +141,7 @@ ifdef(`PPC64',`
 ')
 
 /* dnode_align(dest,src,delta) */
-/* OLD CODE
+/* PPC CODE
 
         define(`dnode_align',`
         __(la $1,($3+(dnode_size-1))($2))
@@ -222,7 +222,7 @@ define(`push',`
 	')
 	
 	/* Generally not a great idea. */
-/* OLD CODE
+/* PPC CODE
 
 define(`pop',`
 	__(ldr($1,0($2)))
@@ -257,7 +257,7 @@ define(`vref32',`
 	')
         
 define(`vref16',`/* dest,src,n*/
-/* OLD CODE
+/* PPC CODE
 
 	__(lhz $1,misc_data_offset+(($3)<<1)($2))
 	')
@@ -282,14 +282,14 @@ define(`getvheader',`
 	')
 	
 	/* Size is unboxed element count */
-/* OLD CODE
+/* PPC CODE
 
 define(`header_size',`
 	__(srri($1,$2,num_subtag_bits))
 	')
 	
 	/* "Length" is fixnum element count */
-/* OLD CODE
+/* PPC CODE
 
 define(`header_length',`
 ifdef(`PPC64',`
@@ -345,7 +345,7 @@ ifdef(`PPC64',`
 ')
 
 	/* vpop argregs - nargs is known to be non-zero */
-/* OLD CODE
+/* PPC CODE
 
 define(`vpop_argregs_nz',`
 	new_macro_labels()
@@ -359,7 +359,7 @@ macro_label(l0):')
 
                 
 	/* vpush argregs */
-/* OLD CODE
+/* PPC CODE
 
 define(`vpush_argregs',`
 	new_macro_labels()
@@ -468,7 +468,7 @@ define(`trap_unless_typecode_equal',`
 ')
         
 /* "jump" to the code-vector of the function in nfn. */
-/* OLD CODE
+/* PPC CODE
 
 define(`jump_nfn',`
 	__(ldr(temp0,_function.codevector(nfn)))
@@ -480,7 +480,7 @@ define(`jump_nfn',`
 define(`jump_nfn',`')
 
 /* "call the code-vector of the function in nfn. */
-/* OLD CODE
+/* PPC CODE
 
 define(`call_nfn',`
 	__(ldr(temp0,_function.codevector(nfn)))
@@ -490,7 +490,7 @@ define(`call_nfn',`
 	
 
 /* "jump" to the function in fnames function cell. */
-/* OLD CODE
+/* PPC CODE
 
 define(`jump_fname',`
 	__(ldr(nfn,symbol.fcell(fname)))
@@ -500,7 +500,7 @@ define(`jump_fname',`
 define(`jump_fname', `')
 
 /* call the function in fnames function cell. */
-/* OLD CODE
+/* PPC CODE
 
 define(`call_fname',`
 	__(ldr(nfn,symbol.fcell(fname)))
@@ -529,21 +529,21 @@ macro_label(bad):
 
 define(`do_funcall',`')
 
-/* OLD CODE
+/* PPC CODE
 define(`mkcatch',`
 	__(mflr loc_pc)
 	__(ldr(imm0,tcr.catch_top(rcontext)))
 	__(lwz imm1,0(loc_pc)) /* a forward branch to the catch/unwind cleanup */
-/* OLD CODE
+/* PPC CODE
 
 	__(rlwinm imm1,imm1,0,6,29)	/* extract LI */
-/* OLD CODE
+/* PPC CODE
 
 	__(add loc_pc,loc_pc,imm1)
 	__(build_lisp_frame(fn,loc_pc,vsp))
 	__(sub loc_pc,loc_pc,imm1)
 	__(la loc_pc,4(loc_pc))	/* skip over the forward branch */
-/* OLD CODE
+/* PPC CODE
 
 	__(mtlr loc_pc)
 	__(lwi(imm4,(catch_frame.element_count<<num_subtag_bits)|subtag_catch_frame))
@@ -621,7 +621,7 @@ define(`clear_alloc_tag',`
 /*       cons cell, so that the thread's next allocation attempt will */
 /*       invoke the segment allocator. */
 
-/* OLD CODE
+/* PPC CODE
 
 define(`Cons',`
 	__(la allocptr,(-cons.size+fulltag_cons)(allocptr))
@@ -657,7 +657,7 @@ define(`Cons',`
 /* fulltag_misc from this; do it in the macro body, rather than force the
 /* (1 ?) caller to do it. */
 
-/* OLD CODE
+/* PPC CODE
 
 define(`Misc_Alloc',`
 	__(la $3,-fulltag_misc($3))
@@ -669,7 +669,7 @@ define(`Misc_Alloc',`
 ')
 
 /*  Parameters $1, $2 as above; $3 = physical size constant. */
-/* OLD CODE
+/* PPC CODE
 
 define(`Misc_Alloc_Fixed',`
 	__(la allocptr,(-$3)+fulltag_misc(allocptr))
@@ -683,7 +683,7 @@ define(`Misc_Alloc_Fixed',`
 /*  Zero $3 bytes worth of doublewords, starting at offset $2 relative */
 /* to the base register $1. */
 
-/* OLD CODE
+/* PPC CODE
 
 ifdef(`DARWIN',`
 	.macro zero_doublewords
@@ -713,7 +713,7 @@ define(`Set_TSP_Frame_Boxed',`
 		
 /* A newly allocated TSP frame is always "raw" (has non-zero type, indicating */
 /* that it doesn't contain tagged data. */
-/* OLD CODE
+/* PPC CODE
 
 define(`TSP_Alloc_Fixed_Unboxed',`
 	__(stru(tsp,-($1+tsp_frame.data_offset)(tsp)))
@@ -743,7 +743,7 @@ define(`TSP_Alloc_Fixed_Boxed',`
 
 
 /* Handle the general case, where the frame might be empty */
-/* OLD CODE
+/* PPC CODE
 
 define(`Zero_TSP_Frame',`
 	__(new_macro_labels())
@@ -759,7 +759,7 @@ macro_label(zero_tsp_test):
 ')
 
 /* Save some branching when we know that the frame can't be empty.*/
-/* OLD CODE
+/* PPC CODE
 
 define(`Zero_TSP_Frame_nz',`
 	new_macro_labels()
@@ -774,7 +774,7 @@ macro_label(zero_tsp_loop):
 	
 /* $1 = 8-byte-aligned size, positive.  $2 (optiional) set */
 /* to negated size. */
-/* OLD CODE
+/* PPC CODE
 
 define(`TSP_Alloc_Var_Unboxed',`
 	__(neg ifelse($2,`',$1,$2),$1)
@@ -809,7 +809,7 @@ macro_label(done):
 ')
 
 /* $1 = ndigits.  Assumes 4-byte digits */    
-/* OLD CODE
+/* PPC CODE
 
 define(`aligned_bignum_size',`((~(dnode_size-1)&(node_size+(dnode_size-1)+(4*$1))))')
 

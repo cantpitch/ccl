@@ -1,3 +1,4 @@
+/***** BEGIN IMPORT FROM ppc_print.c *****/
 /*
  * Copyright 1994-2009 Clozure Associates
  *
@@ -487,3 +488,5 @@ print_lisp_object(LispObj o)
   }
   return printbuf;
 }
+
+/***** END IMPORT FROM ppc_print.c *****/

@@ -1,3 +1,4 @@
+/***** BEGIN IMPORT FROM ppc-gc.c *****/
 /*
  * Copyright 1994-2009 Clozure Associates
  *
@@ -2225,3 +2226,4 @@ signed_natural impurify(TCR *tcr, signed_natural param)
     }
     return -1;
 }
+/***** END IMPORT FROM ppc-gc.c *****/
