@@ -182,24 +182,12 @@ PPC and ARM64 have pretty different register allocations for their ABIs, but sin
 | `r14-r31` | Global integer registers | Y | N | `x30` | Link Register | N/A | N |
 | | | | | `sp` | Stack Pointer | N/A | Y |
 
-
-
 ### Floating Point Registers
-| REGISTER | USAGE | CALLEE SAVE |
-|---|---|---|
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
+| PPC64 | USAGE | CALLEE SAVE | ARM64 | USAGE | CALLEE SAVE |
+|---|---|---|---|---|---|
+| `f0` | Scratch register | N | `v0-v7` | 1st-8th floating point parameter | N |
+| `f1-f13` | 1st-13th floating point parameter | N | `v8-v15` | Non-volatile FP registers | Y (`d8-d15` only) |
+| `f14-f31` | Global FP registers | Y | `v16-v31` | Volatile FP registers | N |
 
 ### Special Registers
 | REGISTER | USAGE | CALLEE SAVE |
@@ -207,16 +195,7 @@ PPC and ARM64 have pretty different register allocations for their ABIs, but sin
 |   |   |   |
 |   |   |   |
 |   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
+
 
 ### Vector Registers
 | REGISTER | USAGE | CALLEE SAVE |
@@ -224,16 +203,7 @@ PPC and ARM64 have pretty different register allocations for their ABIs, but sin
 |   |   |   |
 |   |   |   |
 |   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
+
 
 # Glossary
 
