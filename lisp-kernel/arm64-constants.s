@@ -17,7 +17,71 @@
 
 /* Register usage: */
 
+/* ARM64 REGISTER ALLOCATIONS */
+/* ARM64 ABI x0-x7   store function parameters 0-7 (after that they are pushed 
+                     on the stack) 
+             x0      is also the return value register for functions 
+			 x8      Indirect result register
+             x9-x15  scratch registers 
+			 x16-x17 intra-procedure call or scratch registers
+			 x18     platform register (do not use)
+			 x19-x28 callee-saved/non-volatile registers
+			 x29     frame pointer (do not use)
+			 x30     link register (do not use)
+             xzr     is the "zero register" but it's actually just the stack 
+			         pointer register (sp) not being used for stack ops. 
+*/
+define(`rzero',`xzr')	
 
+/* WHERE DO WE PUT `tsp`? Maybe `x8`? */
+
+define(`imm0',`x0')
+define(`imm1',`x1')
+define(`imm2',`x2')
+define(`imm3',`x3')
+define(`imm4',`x4')
+define(`imm5',`x5') define(`nargs',`imm5')
+define(`allocptr',`x6')
+define(`allocbase',`x7')
+/* If we need this, should point to _SPcall_closure.  Used in FFI. */
+define(`rclosure_call',`x8')
+define(`temp3',`x9')   /* scratch reg */
+define(`temp2',`x10')  /* scratch reg */
+define(`temp1',`x11')  /* scratch reg */
+define(`temp0',`x12')  /* scratch reg */
+define(`arg_x',`x13')  /* scratch reg */
+define(`arg_y',`x14')  /* scratch reg */
+define(`arg_z',`x15')  /* scratch reg */
+define(`fn',`x16')     /* scratch reg */
+define(`vsp',`x17')    /* scratch reg */ 
+define(`loc_pc',`x19') /* non-volatile/callee saved */ /* code vector locative */
+define(`save7',`x20')  /* non-volatile/callee saved */
+define(`save6',`x21')  /* non-volatile/callee saved */
+define(`save5',`x22')  /* non-volatile/callee saved */
+define(`save4',`x23')  /* non-volatile/callee saved */
+define(`save3',`x24')  /* non-volatile/callee saved */
+define(`save2',`x25')  /* non-volatile/callee saved */
+define(`save1',`x26')  /* non-volatile/callee saved */
+define(`save0',`x27')  /* non-volatile/callee saved */
+define(`rcontext',`x28') /* non-volatile/callee saved */
+define(`fp',`x29')
+define(`lr',`x30')      
+
+define(`fname',`temp3')
+define(`nfn',`temp2')
+define(`next_method_context',`temp1')
+define(`first_nvr',`save7')
+define(`second_nvr',`save6')        
+define(`third_nvr',`save5')
+define(`fourth_nvr',`save4')        
+define(`fifth_nvr',`save3')
+define(`sixth_nvr',`save2')        
+define(`seventh_nvr',`save1')
+define(`eighth_nvr',`save0')        
+define(`nargregs',`3') 
+
+
+/* PPC CODE
 define(`rzero',`r0')	
 define(`sp',`r1')
 
@@ -32,7 +96,8 @@ define(`allocbase',`r10')
 define(`nargs',`r11')
 define(`tsp',`r12')      /* temp-consing stack. */
 
-define(`loc_pc',`r14') 	 /* code vector locative */
+/* PPC CODE define(`loc_pc',`r14') 	 /* code vector locative */
+/* PPC CODE
 define(`vsp',`r15')
 define(`fn',`r16')
 define(`temp3',`r17')
@@ -98,8 +163,8 @@ r30 = 30
 r31 = 31
 
 /* Lisp code keeps 0.0 in fp_zero */
-define(`fp_zero',`f31')   /* a non-volatile reg as far as FFI is concerned. */
-define(`fp_s32conv',`f30')   /* for s32->fp conversion */
+/* PPC CODE define(`fp_zero',`f31')   /* a non-volatile reg as far as FFI is concerned. */
+/* PPC CODE define(`fp_s32conv',`f30')   /* for s32->fp conversion */
 	
 /* registers, as used in destrucuring-bind/macro-bind */
 

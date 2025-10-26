@@ -316,6 +316,19 @@ _endfn
 
 /* Logior the value in *r3 with the value in r4 (presumably a bitmask with exactly 1 */
 /* bit set.)  Return non-zero if any of the bits in that bitmask were already set. */
+
+/* ARM64 Atomically OR the value at *x0 with x1 (bitmask), return nonzero if any bits were already set. */
+_exportfn(C(atomic_ior))
+    __(dmb ish)              /* sync */
+1:  __(ldxr x2, [x0])        /* load exclusive x2 = *x0 */
+    __(orr x3, x2, x1)       /* x3 = x2 | x1 */
+    __(stxr w4, x3, [x0])    /* try to store x3 at *x0, w4 = success? */
+    __(cbnz w4, 1b)          /* if failed, retry */
+    __(dmb ish)              /* isync */
+    __(and x0, x2, x1)       /* x0 = x2 & x1 (return nonzero if any bits were already set) */
+    __(ret)
+_endfn
+
 /* PPC CODE        
 _exportfn(C(atomic_ior))
         __(sync)

@@ -158,10 +158,82 @@ This macro loads the NRS symbol `$2` into register `$1`. The calculation for the
 ```
 Now we see that the `-misc_bias` for the origin definition of the symbol structure was designed to mask off the tag bits of the Lisp Global pointer. Elegant, but also can be a bit confusing when seen in the code.
 
-As a side note, it should be noted that symbols have a `vcell` and `fcell` value. This is how symbols can be bound to both a value _and_ a function.
+As a side note, it should be noted that symbols have a `vcell` and `fcell` value. This is how symbols can be bound to both a value _and_ a function. There's also `plist` to store the property list for the symbol.
 
 The rest of `m4macros.s` is boilerplate generation for functions based on the platform as well as some tweaks for the M4 macro processor working with the assembler.
 
+# Register Allocation
+
+PPC and ARM64 have pretty different register allocations for their ABIs, but since the code uses `define`s for register names, this can be worked around pretty easily. For reference, here's the PPC64 ABI:
+
+## PPC64 ABI
+
+### Integer Registers
+| PPC64 | USAGE | SAVE | RESV'D | ARM64 | USAGE | SAVE | RESV'D |
+|---|---|:---:|:---:|---|---|:---:|:---:|
+| `r0` | Used in prolog/epilog | N | N | `x0` | 1st parameter/return value | N | N |
+| `r1` | Stack pointer | Y | Y |  `x1-x7` | 2nd-8th parameters | N | N |
+| `r2` | TOC pointer | Y | Y |`x8` | Indirect result register | N | N |
+| `r3` | 1st parameter/return value | N | N | `x9-15` | Scratch registers | N | N |
+| `r4-r10` | 2nd-8th parameters | N | N | `x16-17` | Intraprocedure call or scratch | N | N |
+| `r11` | Environment pointer | N | N |  `x18` | Platform Register | N/A | Y |
+| `r12` | Used by global linkage | N | N | `x19-x28` | Callee scratch registers | Y | N |
+| `r13` | System thread ID  | N/A | N | `x29` | Frame pointer | N | Y |
+| `r14-r31` | Global integer registers | Y | N | `x30` | Link Register | N/A | N |
+| | | | | `sp` | Stack Pointer | N/A | Y |
+
+
+
+### Floating Point Registers
+| REGISTER | USAGE | CALLEE SAVE |
+|---|---|---|
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+
+### Special Registers
+| REGISTER | USAGE | CALLEE SAVE |
+|---|---|---|
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+
+### Vector Registers
+| REGISTER | USAGE | CALLEE SAVE |
+|---|---|---|
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   |   |   |
 
 # Glossary
 
@@ -186,4 +258,3 @@ which means `IN_GC` is defined as `globals origin - 32 nodes`.
   `lisp_global` at `nil_value - fulltag_nil - dnode_size` == `(0x4000000 + 1) - 1 - 8` == `0x3FFFFF8` (mask off tag then back up one dnode)\
   `nrs_symbol` at `nil_value - fulltag_nil - dnode_size` == `(0x4000000 + 1) - 1 + 8` == `0x4000008` (mask off tag then move up one dnode)
   * ARM64: _Working on now_
-* 
