@@ -162,6 +162,25 @@ As a side note, it should be noted that symbols have a `vcell` and `fcell` value
 
 The rest of `m4macros.s` is boilerplate generation for functions based on the platform as well as some tweaks for the M4 macro processor working with the assembler.
 
+## NRS - "NIL-Relative Symbol" & Lisp Globals
+* Location in memory defined in `lisp_globals.h` (along with Lisp Globals)
+* It's an array of `lispsymbol *` pointers starting with NIL (hence the name).
+* Lisp Globals is an array of `LispObject *` pointers, often starting at the same location as NRS objects but they are referenced in negative numbers from this origin. So in `lisp_globals.h` you'll see something like:\
+`#define IN_GC (-32)             /* non-zero when lisp addresses may be invalid */`\
+which means `IN_GC` is defined as `globals origin - 32 nodes`.
+* Architecture specifics:
+  * PPC32:\
+  `lisp_global` at `nil_value - fulltag_nil` == `0x3015 - 5` == `0x3010` (Masking off the tag of `nil_value` to get the actual pointer)\
+  `nrs_symbol` at `nil_value + (8 - fulltag_nil) + 8` == `0x3015 + (8 - 5) + 8` == `0x3020`
+  * PPC64: `lisp_global` and `nrs_symbol` both start at `0x3000`
+  * x86-32: `lisp_global` at `0x13000`, `nrs_symbol` at `0x13008`
+  * x86-64: `lisp_global` at `0x13000`, `nrs_symbol` at `0x13020`
+  * ARM32:\
+  `lisp_global` at `nil_value - fulltag_nil - dnode_size` == `(0x4000000 + 1) - 1 - 8` == `0x3FFFFF8` (mask off tag then back up one dnode)\
+  `nrs_symbol` at `nil_value - fulltag_nil - dnode_size` == `(0x4000000 + 1) - 1 + 8` == `0x4000008` (mask off tag then move up one dnode)
+  * ARM64: _Working on now_
+
+
 # Register Allocation
 
 PPC and ARM64 have pretty different register allocations for their ABIs, but since the code uses `define`s for register names, this can be worked around pretty easily. For reference, here's the PPC64 ABI:
@@ -241,25 +260,23 @@ define_subtag(lisp_frame,fulltag_imm_3,5)
 lisp_frame_marker = subtag_lisp_frame
 ```
 # Glossary
-
-## node & dnode
-* A "node" is a LispObject. It's a tagged item in memory that is the size of the standard integer on that platform (i.e. 4 bytes on 32-bit platforms, 8 bytes on 64-bit platforms).
-* A "dnode" is a "double node". Heap memory is allocated in dnodes so these are often seen in GC code.
-
-## NRS - "NIL-Relative Symbol" & Lisp Globals
-* Location in memory defined in `lisp_globals.h` (along with Lisp Globals)
-* It's an array of `lispsymbol *` pointers starting with NIL (hence the name).
-* Lisp Globals is an array of `LispObject *` pointers, often starting at the same location as NRS objects but they are referenced in negative numbers from this origin. So in `lisp_globals.h` you'll see something like:\
-`#define IN_GC (-32)             /* non-zero when lisp addresses may be invalid */`\
-which means `IN_GC` is defined as `globals origin - 32 nodes`.
-* Architecture specifics:
-  * PPC32:\
-  `lisp_global` at `nil_value - fulltag_nil` == `0x3015 - 5` == `0x3010` (Masking off the tag of `nil_value` to get the actual pointer)\
-  `nrs_symbol` at `nil_value + (8 - fulltag_nil) + 8` == `0x3015 + (8 - 5) + 8` == `0x3020`
-  * PPC64: `lisp_global` and `nrs_symbol` both start at `0x3000`
-  * x86-32: `lisp_global` at `0x13000`, `nrs_symbol` at `0x13008`
-  * x86-64: `lisp_global` at `0x13000`, `nrs_symbol` at `0x13020`
-  * ARM32:\
-  `lisp_global` at `nil_value - fulltag_nil - dnode_size` == `(0x4000000 + 1) - 1 - 8` == `0x3FFFFF8` (mask off tag then back up one dnode)\
-  `nrs_symbol` at `nil_value - fulltag_nil - dnode_size` == `(0x4000000 + 1) - 1 + 8` == `0x4000008` (mask off tag then move up one dnode)
-  * ARM64: _Working on now_
+* **acode** - An intermediate representation of Lisp code produced by the compiler front-end. Short for “alphatized code,” meaning “has undergone alpha reduction,” which in turn means “all lambda-bound variables have been consistently renamed.”
+* **command stack (cstack)** -
+* **gvector** - A uvector whose elements are nodes.
+* **immediate** - A value in memory or a register that is a raw, untagged value.
+* **ivector** - A uvector whose elements are immediates.
+* **LAP** - An old acronym for Lisp Assembly Program. A notation for writing assembly language in Lisp-like syntax. Not surprisingly, the exact LAP syntax varies, depending on processor architecture.
+* **nfn** - new function
+* **node** & **dnode**
+  * A value in memory or a register that is a tagged lisp datum. Size of the standard integer on that platform (i.e. 4 bytes on 32-bit platforms, 8 bytes on 64-bit platforms). `LispObject` in code.
+  * A "dnode" is a "double node". Heap memory is allocated in dnodes so these are often seen in GC code.
+* **nrs** - nil-relative symbol
+* **nvr** - A non-volatile register (i.e. *callee-saved*, as opposed to caller-saved)
+* **punt, puntable** - If a variable is bound to a simple expression and is never setq’d, then all references to the variable can be replaced by references to the simple expression in question. This process is called “punting.”
+* **tagged return address (tra)** - On x86, the call instruction unconditionally pushes a return address onto the stack. The compiler aligns the call instruction (via insertion of nop instructions) such that the pushed return address will have a special tag that the GC can recognize.
+* **TCR** - Thread context record. All of the state of a thread.
+* **TSP** - Temp-consing stack pointer
+* **uuo** - An “unimplemented user operation.” Sometimes called a trap (after the PowerPC instructions). An illegal instruction used as a way for lisp code to request service from the lisp kernel (such as allocate more memory, initiate a GC, and so forth).
+* **uvector** - A memory-allocated object with a header word that describes the object’s type and the number of elements it contains. (The name comes from Spice Lisp.)
+* **value stack (vstack)** - A stack that contains tagged lisp objects (nodes) such as function arguments, local variables, and other stack-allocated lisp objects. The contents of the value stack between its bottom and top are always unambiguously nodes.
+* **vinsn** - Virtual Instruction. A pre-assembled fragment of code used as a code generation template by the compiler backend. **Vinsns** are written in a LAP-like notation, but a key difference is that **vinsns** are expanded/assembled as much as possible at **vinsn** definition time. When a **vinsn** is emitted at compile time, the operands in the **vinsn** template are then filled in.
