@@ -1480,8 +1480,8 @@ terminate_lisp()
 #define min_os_version "5.10"
 #endif
 
-#if defined(PPC) || defined(ARM64)
-#if defined(PPC64) || defined(ARM64) || !defined(DARWIN)
+#if defined(PPC)
+#if defined(PPC64) || !defined(DARWIN)
 /* ld64 on Darwin doesn't offer anything close to reliable control
    over the layout of a program in memory.  About all that we can
    be assured of is that the canonical subprims jump table address
