@@ -1,0 +1,99 @@
+TAGS (FROM ppc-constants64.s)
+
+
+
+ivector_class_8_bit     = fulltag_immheader_0
+ivector_class_other_bit = fulltag_immheader_1
+ivector_class_32_bit    = fulltag_immheader_2
+ivector_class_64_bit    = fulltag_immheader_3
+gvector_funcallable     = fulltag_nodeheader_0
+
+                                                                                                     LOWTAG      FULLTAG   
+                                                                                                     3bits       4bits
+PRIMARIES 0x0 (b00) --------------------------------------------------------------------------------------------------------------------
+
+Even Fixnum                 |                                                            0000|  0x0  primary     even_fixnum
+Odd Fixnum                  |                                                            1000|  0x8  primary     odd_fixnum
+Cons                        |                                                            0100|  0x4  primary     cons
+Miscellaneous               |                                                            1100|  0xC  primary     misc
+
+
+IMMEDIATES 0x1 (b01) -------------------------------------------------------------------------------------------------------------------
+
+Single Float                |ffffffffffffffffffffffffffffffff                        00000001| 0x01  imm         imm_0
+Character                   |                                                cccccccc00000101| 0x05  imm         imm_1
+Go Tag                      |                                                        00000101| 0x05  imm         imm_1
+Block Tag                   |                                                        00010101| 0x15  imm         imm_1
+Unbound                     |                                                        00001101| 0x0D  imm         imm_3
+Slot Unbound                |                                                        00011101| 0x1D  imm         imm_3
+Illegal                     |                                                        00101101| 0x2D  imm         imm_3
+No Thread Local Binding     |                                                        00111101| 0x3D  imm         imm_3
+   
+
+IMMEDIATE HEADERS 0x2 (b10) ------------------------------------------------------------------------------------------------------------
+
+Signed 8 Vector             |                                                        00010010| 0x12  immheader   ivector_class_8_bit
+Unsigned 8 Vector           |                                                        00100010| 0x22  immheader   ivector_class_8_bit
+    
+Signed 16 Vector            |                                                        00010110| 0x16  immheader   ivector_class_other_bit
+Unsigned 16 Vector          |                                                        00100110| 0x26  immheader   ivector_class_other_bit
+Complex Double Float Vector |                                                        00110110| 0x36  immheader   ivector_class_other_bit
+Bit Vector                  |                                                        10110110| 0x76  immheader   ivector_class_other_bit
+    
+Signed 32 Vector            |                                                        00011010| 0x1A  immheader   ivector_class_32_bit
+Unsigned 32 Vector          |                                                        00101010| 0x2A  immheader   ivector_class_32_bit
+Single Float Vector         |                                                        00111010| 0x3A  immheader   ivector_class_32_bit
+Simple Base String          |                                                        01011010| 0x5A  immheader   ivector_class_32_bit
+    
+Code Vector                 |                                                        00001010| 0x0A  immheader   ivector_class_32_bit
+Xcode Vector                |                                                        00011010| 0x1A  immheader   ivector_class_32_bit
+Bignum                      |                                                        00101010| 0x2A  immheader   ivector_class_32_bit
+   2 Digit Bignum w/ Header |                                                     01000101010|
+   3 Digit Bignum w/ Header |                                                     01100101010|
+   4 Digit Bignum w/ Header |                                                     10000101010|
+   5 Digit Bignum w/ Header |                                                     10100101010|
+Double Float                |                                                        00111010| 0x3A  immheader   ivector_class_32_bit
+     Double Float w/ Header |                                                      1000111010|
+Complex Single Float        |                                                        01001010| 0x4A  immheader   ivector_class_32_bit
+  Complex Single Float w/ H |                                                      1001001010|
+Complex Double Float        |                                                        01011010| 0x5A  immheader   ivector_class_32_bit
+  Complex Double Float w/ H |                                                     11001011010|
+Signed 64 Vector            |                                                        00011110| 0x1E  immheader   ivector_class_64_bit
+Unsigned 64 Vector          |                                                        00101110| 0x2E  immheader   ivector_class_64_bit
+Fixnum Vector               |                                                        00111110| 0x3E  immheader   ivector_class_64_bit
+Double Float Vector         |                                                        01001110| 0x4E  immheader   ivector_class_64_bit
+Complex Single Float Vector |                                                        01011110| 0x5E  immheader   ivector_class_64_bit
+    
+Macptr                      |                                                        00011110| 0x1E  immheader   ivector_class_64_bit
+           Macptr w/ Header |                                                      1100011110|
+Dead Macptr                 |                                                        00101110| 0x2E  immheader   ivector_class_64_bit
+
+
+NODE HEADERS 0x3 (b11) -----------------------------------------------------------------------------------------------------------------
+
+Function                    |                                                        00000011| 0x03  nodeheader  gvector_funcallable
+Symbol                      |                                                        00010011| 0x13  nodeheader  gvector_funcallable
+           Symbol w/ Header |                                                     11100010011|
+Catch Frame                 |                                                        00000111| 0x07  nodeheader  nodeheader_1
+Basic Stream                |                                                        00010111| 0x17  nodeheader  nodeheader_1
+Lock                        |                                                        00100111| 0x27  nodeheader  nodeheader_1
+Hash Vector                 |                                                        00110111| 0x37  nodeheader  nodeheader_1
+Pool                        |                                                        01000111| 0x47  nodeheader  nodeheader_1
+Weak                        |                                                        01010111| 0x57  nodeheader  nodeheader_1
+Package                     |                                                        01100111| 0x67  nodeheader  nodeheader_1
+
+Slot Vector                 |                                                        00001011| 0x0B  nodeheader  nodeheader_2
+Instance                    |                                                        00011011| 0x1B  nodeheader  nodeheader_2
+Struct                      |                                                        00101011| 0x2B  nodeheader  nodeheader_2
+Istruct                     |                                                        00111011| 0x3B  nodeheader  nodeheader_2
+Value Cell                  |                                                        01001011| 0x4B  nodeheader  nodeheader_2
+       Value Cell w/ Header |                                                       101001011|
+Xfunction                   |                                                        01011011| 0x5B  nodeheader  nodeheader_2
+
+Ratio                       |                                                        00001111| 0x0F  nodeheader  nodeheader_3
+Complex                     |                                                        00011111| 0x1F  nodeheader  nodeheader_3
+
+arrayH                      |                                                        10000111| 0x87  nodeheader  nodeheader_1 + cl_array
+vectorH                     |                                                        10001011| 0x8B  nodeheader  nodeheader_2 + cl_array
+          vectorH w/ Header |                                                     10110001011|
+Simple Vector               |                                                        10001111| 0x8F  nodeheader  nodeheader_3 + cl_array
