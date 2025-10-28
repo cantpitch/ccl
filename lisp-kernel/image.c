@@ -141,7 +141,7 @@ seek_to_next_page(int fd)
   the header & return true else return false.
 */
 Boolean
-find_openmcl_image_file_header(int fd, openmcl_image_file_header *header)
+find_openmcl_image_file_header(int fd, openmcl_image_file_header *header /* out */)
 {
   openmcl_image_file_trailer trailer;
   int disp;
@@ -342,8 +342,14 @@ load_image_section(int fd, openmcl_image_section_header *sect)
   LSEEK(fd, pos+advance, SEEK_SET);
 }
 
+/* load_openmcl_image 
+ *  fd - a read-only file descriptor to the *.image file for the kernel.
+ *  *h - a caller-allocated pointer to the image file header struct.
+ * 
+ *  returns 0 on failure, otherwise a pointer to the NIL object in memory.
+ */
 LispObj
-load_openmcl_image(int fd, openmcl_image_file_header *h)
+load_openmcl_image(int fd, openmcl_image_file_header *h /* out */)
 {
   LispObj image_nil = 0;
   area *a;
