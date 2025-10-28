@@ -75,7 +75,7 @@ OSLIBS = -lsystem
 
 ../../darmcl64:	$(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ)
 	$(CC) -arch arm64 $(CDEBUG)  -sectalign __TEXT __text 0x1000  \
-	-L$(MACOSX_SDK)/usr/lib -o $@ $(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ) 
+	-L$(MACOSX_SDK)/usr/lib $(OSLIBS) -o $@ $(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ) 
 
 
 $(SPOBJ): $(SPINC)
