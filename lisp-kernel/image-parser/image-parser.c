@@ -530,7 +530,7 @@ void print_image_section_static64(int fd, openmcl_image_section_header64 *sh)
             for (int j=0; j < 17; j++)
                 chars[j] = 0;
             
-            printf("\n0x%04x: ", i);
+            printf("\n%04x: ", i);
         }
         if ((i + 8) % 16 == 0) 
             printf(" ");
@@ -563,7 +563,7 @@ int main(int argc, char *argv[])
     
 
     dbgout = stderr;
-    int fd = open("dx86cl64.image", O_RDONLY, 0666);
+    int fd = open(argv[1], O_RDONLY, 0666);
     bool found = find_openmcl_image_file_header_and_trailer(
         fd, &eof_pos, &trailer_pos, &header_pos, &h, &t);
 
@@ -593,7 +593,7 @@ int main(int argc, char *argv[])
     printf(" Trailer offset: %lld (from end: %lld)\n", trailer_pos, trailer_pos - eof_pos);
     print_image_file_trailer(&t);
     printf(" EOF offset: %lld (from end: 0)\n", eof_pos);
-
+/*
     for (int i = 0; i < h.nsections; i++)
     {
         openmcl_image_section_header64 *sect = &sh[i];
@@ -602,7 +602,7 @@ int main(int argc, char *argv[])
             print_image_section_static64(fd, sect);
         }
     }
-
+*/
     printf("\n");
 
     if (sh) free(sh);
