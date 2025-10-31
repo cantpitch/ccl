@@ -5,6 +5,10 @@
         "lisp.h": "c",
         "thread_state.h": "c",
         "thread_status.h": "c",
-        "arm64-constants.h": "c"
+        "arm64-constants.h": "c",
+        "ios": "c",
+        "lisp_globals.h": "c",
+        "image.h": "c",
+        "stdio.h": "c"
     }
 }

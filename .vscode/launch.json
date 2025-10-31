@@ -38,6 +38,14 @@
             "program": "${workspaceFolder}/lx86cl32",
             "args": ["-I", "lx86cl32.image"],
             "cwd": "${workspaceFolder}",
-        }
+        },
+        {
+            "name": "Launch image-parser",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/lisp-kernel/image-parser/image-parser",
+            "args": ["nothing"],
+            "cwd": "${workspaceFolder}/lisp-kernel/image-parser",
+        },
     ]
 }

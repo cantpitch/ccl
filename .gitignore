@@ -47,3 +47,5 @@ lisp-kernel/static-linuxppc/external-functions.h
 
 lisp-kernel/linuxppc64/lisp.s
 lisp-kernel/linuxppc64/m4test.m4
+*.image
+**/image-parser/image-parser
