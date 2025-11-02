@@ -59,8 +59,8 @@ extern LispObj lisp_nil;
 extern natural lisp_heap_gc_threshold;
 extern Boolean grow_dynamic_area(natural);
 
-int page_size = 4096;
-int log2_page_size = 12;
+int page_size = 0x4000; // 16KB page size
+int log2_page_size = 14; // 1 << 14 = 16KB
 
 /*
   If the PC is pointing to an allocation trap, the previous instruction

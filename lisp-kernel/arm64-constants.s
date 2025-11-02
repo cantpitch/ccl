@@ -579,12 +579,13 @@ max_1_bit_constant_index = ((0x7fff + misc_data_offset)<<5)
 /* is surprisingly hard. */
 
 
-nrs_origin = (0x3000+(LOWMEM_BIAS))
+nrs_origin = 0
 nrs_symbol_fulltag = fulltag_misc        
 define(`nilsym',`nil')        
-lisp_globals_limit = (0x3000+(LOWMEM_BIAS))
-        
+lisp_globals_limit = 0
         include(lisp_globals.s)
+
+	
         
 	
 

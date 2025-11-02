@@ -20,7 +20,7 @@
 #define LSEEK(fd, offset, how) lseek(fd, offset, how)
 #endif
 
-uint32_t log2_page_size = 12; // 4KB page
+uint32_t log2_page_size = 12; // 4KB page on X8664 (it's 16KB on Apple Silicon)
 static inline uint64_t
 _align_to_power_of_2(uint64_t n, uint32_t power)
 {

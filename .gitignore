@@ -46,6 +46,13 @@ lisp-kernel/darwinarm64/probes.h
 lisp-kernel/static-linuxppc/external-functions.h
 
 lisp-kernel/linuxppc64/lisp.s
-lisp-kernel/linuxppc64/m4test.m4
+
 *.image
+
+
+/dump.s
+lisp-kernel/*-otool-*.txt
+lisp-kernel/*-vmmap*.txt
+lisp-kernel/darwinarm64/temp.s
+lisp-kernel/darwinarm64/m4test.m4
 **/image-parser/image-parser

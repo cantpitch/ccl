@@ -62,7 +62,11 @@
 #define BA_VAL  ((unsigned) ((18<<26) | (1<<1)))
 
 
-#define STATIC_BASE_ADDRESS 0x00002000
+/* STATIC_BASE_ADDRESS doesn't exist on Darwin ARM64. Address Space Layout 
+   Randomization (ASLR) prevents us from knowing exactly WHERE in memory we
+   will be placed. For example, two separate runs of this executable placed 
+   the __TEXT segment at 0x104eb8000 and 0x1020bc000. */
+//#define STATIC_BASE_ADDRESS 0x00002000
 
 /***** END IMPORT FROM arm-constants.h *****/
 /***** BEGIN IMPORT FROM arm-constants64.h *****/

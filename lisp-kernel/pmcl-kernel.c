@@ -1574,8 +1574,8 @@ remap_spjump()
 #ifdef ARM64
 void remap_spjump()
 {
-  extern opcode spjump_start, spjump_end;
-  fprintf(stderr, "spjump_start: %llu, spjump_end: %llu\n", spjump_start, spjump_end);
+  extern opcode spjump_start[], spjump_end[];
+  fprintf(stderr, "spjump_start: 0x%llx, spjump_end: 0x%llx\n", spjump_start, spjump_end);
 }
 #endif
 
