@@ -259,6 +259,14 @@ stack_alloc_marker = subtag_stack_alloc
 define_subtag(lisp_frame,fulltag_imm_3,5)
 lisp_frame_marker = subtag_lisp_frame
 ```
+
+# Garbage Collector
+
+## Mark Phase
+* Each doublenode in the heap has a bit in the markbits vector:\
+`(<addr of dnode> - <heap start addr>)/16`
+
+
 # Glossary
 * **acode** - An intermediate representation of Lisp code produced by the compiler front-end. Short for “alphatized code,” meaning “has undergone alpha reduction,” which in turn means “all lambda-bound variables have been consistently renamed.”
 * **command stack (cstack)** -

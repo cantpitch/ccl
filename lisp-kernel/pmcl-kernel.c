@@ -1571,6 +1571,14 @@ remap_spjump()
 #endif
 #endif
 
+#ifdef ARM64
+void remap_spjump()
+{
+  extern opcode spjump_start, spjump_end;
+  fprintf(stderr, "spjump_start: %llu, spjump_end: %llu\n", spjump_start, spjump_end);
+}
+#endif
+
 natural os_major_version = 0;
 
 void
