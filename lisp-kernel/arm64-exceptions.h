@@ -23,7 +23,7 @@
 /* If an instruction is a UUO, the minor opcode is in bits 21:27 */
 #define UUO_MINOR(u) (((u) >> 4) & 0x7f)
 
-typedef u_int32_t opcode, *pc;
+typedef uint64_t opcode, *pc;
 
 OSStatus handle_uuo(ExceptionInformation *, opcode, pc);
 
