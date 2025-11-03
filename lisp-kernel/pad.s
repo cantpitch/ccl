@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-	.globl openmcl_low_address
-openmcl_low_address:
+        include(m4macros.m4)
+
+	.globl C(openmcl_low_address)
+C(openmcl_low_address):
         nop
-        
+        .space (0x3000 - 0x10)
 
 

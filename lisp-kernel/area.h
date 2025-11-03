@@ -172,8 +172,9 @@ typedef struct area_list {
 #define STATIC_RESERVE (2<<12)
 #define MANAGED_STATIC_SIZE ((natural) ((PURESPACE_RESERVE-PURESPACE_SIZE)/2))
 
-
+#if !(defined(DARWIN) && defined(ARM64))
 #define SPJUMP_TARGET_ADDRESS (STATIC_BASE_ADDRESS+0x3000)
+#endif
 
 extern LispObj image_base;
 extern BytePtr pure_space_start, pure_space_active, pure_space_limit;

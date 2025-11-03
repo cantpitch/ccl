@@ -97,6 +97,9 @@ Boolean use_mach_exception_handling =
 #include <mach-o/dyld.h>
 #include <dlfcn.h>
 #include <libgen.h>
+#ifdef ARM64
+#include "pad.h"
+#endif
 #endif
 
 #ifdef FREEBSD
@@ -578,7 +581,15 @@ create_reserved_area(natural totalsize)
   base = (natural) start;
   image_base = base;
   lastbyte = (BytePtr) (start+totalsize);
+
+  //extern uint64_t openmcl_low_address;
+  // If ASLR support gets working, back-porting to x86-64 may be possible.
+  #if defined(DARWIN) && defined(ARM64)
+  static_space_start = static_space_active = (BytePtr)&openmcl_low_address;
+  printf("static_space_start: 0x%llx\n", static_space_start);
+  #else
   static_space_start = static_space_active = (BytePtr)STATIC_BASE_ADDRESS;
+  #endif
   static_space_limit = static_space_start + STATIC_RESERVE;
   pure_space_start = pure_space_active = start;
   pure_space_limit = start + PURESPACE_SIZE;

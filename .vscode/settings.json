@@ -9,6 +9,8 @@
         "ios": "c",
         "lisp_globals.h": "c",
         "image.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "lisp-exceptions.h": "c",
+        "lisptypes.h": "c"
     }
 }

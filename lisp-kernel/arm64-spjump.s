@@ -16,17 +16,15 @@
         include(lisp.s)
 	
 define(`_spjump',`
-        .align 8
+        .align 4
         .globl _SP$1
 _exportfn(j_SP$1)
           __(b _SP$1)
 _endfn
 ')
     	_beginfile
-        __ifdef(`DARWIN')
-        .space 0x6000,0
-        __endif
-         .globl C(spjump_start)
+        .align 4
+        .globl C(spjump_start)
 C(spjump_start):
         _spjump(jmpsym)
         _spjump(jmpnfn)
