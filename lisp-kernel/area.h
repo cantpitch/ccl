@@ -128,8 +128,8 @@ extern void *tcr_area_lock;
 #endif
 
 #define MIN_TSTACK_SIZE (256<<10)  /* 256 KiB */
-#define TSTACK_HARDPROT ((64<<10)+(4<<10)) /* 64 KiB */
-#define TSTACK_SOFTPROT ((64<<10)+(4<<10)) /* 64 KiB */
+#define TSTACK_HARDPROT ((64<<10)+(4<<10)) /* 68 KiB */
+#define TSTACK_SOFTPROT ((64<<10)+(4<<10)) /* 68 KiB */
 
 #ifdef PPC
 #define CS_OVERFLOW_FORCE_LIMIT ((natural)(-(sizeof(lisp_frame))))
