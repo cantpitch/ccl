@@ -375,20 +375,12 @@ allocate_tstack_holding_area_lock(natural usable)
 /* It's hard to believe that max & min don't exist already */
 unsigned unsigned_min(unsigned x, unsigned y)
 {
-  if (x <= y) {
-    return x;
-  } else {
-    return y;
-  }
+  return (x <= y) ? x : y;
 }
 
 unsigned unsigned_max(unsigned x, unsigned y)
 {
-  if (x >= y) {
-    return x;
-  } else {
-    return y;
-  }
+  return (x >= y) ? x : y;
 }
 
 natural
