@@ -157,21 +157,22 @@ typedef struct area_list {
 
 
 #if (WORD_SIZE==64)
-#define PURESPACE_RESERVE 0x2000000000LL /* 128 GB */
-#define PURESPACE_SIZE (1LL<<30LL)
+#define PURESPACE_RESERVE (8LL<<30LL) /* 8 GiB */
+#define PURESPACE_SIZE (1LL<<30LL) /* 1 GiB */
 #else
 #ifdef ARM
 #define PURESPACE_RESERVE (64<<20)
 #define PURESPACE_SIZE (32<<20)
 #else
-#define PURESPACE_RESERVE (128<<20) /* MB */
+#define PURESPACE_RESERVE (128<<20) /* MiB */
 #define PURESPACE_SIZE (64<<20)
 #endif
 #endif
 
-#define STATIC_RESERVE (2<<12)
+#define STATIC_RESERVE (8<<10) /* 8 KiB */ 
 #define MANAGED_STATIC_SIZE ((natural) ((PURESPACE_RESERVE-PURESPACE_SIZE)/2))
 
+// ASLR disallows static addresses
 #if !(defined(DARWIN) && defined(ARM64))
 #define SPJUMP_TARGET_ADDRESS (STATIC_BASE_ADDRESS+0x3000)
 #endif
