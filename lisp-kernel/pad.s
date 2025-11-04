@@ -18,6 +18,8 @@
 	.globl C(openmcl_low_address)
 C(openmcl_low_address):
         nop
+ifdef(`ARM64',`
+  ifdef(`DARWIN',`
         .space (0x3000 - 0x10)
-
+')')
 
