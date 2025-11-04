@@ -840,7 +840,6 @@ natural user_signal_semaphores[NSIG];
 sigset_t user_signals_reserved;
 #endif
 
-
 #ifndef WINDOWS
 void
 user_signal_handler (int signum, siginfo_t *info, ExceptionInformation *context)
@@ -913,8 +912,6 @@ initial_stack_bottom()
   os_get_current_thread_stack_bounds(&stack_bottom, &stack_size);
   return (BytePtr)stack_bottom;
 }
-
-
 
   
 Ptr fatal_spare_ptr = NULL;
