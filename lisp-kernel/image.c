@@ -235,10 +235,10 @@ load_image_section(int fd, openmcl_image_section_header *sect)
 
   case AREA_STATIC:
     if (!MapFile(static_space_active,
-		 pos,
-		 align_to_power_of_2(mem_size,log2_page_size),
-		 MEMPROTECT_RWX,
-		 fd)) {
+                 pos,
+                 align_to_power_of_2(mem_size,log2_page_size),
+                 MEMPROTECT_RWX,
+                 fd)) {
       return;
     }
     a = new_area(static_space_active, static_space_limit, AREA_STATIC);
@@ -250,10 +250,10 @@ load_image_section(int fd, openmcl_image_section_header *sect)
   case AREA_DYNAMIC:
     a = allocate_dynamic_area(mem_size);
     if (!MapFile(a->low,
-		 pos,
-		 align_to_power_of_2(mem_size,log2_page_size),
-		 MEMPROTECT_RWX,
-		 fd)) {
+                 pos,
+                 align_to_power_of_2(mem_size,log2_page_size),
+                 MEMPROTECT_RWX,
+                 fd)) {
       return;
     }
 
