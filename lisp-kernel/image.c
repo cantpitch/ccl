@@ -105,15 +105,15 @@ relocate_area_contents(area *a, LispObj bias)
       }
 
       if ((w0 >= low) && (w0 < high) &&
-	  ((1<<fulltag) & RELOCATABLE_FULLTAG_MASK)) {
-	*start = (w0+bias);
+          ((1<<fulltag) & RELOCATABLE_FULLTAG_MASK)) {
+        *start = (w0+bias);
       }
       w1 = *++start;
       fulltag = fulltag_of(w1);
       if ((w1 >= low) && (w1 < high) &&
-	  (fixnum_after_header_is_link ||
+          (fixnum_after_header_is_link ||
            ((1<<fulltag) & RELOCATABLE_FULLTAG_MASK))) {
-	*start = (w1+bias);
+        *start = (w1+bias);
       }
       fixnum_after_header_is_link = false;
       ++start;
