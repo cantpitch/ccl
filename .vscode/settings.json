@@ -11,6 +11,7 @@
         "image.h": "c",
         "stdio.h": "c",
         "lisp-exceptions.h": "c",
-        "lisptypes.h": "c"
+        "lisptypes.h": "c",
+        "lispdcmd.h": "c"
     }
 }

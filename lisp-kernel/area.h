@@ -113,29 +113,23 @@ extern void *tcr_area_lock;
 #define reserved_area ((area *)(all_areas))
 #define active_dynamic_area ((area *)(reserved_area->succ))
 
-typedef struct area_list {
-  area *the_area;
-  struct area_list *next;
-} area_list;
-
 /* The useable size of a tsp or vsp stack segment.
   */
-/* #define STACK_SEGMENT_SIZE (64<<10) */
-#define MIN_CSTACK_SIZE (1<<17)
-#define CSTACK_HARDPROT (100<<10)
-#define CSTACK_SOFTPROT (100<<10)
-#define MIN_VSTACK_SIZE (1<<16)
-#define VSTACK_HARDPROT (1<<12)
+#define MIN_CSTACK_SIZE (128<<10)  /* 128 KiB */
+#define CSTACK_HARDPROT (100<<10)  /* 100 KiB */
+#define CSTACK_SOFTPROT (100<<10)  /* 100 KiB */
+#define MIN_VSTACK_SIZE (64<<10)   /* 64 KiB */
+#define VSTACK_HARDPROT (4<<10)    /* 4 KiB */
 
 #ifdef PPC
-#define VSTACK_SOFTPROT (1<<16)
+#define VSTACK_SOFTPROT (64<<10)   /* 64 KiB */
 #else
-#define VSTACK_SOFTPROT CSTACK_SOFTPROT
+#define VSTACK_SOFTPROT CSTACK_SOFTPROT /* 100 KiB */
 #endif
 
-#define MIN_TSTACK_SIZE (1<<18)
-#define TSTACK_HARDPROT ((1<<16)+(1<<12))
-#define TSTACK_SOFTPROT ((1<<16)+(1<<12))
+#define MIN_TSTACK_SIZE (256<<10)  /* 256 KiB */
+#define TSTACK_HARDPROT ((64<<10)+(4<<10)) /* 64 KiB */
+#define TSTACK_SOFTPROT ((64<<10)+(4<<10)) /* 64 KiB */
 
 #ifdef PPC
 #define CS_OVERFLOW_FORCE_LIMIT ((natural)(-(sizeof(lisp_frame))))
@@ -158,18 +152,18 @@ typedef struct area_list {
 
 #if (WORD_SIZE==64)
 #define PURESPACE_RESERVE (8LL<<30LL) /* 8 GiB */
-#define PURESPACE_SIZE (1LL<<30LL) /* 1 GiB */
+#define PURESPACE_SIZE (1LL<<30LL)    /* 1 GiB */
 #else
 #ifdef ARM
-#define PURESPACE_RESERVE (64<<20)
-#define PURESPACE_SIZE (32<<20)
+#define PURESPACE_RESERVE (64<<20)    /* 64 MiB */
+#define PURESPACE_SIZE (32<<20)       /* 32 MiB */
 #else
-#define PURESPACE_RESERVE (128<<20) /* MiB */
-#define PURESPACE_SIZE (64<<20)
+#define PURESPACE_RESERVE (128<<20)   /* 128 MiB */
+#define PURESPACE_SIZE (64<<20)       /* 64 MiB */
 #endif
 #endif
 
-#define STATIC_RESERVE (8<<10) /* 8 KiB */ 
+#define STATIC_RESERVE (8<<10)         /* 8 KiB */ 
 #define MANAGED_STATIC_SIZE ((natural) ((PURESPACE_RESERVE-PURESPACE_SIZE)/2))
 
 // ASLR disallows static addresses
