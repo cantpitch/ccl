@@ -353,66 +353,73 @@ load_openmcl_image(int fd, openmcl_image_file_header *h /* out */)
 {
   LispObj image_nil = 0;
   area *a;
-  if (find_openmcl_image_file_header(fd, h)) {
-    int i, nsections = h->nsections;
-    openmcl_image_section_header sections[nsections], *sect=sections;
-    LispObj bias = image_base - ACTUAL_IMAGE_BASE(h);
+  if (!find_openmcl_image_file_header(fd, h)) 
+  {
+    return 0;
+  }
+
+  int i, nsections = h->nsections;
+  openmcl_image_section_header sections[nsections], *sect=sections;
+  LispObj bias = image_base - ACTUAL_IMAGE_BASE(h);
 #if (WORD_SIZE== 64)
-    signed_natural section_data_delta = 
-      ((signed_natural)(h->section_data_offset_high) << 32L) | h->section_data_offset_low;
+  signed_natural section_data_delta = 
+    ((signed_natural)(h->section_data_offset_high) << 32L) | h->section_data_offset_low;
 #endif
 
-    if (read (fd, sections, nsections*sizeof(openmcl_image_section_header)) !=
-	nsections * sizeof(openmcl_image_section_header)) {
+  if (read(fd, sections, nsections * sizeof(openmcl_image_section_header)) !=
+      nsections * sizeof(openmcl_image_section_header)) {
+    return 0;
+  }
+
+#if WORD_SIZE == 64
+  LSEEK(fd, section_data_delta, SEEK_CUR);
+#endif
+  for (i = 0; i < nsections; i++, sect++) {
+    load_image_section(fd, sect);
+    a = sect->area;
+    if (a == NULL) {
       return 0;
     }
-#if WORD_SIZE == 64
-    LSEEK(fd, section_data_delta, SEEK_CUR);
-#endif
-    for (i = 0; i < nsections; i++, sect++) {
-      load_image_section(fd, sect);
-      a = sect->area;
-      if (a == NULL) {
-	return 0;
-      }
-    }
+  }
 
-    for (i = 0, sect = sections; i < nsections; i++, sect++) {
-      a = sect->area;
-      switch(sect->code) {
+  for (i = 0, sect = sections; i < nsections; i++, sect++) {
+    a = sect->area;
+    switch(sect->code) {
       case AREA_STATIC:
-	nilreg_area = a;
+        nilreg_area = a;
 #ifdef PPC
 #ifdef PPC64
         image_nil = ptr_to_lispobj(a->low + (1024*4) + sizeof(lispsymbol) + fulltag_misc);
 #else
-	image_nil = (LispObj)(a->low + 8 + 8 + (1024*4) + fulltag_nil);
+        image_nil = (LispObj)(a->low + 8 + 8 + (1024*4) + fulltag_nil);
 #endif
 #endif
 #ifdef X86
 #ifdef X8664
-	image_nil = (LispObj)(a->low) + (1024*4) + fulltag_nil;
+        image_nil = (LispObj)(a->low) + (1024*4) + fulltag_nil;
 #else
-	image_nil = (LispObj)(a->low) + (1024*4) + fulltag_cons;
+        image_nil = (LispObj)(a->low) + (1024*4) + fulltag_cons;
 #endif
 #endif
 #ifdef ARM
-	image_nil = (LispObj)(a->low) + (1024*4) + fulltag_nil;
-#endif
-	set_nil(image_nil);
-	if (bias) {
+        image_nil = (LispObj)(a->low) + (1024*4) + fulltag_nil;
+#endif 
+        set_nil(image_nil);
+
+        if (bias) {
           LispObj weakvll = lisp_global(WEAKVLL);
 
           if ((weakvll >= ((LispObj)image_base-bias)) &&
               (weakvll < (ptr_to_lispobj(active_dynamic_area->active)-bias))) {
             lisp_global(WEAKVLL) = weakvll+bias;
           }
-	  relocate_area_contents(a, bias);
-	}
-	make_dynamic_heap_executable(a->low, a->active);
+          relocate_area_contents(a, bias);
+        }
+        
+        make_dynamic_heap_executable(a->low, a->active);
         add_area_holding_area_lock(a);
         break;
-        
+      
       case AREA_READONLY:
         if (bias && 
             (managed_static_area->active != managed_static_area->low)) {
@@ -421,41 +428,43 @@ load_openmcl_image(int fd, openmcl_image_file_header *h /* out */)
           ProtectMemory(a->low, a->active-a->low);
         }
         readonly_area = a;
-	add_area_holding_area_lock(a);
-	break;
-      }
-    }
-    for (i = 0, sect = sections; i < nsections; i++, sect++) {
-      a = sect->area;
-      switch(sect->code) {
+        add_area_holding_area_lock(a);
+        break;
+    } /* switch(sect->code) */
+  } /* for sections */
+
+  for (i = 0, sect = sections; i < nsections; i++, sect++) {
+    a = sect->area;
+    switch(sect->code) {
       case AREA_MANAGED_STATIC:
         if (bias) {
           relocate_area_contents(a, bias);
         }
         add_area_holding_area_lock(a);
         break;
+
       case AREA_STATIC_CONS:
-	if (bias) {
-	  LispObj static_conses = lisp_global(STATIC_CONSES);
-	  if (static_conses && static_conses != lisp_nil) {
-	    lisp_global(STATIC_CONSES) += bias;
-	    relocate_area_contents(a, bias);
-	  }
-	}
+        if (bias) {
+          LispObj static_conses = lisp_global(STATIC_CONSES);
+          if (static_conses && static_conses != lisp_nil) {
+            lisp_global(STATIC_CONSES) += bias;
+            relocate_area_contents(a, bias);
+          }
+        }
         /* not yet
- lower_heap_start(static_cons_area->low,tenured_area);
+        lower_heap_start(static_cons_area->low,tenured_area);
         */
         break;
       case AREA_DYNAMIC:
         if (bias) {
           relocate_area_contents(a, bias);
         }
-	resize_dynamic_heap(a->active, lisp_heap_gc_threshold);
-	xMakeDataExecutable(a->low, a->active - a->low);
-	break;
-      }
-    }
-  }
+        resize_dynamic_heap(a->active, lisp_heap_gc_threshold);
+        xMakeDataExecutable(a->low, a->active - a->low);
+        break;
+    } /* switch(sect->code) */
+  } /* for sections */
+
   return image_nil;
 }
  
