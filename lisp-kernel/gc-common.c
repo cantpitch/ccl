@@ -1718,7 +1718,7 @@ gc(TCR *tcr, signed_natural param)
           break;
 
         case AREA_STATIC:
-	case AREA_WATCHED:
+        case AREA_WATCHED:
         case AREA_DYNAMIC:                  /* some heap that isn't "the" heap */
           /* In both of these cases, we -could- use the area's "markbits"
              bitvector as a reference map.  It's safe (but slower) to
@@ -1861,7 +1861,7 @@ gc(TCR *tcr, signed_natural param)
           break;
 
         case AREA_STATIC:
-	case AREA_WATCHED:
+        case AREA_WATCHED:
         case AREA_DYNAMIC:                  /* some heap that isn't "the" heap */
           if (next_area->younger == NULL) {
             forward_range((LispObj *) next_area->low, (LispObj *) next_area->active);
@@ -1952,16 +1952,16 @@ gc(TCR *tcr, signed_natural param)
 
 #ifdef USE_DTRACE
       if (note == tenured_area) {
-	if (CCL_GC_FINISH_ENABLED()) {
-	  natural bytes_freed = justfreed <= heap_segment_size ? 0 : justfreed;
-	  CCL_GC_FINISH(bytes_freed);
-	}
+        if (CCL_GC_FINISH_ENABLED()) {
+          natural bytes_freed = justfreed <= heap_segment_size ? 0 : justfreed;
+          CCL_GC_FINISH(bytes_freed);
+        }
       } else {
-	if (CCL_EGC_FINISH_ENABLED()) {
-	  natural bytes_freed = justfreed <= heap_segment_size ? 0 : justfreed;
-	  unsigned generation = (from == g2_area) ? 2 : (from == g1_area) ? 1 : 0;
-	  CCL_EGC_FINISH(bytes_freed, generation);
-	}
+        if (CCL_EGC_FINISH_ENABLED()) {
+          natural bytes_freed = justfreed <= heap_segment_size ? 0 : justfreed;
+          unsigned generation = (from == g2_area) ? 2 : (from == g1_area) ? 1 : 0;
+          CCL_EGC_FINISH(bytes_freed, generation);
+        }
       }
 #endif
 

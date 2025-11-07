@@ -118,11 +118,11 @@ check_node(LispObj n)
       LispObj fun = 0;
 
       if (*(unsigned char *)n == RECOVER_FN_OPCODE)
-	fun = *(LispObj *)(n + 1);
+        fun = *(LispObj *)(n + 1);
       if (fun == 0 ||
-	 (header_subtag(header_of(fun)) != subtag_function) ||
-	 (heap_area_containing((BytePtr)ptr_from_lispobj(fun)) != a)) {
-	Bug(NULL, "TRA at 0x" LISP " has bad function address 0x" LISP "\n", n, fun);
+          (header_subtag(header_of(fun)) != subtag_function) ||
+          (heap_area_containing((BytePtr)ptr_from_lispobj(fun)) != a)) {
+        Bug(NULL, "TRA at 0x" LISP " has bad function address 0x" LISP "\n", n, fun);
       }
       n = fun;
     }
@@ -288,11 +288,11 @@ check_range(LispObj *start, LispObj *end, Boolean header_allowed)
       elements = header_element_count(node) | 1;
       if (header_subtag(node) == subtag_function) {
 #ifdef X8632
-	int skip = *(unsigned short *)current;
+        int skip = *(unsigned short *)current;
 
-	/* XXX bootstrapping */
-	if (skip & 0x8000)
-	  skip = elements - (skip & 0x7fff);
+        /* XXX bootstrapping */
+        if (skip & 0x8000)
+          skip = elements - (skip & 0x7fff);
 #else
         int skip = *(int *)current;
 #endif
