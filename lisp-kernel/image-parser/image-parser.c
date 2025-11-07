@@ -55,33 +55,36 @@ _align_to_power_of_2(uint64_t n, uint32_t power)
 #define fixnumshift64 3L
 #define fixnumshift32 2
 
+#define LISP_FIXNUM32(n) (n<<fixnumshift32)
+#define LISP_FIXNUM64(n) (n<<fixnumshift64)
+
 
 typedef enum {
   AREA_VOID64 = 0,		/* Not really an area at all */
-  AREA_CSTACK64 = 1<<fixnumshift64, /* A control stack */
-  AREA_VSTACK64 = 2<<fixnumshift64, /* A value stack.  The GC sees it as being doubleword-aligned */
-  AREA_TSTACK64 = 3<<fixnumshift64, /* A temp stack.  It -is- doubleword-aligned */
-  AREA_READONLY64 = 4<<fixnumshift64, /* A (cfm) read-only section. */
-  AREA_WATCHED64 = 5<<fixnumshift64, /* A static area containing a single object. */
-  AREA_STATIC_CONS64 = 6<<fixnumshift64, /* static, conses only */
-  AREA_MANAGED_STATIC64 = 7<<fixnumshift64, /* A resizable static area */
-  AREA_STATIC64 = 8<<fixnumshift64, /* A  static section: contains
+  AREA_CSTACK64 = LISP_FIXNUM64(1), /* A control stack */
+  AREA_VSTACK64 = LISP_FIXNUM64(2), /* A value stack.  The GC sees it as being doubleword-aligned */
+  AREA_TSTACK64 = LISP_FIXNUM64(3), /* A temp stack.  It -is- doubleword-aligned */
+  AREA_READONLY64 = LISP_FIXNUM64(4), /* A (cfm) read-only section. */
+  AREA_WATCHED64 = LISP_FIXNUM64(5), /* A static area containing a single object. */
+  AREA_STATIC_CONS64 = LISP_FIXNUM64(6), /* static, conses only */
+  AREA_MANAGED_STATIC64 = LISP_FIXNUM64(7), /* A resizable static area */
+  AREA_STATIC64 = LISP_FIXNUM64(8), /* A  static section: contains
                                  roots, but not GCed */
-  AREA_DYNAMIC64 = 9<<fixnumshift64/* A heap. Only one such area is "the heap."*/
+  AREA_DYNAMIC64 = LISP_FIXNUM64(9) /* A heap. Only one such area is "the heap."*/
 } area_code64;
 
 typedef enum {
   AREA_VOID32 = 0,		/* Not really an area at all */
-  AREA_CSTACK32 = 1<<fixnumshift32, /* A control stack */
-  AREA_VSTACK32 = 2<<fixnumshift32, /* A value stack.  The GC sees it as being doubleword-aligned */
-  AREA_TSTACK32 = 3<<fixnumshift32, /* A temp stack.  It -is- doubleword-aligned */
-  AREA_READONLY32 = 4<<fixnumshift32, /* A (cfm) read-only section. */
-  AREA_WATCHED32 = 5<<fixnumshift32, /* A static area containing a single object. */
-  AREA_STATIC_CONS32 = 6<<fixnumshift32, /* static, conses only */
-  AREA_MANAGED_STATIC32 = 7<<fixnumshift32, /* A resizable static area */
-  AREA_STATIC32 = 8<<fixnumshift32, /* A  static section: contains
+  AREA_CSTACK32 = LISP_FIXNUM32(1), /* A control stack */
+  AREA_VSTACK32 = LISP_FIXNUM32(2), /* A value stack.  The GC sees it as being doubleword-aligned */
+  AREA_TSTACK32 = LISP_FIXNUM32(3), /* A temp stack.  It -is- doubleword-aligned */
+  AREA_READONLY32 = LISP_FIXNUM32(4), /* A (cfm) read-only section. */
+  AREA_WATCHED32 = LISP_FIXNUM32(5), /* A static area containing a single object. */
+  AREA_STATIC_CONS32 = LISP_FIXNUM32(6), /* static, conses only */
+  AREA_MANAGED_STATIC32 = LISP_FIXNUM32(7), /* A resizable static area */
+  AREA_STATIC32 = LISP_FIXNUM32(8), /* A  static section: contains
                                  roots, but not GCed */
-  AREA_DYNAMIC32 = 9<<fixnumshift32/* A heap. Only one such area is "the heap."*/
+  AREA_DYNAMIC32 = LISP_FIXNUM32(9) /* A heap. Only one such area is "the heap."*/
 } area_code32;
 
 wchar_t *enum_names[10] = {
