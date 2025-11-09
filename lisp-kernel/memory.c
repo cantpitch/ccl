@@ -337,6 +337,10 @@ MapFile(LogicalAddress addr, natural pos, natural nbytes, int permissions, int f
   return true;
 #endif
 #else
+#ifdef DEBUG_MEMORY
+  fprintf(stderr, "attempting mmap -- 0x%llx-0x%llx, perm: 0x%x, MAP_PRIVATE|MAP_FIXED, fd?: %s, pos: %u\n", 
+    addr, addr + nbytes, permissions, fd ? "yes" : "no", pos);
+#endif
   return mmap(addr, nbytes, permissions, MAP_PRIVATE|MAP_FIXED, fd, pos) != MAP_FAILED;
 #endif
 }

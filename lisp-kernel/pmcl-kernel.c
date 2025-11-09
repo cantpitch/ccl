@@ -578,7 +578,7 @@ create_reserved_area(natural totalsize)
   // If ASLR support gets working, back-porting to x86-64 may be possible.
   #if defined(DARWIN) && defined(ARM64)
   static_space_start = static_space_active = (BytePtr)&openmcl_low_address;
-  printf("static_space_start: 0x%llx\n", static_space_start);
+
   #else
   static_space_start = static_space_active = (BytePtr)STATIC_BASE_ADDRESS;
   #endif
@@ -586,7 +586,17 @@ create_reserved_area(natural totalsize)
   pure_space_start = pure_space_active = start;
   pure_space_limit = start + PURESPACE_SIZE;
   start += PURESPACE_RESERVE;
-
+  
+#ifdef DEBUG_MEMORY
+  fprintf(stderr, 
+    "\ntotal_size:         0x%llx\n", totalsize);
+  fprintf(stderr, 
+    "static_space_start: 0x%llx\n"
+    "static_space_limit: 0x%llx (STATIC_RESERVE: 0x%llx)\n", 
+    static_space_start, static_space_limit, STATIC_RESERVE);
+  fprintf(stderr, 
+    "lastbyte:           0x%llx\n\n", lastbyte);
+#endif
   /*
     Allocate mark bits here.  They need to be 1/64 the size of the
      maximum useable area of the heap (+ 3 words for the EGC.)
@@ -608,6 +618,29 @@ create_reserved_area(natural totalsize)
   /* The root of all evil is initially linked to itself. */
   reserved->pred = reserved->succ = reserved;
   all_areas = reserved;
+
+#ifdef DEBUG_MEMORY
+  fprintf(stderr, 
+    "\npure_space:\n"
+    "  pure_space_start:     0x%llx\n"
+    "  pure_space_limit:     0x%llx (delta: %llu GiB)\n\n"
+    "reserved_region\n"
+    "  start:                0x%llx (delta: %llu GiB -- from pure_space_start)\n"
+    "  ...                   ...            (delta: ~%llu GiB)\n"
+    "  global_reloctab:      0x%llx (delta: -%llu GiB -- from end)\n"
+    "  global_refidx:        0x%llx (delta: %llu GiB)\n"
+    "  global_mark_ref_bits: 0x%llx (delta: %llu MiB)\n"
+    "  end:                  0x%llx (delta: %llu GiB)\n\n", 
+    pure_space_start, 
+    pure_space_limit, (pure_space_limit - pure_space_start) >> 30, 
+    start, (start - pure_space_start) >> 30,
+    ((BytePtr)global_reloctab - start) >> 30,
+    global_reloctab, (reserved_region_end - (BytePtr)global_reloctab) >> 30, 
+    global_refidx, (global_refidx - global_reloctab) >> 30, 
+    global_mark_ref_bits, (global_mark_ref_bits - global_refidx) >> 20, 
+    reserved_region_end, (reserved_region_end - (BytePtr)global_mark_ref_bits) >> 30);  
+#endif
+
 #ifdef X86
   {
     managed_static_refbits = ReserveMemory((((MANAGED_STATIC_SIZE>>dnode_shift)+7)>>3));
@@ -778,6 +811,15 @@ allocate_dynamic_area(natural initsize)
   map_initial_markbits(a->low, a->high);
   lisp_global(HEAP_START) = ptr_to_lispobj(a->low);
   lisp_global(HEAP_END) = ptr_to_lispobj(a->high);
+
+#ifdef DEBUG_MEMORY
+  fprintf(stderr, 
+    "\nAREA_DYNAMIC:\n"
+    "  low:               0x%llx\n"
+    "  high:              0x%llx\n"
+    "  active:            0x%llx\n\n",
+    a->low, a->high, a->active);
+#endif
   return a;
  }
 
