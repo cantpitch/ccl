@@ -40,6 +40,8 @@ _align_to_power_of_2(natural n, unsigned power)
 
 #define align_to_power_of_2(n,p) _align_to_power_of_2(((natural)(n)),p)
 
+#define align_to_page(n) (align_to_power_of_2(n, log2_page_size))
+
 static inline natural
 _truncate_to_power_of_2(natural n, unsigned power)
 {

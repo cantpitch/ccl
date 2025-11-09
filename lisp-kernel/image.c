@@ -131,7 +131,7 @@ off_t
 seek_to_next_page(int fd)
 {
   off_t pos = LSEEK(fd, 0, SEEK_CUR);
-  pos = align_to_power_of_2(pos, log2_page_size);
+  pos = align_to_page(pos);
   return LSEEK(fd, pos, SEEK_SET);
 }
   
@@ -198,7 +198,7 @@ find_openmcl_image_file_header(int fd, openmcl_image_file_header *header /* out 
   }
   flags = header->flags;
   if (flags != PLATFORM) {
-    fprintf(dbgout, "Heap image was saved for another platform.\n");
+    fprintf(dbgout, "Heap image was saved for another platform. (0x%x != 0x%x)\n", flags, PLATFORM);
     return false;
   }
   return true;
@@ -221,7 +221,7 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     if (mem_size != 0) {
       if (!MapFile(pure_space_active,
                    pos,
-                   align_to_power_of_2(mem_size,log2_page_size),
+                   align_to_page(mem_size),
                    MEMPROTECT_RX,
                    fd)) {
         return;
@@ -236,7 +236,7 @@ load_image_section(int fd, openmcl_image_section_header *sect)
   case AREA_STATIC:
     if (!MapFile(static_space_active,
                  pos,
-                 align_to_power_of_2(mem_size,log2_page_size),
+                 align_to_page(mem_size),
                  MEMPROTECT_RWX,
                  fd)) {
       return;
@@ -245,13 +245,21 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     static_space_active += mem_size;
     a->active = static_space_active;
     sect->area = a;
+#ifdef DEBUG_MEMORY
+  fprintf(stderr, 
+    "\nAREA_STATIC:\n"
+    "  low:               0x%llx\n"
+    "  high:              0x%llx\n"
+    "  active:            0x%llx\n\n",
+    a->low, a->high, a->active);
+#endif
     break;
 
   case AREA_DYNAMIC:
     a = allocate_dynamic_area(mem_size);
     if (!MapFile(a->low,
                  pos,
-                 align_to_power_of_2(mem_size,log2_page_size),
+                 align_to_page(mem_size),
                  MEMPROTECT_RWX,
                  fd)) {
       return;
@@ -262,15 +270,14 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     break;
 
   case AREA_MANAGED_STATIC:
-    a = new_area(pure_space_limit, pure_space_limit+align_to_power_of_2(mem_size,log2_page_size), AREA_MANAGED_STATIC);
+    a = new_area(pure_space_limit, pure_space_limit+align_to_page(mem_size), AREA_MANAGED_STATIC);
     a->active = a->low+mem_size;
     if (mem_size) {
       natural
-        refbits_size = align_to_power_of_2((((mem_size>>dnode_shift)+7)>>3),
-                                           log2_page_size);
+        refbits_size = align_to_page(((mem_size>>dnode_shift)+7)>>3);
       if (!MapFile(a->low,
                    pos,
-                   align_to_power_of_2(mem_size,log2_page_size),
+                   align_to_page(mem_size),
                    MEMPROTECT_RWX,
                    fd)) {
         return;
@@ -280,7 +287,7 @@ load_image_section(int fd, openmcl_image_section_header *sect)
       }
       /* Need to save/restore persistent refbits. */
       if (!MapFile(managed_static_refbits,
-                   align_to_power_of_2(pos+mem_size,log2_page_size),
+                   align_to_page(pos+mem_size),
                    refbits_size,
                    MEMPROTECT_RW,
                    fd)) {
@@ -317,11 +324,11 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     addr = (char *) lisp_global(HEAP_START);
     tenured_area = new_area(addr, addr, AREA_STATIC);
 
-    a = new_area(addr-align_to_power_of_2(mem_size,log2_page_size), addr, AREA_STATIC_CONS);
+    a = new_area(addr-align_to_page(mem_size), addr, AREA_STATIC_CONS);
     if (mem_size) {      
       if (!MapFile(a->low,
                    pos,
-                   align_to_power_of_2(mem_size,log2_page_size),
+                   align_to_page(mem_size),
                    MEMPROTECT_RWX,
                    fd)) {
         return;
@@ -674,7 +681,7 @@ save_application_internal(unsigned fd, Boolean egc_was_enabled)
     }
     if (n &&  ((sections[i].code) == AREA_MANAGED_STATIC)) {
       natural ndnodes = area_dnode(a->active, a->low);
-      natural nrefbytes = align_to_power_of_2((ndnodes+7)>>3,log2_page_size);
+      natural nrefbytes = align_to_page((ndnodes+7)>>3);
 
       seek_to_next_page(fd);
       if (writebuf(fd,(char*)managed_static_refbits,nrefbytes)) {
