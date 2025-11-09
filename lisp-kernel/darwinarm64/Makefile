@@ -30,6 +30,8 @@ ASFLAGS = -arch arm64 -g -mmacosx-version-min=$(OSVERSION)
 M4FLAGS = -DDARWIN -DARM64
 CDEFINES = -isysroot $(MACOSX_SDK) -DARM64 -DDARWIN -D_REENTRANT -D_XOPEN_SOURCE \
 	-DDISABLE_EGC -DGC_INTEGRITY_CHECKING -DVC_REVISION=$(VC_REVISION) -Wp,-dM 
+# uncomment to add more debugging output
+CDEFINES += -DDEBUG_MEMORY
 CDEBUG = -g
 COPT = #-O2
 # word size issues are a little more relevant on a 64-bit platform

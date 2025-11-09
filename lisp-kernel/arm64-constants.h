@@ -436,8 +436,8 @@ typedef struct tcr {
 #define heap_segment_size 0x00020000L
 #define log2_heap_segment_size 17L
 
-#define ABI_VERSION_MIN 1040
-#define ABI_VERSION_CURRENT 1040
-#define ABI_VERSION_MAX 1040
+#define ABI_VERSION_MIN 1042
+#define ABI_VERSION_CURRENT 1042
+#define ABI_VERSION_MAX 1042
 
 /***** END IMPORT FROM arm-constants64.h *****/

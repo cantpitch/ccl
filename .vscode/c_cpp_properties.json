@@ -10,7 +10,8 @@
             ],
             "defines": [
                 "ARM64",
-                "DARWIN"
+                "DARWIN",
+                "DEBUG_MEMORY"
             ],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c17",

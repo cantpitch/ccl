@@ -6,6 +6,7 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/darmcl64",
+            "args": ["-I", "fake-darmcl64.image"], // use x86-64 image for dev
             "cwd": "${workspaceFolder}",
         },
         {
