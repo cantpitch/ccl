@@ -151,15 +151,15 @@ extern void *tcr_area_lock;
 
 
 #if (WORD_SIZE==64)
-#define PURESPACE_RESERVE (80LL<<30LL) /* 8 GiB */
-#define PURESPACE_SIZE (1LL<<30LL)    /* 1 GiB */
+#define PURESPACE_RESERVE (128LL<<30LL) /* 128 GiB */
+#define PURESPACE_SIZE (1LL<<30LL)      /* 1 GiB */
 #else
 #ifdef ARM
-#define PURESPACE_RESERVE (64<<20)    /* 64 MiB */
-#define PURESPACE_SIZE (32<<20)       /* 32 MiB */
+#define PURESPACE_RESERVE (64<<20)      /* 64 MiB */
+#define PURESPACE_SIZE (32<<20)         /* 32 MiB */
 #else
-#define PURESPACE_RESERVE (128<<20)   /* 128 MiB */
-#define PURESPACE_SIZE (64<<20)       /* 64 MiB */
+#define PURESPACE_RESERVE (128<<20)     /* 128 MiB */
+#define PURESPACE_SIZE (64<<20)         /* 64 MiB */
 #endif
 #endif
 
