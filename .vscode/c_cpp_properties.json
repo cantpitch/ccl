@@ -53,6 +53,24 @@
             "cStandard": "c17",
             "cppStandard": "c++14",
             "intelliSenseMode": "linux-gcc-x86"
+        },
+        {
+            "name": "Windows-x64",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [
+                "${workspaceFolder}/lisp-kernel/platform-win64.h"
+            ],
+            "defines": [
+                "X86",
+                "X8664",
+                "WINDOWS"
+            ],
+            "compilerPath": "C:\\msys64\\mingw64\\bin\\gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "windows-gcc-x64"
         }
     ],
     "version": 4

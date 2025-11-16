@@ -1,0 +1,21 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Build Windows x86-64 Lisp Kernel",
+            "options": {
+                "cwd": "${workspaceFolder}\\lisp-kernel\\win64",
+                "env": {
+                    "PATH": "${env:PATH};C:\\msys64\\mingw64\\bin;C:\\msys64\\usr\\bin"
+                }
+            },
+            "command": "make",
+            "args": [
+                "-f",
+                "Makefile",
+                "all",
+            ]
+        }
+    ]
+}
