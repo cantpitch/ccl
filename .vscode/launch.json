@@ -8,6 +8,19 @@
             "program": "${workspaceFolder}/darmcl64",
             "args": ["-I", "fake-darmcl64.image"], // use x86-64 image for dev
             "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Build Darwin ARM64 Kernel",
+            "preRunCommands": [
+                "process handle -p true -s false -n false SIGKILL",
+                "process handle -p true -s false -n false SIGILL",
+                "process handle -p true -s false -n false SIGSEGV",
+                "process handle -p true -s false -n false SIGBUS",
+                "process handle -p true -s false -n false SIGFPE",
+                "process handle -p true -s false -n false SIG40",
+                "process handle -p true -s false -n false SIG41",
+                "process handle -p true -s false -n false SIG42",
+                "process handle -p true -s false -n false SIGPWR",
+                "process handle -p true -s false -n false SIGQUIT",
+            ]
         },
         {
             "name": "Launch dx86cl64",
