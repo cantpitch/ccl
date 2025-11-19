@@ -41,6 +41,23 @@
       insertion of nop instructions) such that the pushed return
       address will have a special tag that the GC can recognize."))
 
+  (glossentry "TCR"
+    (para
+     "Thread Context Record"))
+
+  (glossentry "TLS"
+    (para
+     "Thread Local Storage (TLS) is available on many platforms (notably notably
+      NOT Darwin, which uses {term TSD}) which allows global variables that are
+      set to different values for different threads."))
+
+  (glossentry "TSD"
+    (para
+     "Similar to {term TLS}, Thread-Specific Data (TSD) is used to store the 
+      {term TCR} for the current thread. CCL uses the pthread functions
+      pthread_key_create, pthread_setspecific, and pthread_getspecific."))
+
+
   (glossentry "uuo"
     (para
      "An “unimplemented user operation.” Sometimes called a trap (after the
