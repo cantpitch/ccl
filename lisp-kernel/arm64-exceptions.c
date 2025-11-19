@@ -28,6 +28,7 @@
 
 #ifdef DARWIN
 #include <sys/mman.h>
+#include <mach/mach.h>
 #ifndef SA_NODEFER
 #define SA_NODEFER 0
 #endif
@@ -59,7 +60,7 @@ extern LispObj lisp_nil;
 extern natural lisp_heap_gc_threshold;
 extern Boolean grow_dynamic_area(natural);
 
-int page_size = 0x4000; // 16KB page size
+int page_size = 0x4000; // 16KB page size on Darwin. Future Linux ARM64 port??
 int log2_page_size = 14; // 1 << 14 = 16KB
 
 /*

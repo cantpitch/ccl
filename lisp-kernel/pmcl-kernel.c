@@ -576,12 +576,12 @@ create_reserved_area(natural totalsize)
   lastbyte = (BytePtr) (start+totalsize);
 
   // If ASLR support gets working, back-porting to x86-64 may be possible.
-  #if defined(DARWIN) && defined(ARM64)
-  static_space_start = static_space_active = (BytePtr)&openmcl_low_address;
-
+  #if DARWIN_ON_ARM64
+  static_space_start = static_space_active = AllocateStaticSpaceASLR(STATIC_RESERVE);
   #else
   static_space_start = static_space_active = (BytePtr)STATIC_BASE_ADDRESS;
   #endif
+
   static_space_limit = static_space_start + STATIC_RESERVE;
   pure_space_start = pure_space_active = start;
   pure_space_limit = start + PURESPACE_SIZE;
@@ -1625,16 +1625,6 @@ remap_spjump()
 #endif
 #endif
 
-#ifdef ARM64
-void remap_spjump()
-{
-  extern opcode spjump_start[], spjump_end[];
-  fprintf(dbgout, 
-    "spjump_start:           0x%llx\n"
-    "spjump_end:             0x%llx\n\n", spjump_start, spjump_end);
-}
-#endif
-
 natural os_major_version = 0;
 
 void
@@ -2010,8 +2000,8 @@ main
   ensure_gs_available(real_executable_name);
 #endif
 #endif
-#if (defined(DARWIN) && (defined(PPC64) || defined(ARM64))) || \
-    (defined(LINUX) && defined(PPC))|| \
+#if (defined(DARWIN) && defined(PPC64)) || \
+    (defined(LINUX) && defined(PPC)) || \
     defined(X8664) || \
     (defined(X8632) && !defined(DARWIN))
   remap_spjump();

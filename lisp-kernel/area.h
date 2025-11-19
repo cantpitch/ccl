@@ -163,12 +163,21 @@ extern void *tcr_area_lock;
 #endif
 #endif
 
+#if defined(ARM64) && defined(DARWIN)
+/* MacOS on ARM64 defines the page size as 16 KiB, so we want to use that 
+   when mmapping. */
+#define STATIC_RESERVE (16<<10)        /* 16 KiB */
+#else
 #define STATIC_RESERVE (8<<10)         /* 8 KiB */ 
+#endif
+
 #define MANAGED_STATIC_SIZE ((natural) ((PURESPACE_RESERVE-PURESPACE_SIZE)/2))
 
 // ASLR disallows static addresses
-#if !(defined(DARWIN) && defined(ARM64))
+#ifndef DARWIN_ON_ARM64
 #define SPJUMP_TARGET_ADDRESS (STATIC_BASE_ADDRESS+0x3000)
+#else
+#define SPJUMP_TARGET_ADDRESS (static_space_start+0x3000)
 #endif
 
 extern LispObj image_base;

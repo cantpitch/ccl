@@ -54,6 +54,8 @@ LogicalAddress
 ReserveMemoryForHeap(LogicalAddress want, natural totalsize);
 LogicalAddress
 ReserveMemory(natural totalsize);
+LogicalAddress
+AllocateStaticSpaceASLR(natural totalsize);
 
 int
 CommitMemory (LogicalAddress start, natural len);

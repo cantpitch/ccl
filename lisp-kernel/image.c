@@ -244,7 +244,7 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     break;
 
   case AREA_STATIC:
-#if !(defined(ARM64) && defined(DARWIN))
+#ifndef DARWIN_ON_ARM64
     if (!MapFile(static_space_active,
                  pos,
                  align_to_page(mem_size),
@@ -252,9 +252,8 @@ load_image_section(int fd, openmcl_image_section_header *sect)
                  fd)) {
       return;
     }
-#else
-    /* just skip over mapping in STATIC */
-    LSEEK(fd, align_to_page(mem_size), SEEK_CUR);
+#else /* DARWIN_ON_ARM64 ASLR */
+    /* Allocate a STATIC space and */
 #endif
     a = new_area(static_space_active, static_space_limit, AREA_STATIC);
     static_space_active += mem_size;
@@ -273,11 +272,7 @@ load_image_section(int fd, openmcl_image_section_header *sect)
 
   case AREA_DYNAMIC:
     a = allocate_dynamic_area(mem_size);
-#if defined(ARM64) && defined(DARWIN)
-    perms = MEMPROTECT_RX;
-#else
     perms = MEMPROTECT_RWX;
-#endif
     if (!MapFile(a->low,
                  pos,
                  align_to_page(mem_size),
@@ -296,11 +291,8 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     if (mem_size) {
       natural
         refbits_size = align_to_page(((mem_size>>dnode_shift)+7)>>3);
-#if defined(ARM64) && defined(DARWIN)
-      perms = MEMPROTECT_RX;
-#else
       perms = MEMPROTECT_RWX;
-#endif
+
       if (!MapFile(a->low,
                    pos,
                    align_to_page(mem_size),
@@ -360,12 +352,8 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     tenured_area = new_area(addr, addr, AREA_STATIC);
 
     a = new_area(addr-align_to_page(mem_size), addr, AREA_STATIC_CONS);
-    if (mem_size) {      
-#if defined(ARM64) && defined(DARWIN)
-      perms = MEMPROTECT_RX;
-#else
+    if (mem_size) {
       perms = MEMPROTECT_RWX;
-#endif
       if (!MapFile(a->low,
                    pos,
                    align_to_page(mem_size),

@@ -91,17 +91,25 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
       return NULL;
     }
   }
-#else
+#else /* NOT WINDOWS */
+  int flags = MAP_PRIVATE | MAP_ANON; // | MAP_NORESERVE;
+
+#if DEBUG_MEMORY
+  fprintf(dbgout, "Reserving heap at 0x" LISP ", size 0x" LISP "\n", want, totalsize + heap_segment_size);
+#endif
+
   start = mmap((void *)want,
 	       totalsize + heap_segment_size,
 	       PROT_NONE,
-	       MAP_PRIVATE | MAP_ANON | MAP_NORESERVE,
+	       flags,
 	       -1,
 	       0);
   if (start == MAP_FAILED) {
     return NULL;
   }
 
+  /* On MacOS ARM64, due to ASLR, we take whatever we get. */
+#ifndef DARWIN_ON_ARM64
   if (start != want) {
     munmap(start, totalsize+heap_segment_size);
     start = (void *)((((natural)start)+heap_segment_size-1) & ~(heap_segment_size-1));
@@ -109,11 +117,37 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
       return NULL;
     }
   }
+#endif /* DARWIN_ON_ARM64 */
+
   mprotect(start, totalsize, PROT_NONE);
-#endif
+#endif /* NOT WINDOWS */
+
 #if DEBUG_MEMORY
   fprintf(dbgout, "Reserving heap at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
 #endif
+
+  return start;
+}
+
+LogicalAddress
+AllocateStaticSpaceASLR(natural totalsize)
+{
+  LogicalAddress start;
+
+  int flags = MAP_PRIVATE | MAP_ANON | MAP_NORESERVE;
+#ifdef DARWIN_ON_ARM64
+  flags |= MAP_JIT;
+#endif
+
+  start = mmap(NULL, totalsize, PROT_NONE, flags, -1, 0);
+  if (start == MAP_FAILED) {
+    return NULL;
+  }
+
+#if DEBUG_MEMORY
+  fprintf(dbgout, "Reserving static space at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
+#endif
+
   return start;
 }
 
