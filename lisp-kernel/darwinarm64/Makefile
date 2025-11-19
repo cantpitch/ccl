@@ -60,6 +60,7 @@ CHEADERS = area.h bits.h arm64-constants.h lisp-errors.h gc.h lisp.h lisp-except
 	lisp_globals.h macros.h memprotect.h image.h threads.h arm64-constants.h arm64-exceptions.h \
 	$(PLATFORM_H) constants.h
 
+
 # Subprims linked into the kernel ?
 # Yes:
 
@@ -75,9 +76,10 @@ all:	../../darmcl64
 OSLIBS = -lsystem
 
 
-../../darmcl64:	$(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ)
+../../darmcl64:	$(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ) Makefile
 	$(CC) -arch arm64 $(CDEBUG)  -sectalign __TEXT __text 0x1000  \
-	-L$(MACOSX_SDK)/usr/lib $(OSLIBS) -o $@ $(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ) 
+		-L$(MACOSX_SDK)/usr/lib $(OSLIBS) -o $@ $(KSPOBJ) $(KERNELOBJ) $(DEBUGOBJ)
+	codesign --sign - --entitlements allow-jit.entitlements --deep $@ --force
 
 
 $(SPOBJ): $(SPINC)
