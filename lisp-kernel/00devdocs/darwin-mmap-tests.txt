@@ -1,0 +1,70 @@
+---------------- Fixed Address (0x300000000000) (Y=F)?
+|  ------------- PROT_READ/WRITE/EXEC
+|  |   --------- MAP_PRIVATE/ANON/JIT
+|  |   |  ------ File Descriptor Passed (Y/N)?
+|  |   |  |
+V  V   V  V
+  R   P   Y: mmap succeeded. want: 0x0, flags: 0x0002, fd:  3,  addr: 0x104bdc000
+  RW  P   Y: mmap succeeded. want: 0x0, flags: 0x0002, fd:  3,  addr: 0x104be0000
+  R X P   Y: mmap failed.    want: 0x0, flags: 0x0002, fd:  3, errno: 1 Operation not permitted
+  RWX P   Y: mmap failed.    want: 0x0, flags: 0x0002, fd:  3, errno: 1 Operation not permitted
+  R   PA  Y: mmap failed.    want: 0x0, flags: 0x1002, fd:  3, errno: 22 Invalid argument
+  RW  PA  Y: mmap failed.    want: 0x0, flags: 0x1002, fd:  3, errno: 22 Invalid argument
+  R X PA  Y: mmap failed.    want: 0x0, flags: 0x1002, fd:  3, errno: 22 Invalid argument
+  RWX PA  Y: mmap failed.    want: 0x0, flags: 0x1002, fd:  3, errno: 22 Invalid argument
+  R   P J Y: mmap failed.    want: 0x0, flags: 0x0802, fd:  3, errno: 22 Invalid argument
+  RW  P J Y: mmap failed.    want: 0x0, flags: 0x0802, fd:  3, errno: 22 Invalid argument
+  R X P J Y: mmap failed.    want: 0x0, flags: 0x0802, fd:  3, errno: 22 Invalid argument
+  RWX P J Y: mmap failed.    want: 0x0, flags: 0x0802, fd:  3, errno: 22 Invalid argument
+  R   PAJ Y: mmap failed.    want: 0x0, flags: 0x1802, fd:  3, errno: 22 Invalid argument
+  RW  PAJ Y: mmap failed.    want: 0x0, flags: 0x1802, fd:  3, errno: 22 Invalid argument
+  R X PAJ Y: mmap failed.    want: 0x0, flags: 0x1802, fd:  3, errno: 22 Invalid argument
+  RWX PAJ Y: mmap failed.    want: 0x0, flags: 0x1802, fd:  3, errno: 22 Invalid argument
+  R   P   N: mmap failed.    want: 0x0, flags: 0x0002, fd: -1, errno: 9 Bad file descriptor
+  RW  P   N: mmap failed.    want: 0x0, flags: 0x0002, fd: -1, errno: 9 Bad file descriptor
+  R X P   N: mmap failed.    want: 0x0, flags: 0x0002, fd: -1, errno: 9 Bad file descriptor
+  RWX P   N: mmap failed.    want: 0x0, flags: 0x0002, fd: -1, errno: 9 Bad file descriptor
+  R   PA  N: mmap succeeded. want: 0x0, flags: 0x1002, fd: -1,  addr: 0x104be4000
+  RW  PA  N: mmap succeeded. want: 0x0, flags: 0x1002, fd: -1,  addr: 0x104be8000
+  R X PA  N: mmap succeeded. want: 0x0, flags: 0x1002, fd: -1,  addr: 0x104bec000
+  RWX PA  N: mmap failed.    want: 0x0, flags: 0x1002, fd: -1, errno: 13 Permission denied
+  R   P J N: mmap failed.    want: 0x0, flags: 0x0802, fd: -1, errno: 22 Invalid argument
+  RW  P J N: mmap failed.    want: 0x0, flags: 0x0802, fd: -1, errno: 22 Invalid argument
+  R X P J N: mmap failed.    want: 0x0, flags: 0x0802, fd: -1, errno: 22 Invalid argument
+  RWX P J N: mmap failed.    want: 0x0, flags: 0x0802, fd: -1, errno: 22 Invalid argument
+  R   PAJ N: mmap succeeded. want: 0x0, flags: 0x1802, fd: -1,  addr: 0x104bf0000
+  RW  PAJ N: mmap succeeded. want: 0x0, flags: 0x1802, fd: -1,  addr: 0x104bf0000
+  R X PAJ N: mmap succeeded. want: 0x0, flags: 0x1802, fd: -1,  addr: 0x104bf0000
+  RWX PAJ N: mmap succeeded. want: 0x0, flags: 0x1802, fd: -1,  addr: 0x104bf0000
+F R   P   Y: mmap succeeded. want: 0x300000000000, flags: 0x0002, fd:  3,  addr: 0x300000000000
+F RW  P   Y: mmap succeeded. want: 0x300000000000, flags: 0x0002, fd:  3,  addr: 0x300000004000
+F R X P   Y: mmap failed.    want: 0x300000000000, flags: 0x0002, fd:  3, errno: 1 Operation not permitted
+F RWX P   Y: mmap failed.    want: 0x300000000000, flags: 0x0002, fd:  3, errno: 1 Operation not permitted
+F R   PA  Y: mmap failed.    want: 0x300000000000, flags: 0x1002, fd:  3, errno: 22 Invalid argument
+F RW  PA  Y: mmap failed.    want: 0x300000000000, flags: 0x1002, fd:  3, errno: 22 Invalid argument
+F R X PA  Y: mmap failed.    want: 0x300000000000, flags: 0x1002, fd:  3, errno: 22 Invalid argument
+F RWX PA  Y: mmap failed.    want: 0x300000000000, flags: 0x1002, fd:  3, errno: 22 Invalid argument
+F R   P J Y: mmap failed.    want: 0x300000000000, flags: 0x0802, fd:  3, errno: 22 Invalid argument
+F RW  P J Y: mmap failed.    want: 0x300000000000, flags: 0x0802, fd:  3, errno: 22 Invalid argument
+F R X P J Y: mmap failed.    want: 0x300000000000, flags: 0x0802, fd:  3, errno: 22 Invalid argument
+F RWX P J Y: mmap failed.    want: 0x300000000000, flags: 0x0802, fd:  3, errno: 22 Invalid argument
+F R   PAJ Y: mmap failed.    want: 0x300000000000, flags: 0x1802, fd:  3, errno: 22 Invalid argument
+F RW  PAJ Y: mmap failed.    want: 0x300000000000, flags: 0x1802, fd:  3, errno: 22 Invalid argument
+F R X PAJ Y: mmap failed.    want: 0x300000000000, flags: 0x1802, fd:  3, errno: 22 Invalid argument
+F RWX PAJ Y: mmap failed.    want: 0x300000000000, flags: 0x1802, fd:  3, errno: 22 Invalid argument
+F R   P   N: mmap failed.    want: 0x300000000000, flags: 0x0012, fd: -1, errno: 9 Bad file descriptor
+F RW  P   N: mmap failed.    want: 0x300000000000, flags: 0x0012, fd: -1, errno: 9 Bad file descriptor
+F R X P   N: mmap failed.    want: 0x300000000000, flags: 0x0012, fd: -1, errno: 9 Bad file descriptor
+F RWX P   N: mmap failed.    want: 0x300000000000, flags: 0x0012, fd: -1, errno: 9 Bad file descriptor
+F R   PA  N: mmap succeeded. want: 0x300000000000, flags: 0x1012, fd: -1,  addr: 0x300000000000
+F RW  PA  N: mmap succeeded. want: 0x300000000000, flags: 0x1012, fd: -1,  addr: 0x300000000000
+F R X PA  N: mmap succeeded. want: 0x300000000000, flags: 0x1012, fd: -1,  addr: 0x300000000000
+F RWX PA  N: mmap failed.    want: 0x300000000000, flags: 0x1012, fd: -1, errno: 13 Permission denied
+F R   P J N: mmap failed.    want: 0x300000000000, flags: 0x0812, fd: -1, errno: 22 Invalid argument
+F RW  P J N: mmap failed.    want: 0x300000000000, flags: 0x0812, fd: -1, errno: 22 Invalid argument
+F R X P J N: mmap failed.    want: 0x300000000000, flags: 0x0812, fd: -1, errno: 22 Invalid argument
+F RWX P J N: mmap failed.    want: 0x300000000000, flags: 0x0812, fd: -1, errno: 22 Invalid argument
+F R   PAJ N: mmap failed.    want: 0x300000000000, flags: 0x1812, fd: -1, errno: 22 Invalid argument
+F RW  PAJ N: mmap failed.    want: 0x300000000000, flags: 0x1812, fd: -1, errno: 22 Invalid argument
+F R X PAJ N: mmap failed.    want: 0x300000000000, flags: 0x1812, fd: -1, errno: 22 Invalid argument
+F RWX PAJ N: mmap failed.    want: 0x300000000000, flags: 0x1812, fd: -1, errno: 22 Invalid argument
