@@ -248,7 +248,7 @@ allocate_lisp_stack(natural useable,
     return NULL;
   }
   if (h_p) *h_p = h;
-  base = (BytePtr) align_to_power_of_2( h, log2_page_size);
+  base = (BytePtr) align_to_page(h);
   hardlimit = (BytePtr) (base+hardsize);
   softlimit = hardlimit+softsize;
 
@@ -402,15 +402,15 @@ int cache_block_size=32;
 
 
 #if WORD_SIZE == 64
-#define DEFAULT_LISP_HEAP_GC_THRESHOLD (32<<20)
-#define G2_AREA_THRESHOLD (8<<20)
-#define G1_AREA_THRESHOLD (4<<20)
-#define G0_AREA_THRESHOLD (2<<20)
+#define DEFAULT_LISP_HEAP_GC_THRESHOLD (32<<20) /* 32 MiB */
+#define G2_AREA_THRESHOLD (8<<20)               /*  8 MiB */
+#define G1_AREA_THRESHOLD (4<<20)               /*  4 MiB */
+#define G0_AREA_THRESHOLD (2<<20)               /*  2 MiB */
 #else
-#define DEFAULT_LISP_HEAP_GC_THRESHOLD (16<<20)
-#define G2_AREA_THRESHOLD (4<<20)
-#define G1_AREA_THRESHOLD (2<<20)
-#define G0_AREA_THRESHOLD (1<<20)
+#define DEFAULT_LISP_HEAP_GC_THRESHOLD (16<<20) /* 16 MiB */
+#define G2_AREA_THRESHOLD (4<<20)               /*  4 MiB */
+#define G1_AREA_THRESHOLD (2<<20)               /*. 2 MiB */
+#define G0_AREA_THRESHOLD (1<<20)               /*  1 MiB */
 #endif
 
 #define MIN_DYNAMIC_SIZE (DEFAULT_LISP_HEAP_GC_THRESHOLD *2)
@@ -507,8 +507,8 @@ extend_readonly_area(natural more)
     if (mask) {
       UnProtectMemory(a->active-mask, page_size);
     }
-    new_start = (BytePtr)(align_to_power_of_2(a->active,log2_page_size));
-    new_end = (BytePtr)(align_to_power_of_2(a->active+more,log2_page_size));
+    new_start = (BytePtr)(align_to_page(a->active));
+    new_end = (BytePtr)(align_to_page(a->active+more));
     if (!CommitMemory(new_start, new_end-new_start)) {
       return NULL;
     }
@@ -548,7 +548,7 @@ create_reserved_area(natural totalsize)
   area *reserved;
   Boolean fatal = false;
 
-  totalsize = align_to_power_of_2((void *)totalsize, log2_heap_segment_size);
+  totalsize = align_to_heap_segment((void *)totalsize);
     
   if (totalsize < (PURESPACE_RESERVE + MIN_DYNAMIC_SIZE)) {
     totalsize = PURESPACE_RESERVE + MIN_DYNAMIC_SIZE;
@@ -673,7 +673,7 @@ allocate_from_reserved_area(natural size)
   BytePtr low = reserved->low, high = reserved->high;
   natural avail = high-low;
   
-  size = align_to_power_of_2(size, log2_heap_segment_size);
+  size = align_to_heap_segment(size);
 
   if (size > avail) {
     return NULL;
@@ -700,7 +700,7 @@ map_initial_reloctab(BytePtr low, BytePtr high)
   ndnodes = area_dnode(high,low);
   reloctab_size = (sizeof(LispObj)*(((ndnodes+((1<<bitmap_shift)-1))>>bitmap_shift)+1));
   
-  reloctab_limit = (BytePtr)align_to_power_of_2(((natural)global_reloctab)+reloctab_size,log2_page_size);
+  reloctab_limit = (BytePtr)align_to_page(((natural)global_reloctab)+reloctab_size);
   CommitMemory(global_reloctab,reloctab_limit-(BytePtr)global_reloctab);
 }
 
@@ -726,7 +726,7 @@ map_initial_markbits(BytePtr low, BytePtr high)
   }
   dynamic_refidx = (bitvector)(((BytePtr)global_refidx)+(prefix_index_bits>>3));
   relocatable_mark_ref_bits = dynamic_mark_ref_bits;
-  n = align_to_power_of_2(markbits_size,log2_page_size);
+  n = align_to_page(markbits_size);
   markbits_limit = ((BytePtr)dynamic_mark_ref_bits)+n;
   CommitMemory(dynamic_mark_ref_bits,n);
 }
@@ -769,8 +769,8 @@ ensure_gc_structures_writable()
     reloctab_size = (sizeof(LispObj)*(((ndnodes+((1<<bitmap_shift)-1))>>bitmap_shift)+1)),
     n;
   BytePtr 
-    new_reloctab_limit = (BytePtr)align_to_power_of_2(((natural)global_reloctab)+reloctab_size,log2_page_size),
-    new_markbits_limit = (BytePtr)align_to_power_of_2(((natural)relocatable_mark_ref_bits)+markbits_size,log2_page_size);
+    new_reloctab_limit = (BytePtr)align_to_page(((natural)global_reloctab)+reloctab_size),
+    new_markbits_limit = (BytePtr)align_to_page(((natural)relocatable_mark_ref_bits)+markbits_size);
 
   if (new_reloctab_limit > reloctab_limit) {
     n = new_reloctab_limit - reloctab_limit;
@@ -791,7 +791,7 @@ ensure_gc_structures_writable()
 area *
 allocate_dynamic_area(natural initsize)
 {
-  natural totalsize = align_to_power_of_2(initsize, log2_heap_segment_size);
+  natural totalsize = align_to_heap_segment(initsize);
   BytePtr start, end;
   area *a;
 
@@ -830,7 +830,7 @@ grow_dynamic_area(natural delta)
   area *a = active_dynamic_area, *reserved = reserved_area;
   natural avail = reserved->high - reserved->low;
   
-  delta = align_to_power_of_2(delta, log2_heap_segment_size);
+  delta = align_to_heap_segment(delta);
   if (delta > avail) {
     return false;
   }
@@ -862,7 +862,7 @@ shrink_dynamic_area(natural delta)
 {
   area *a = active_dynamic_area, *reserved = reserved_area;
   
-  delta = align_to_power_of_2(delta, log2_heap_segment_size);
+  delta = align_to_heap_segment(delta);
 
   a->high -= delta;
   a->ndnodes = area_dnode(a->high, a->low);
