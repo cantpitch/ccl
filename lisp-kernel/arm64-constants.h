@@ -433,8 +433,8 @@ typedef struct tcr {
   be constants.
 */
 
-#define heap_segment_size 0x00020000L
-#define log2_heap_segment_size 17L
+#define heap_segment_size 128L<<10 /* 128KiB */
+#define log2_heap_segment_size 17L /* 1<<17 = 128KiB (for heap segment (page) size)*/
 
 #define ABI_VERSION_MIN 1042
 #define ABI_VERSION_CURRENT 1042

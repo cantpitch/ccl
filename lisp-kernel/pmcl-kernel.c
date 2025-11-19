@@ -100,6 +100,7 @@ Boolean use_mach_exception_handling =
 #ifdef ARM64
 #include "pad.h"
 #endif
+#include <mach-o/getsect.h>
 #endif
 
 #ifdef FREEBSD
@@ -574,7 +575,6 @@ create_reserved_area(natural totalsize)
   image_base = base;
   lastbyte = (BytePtr) (start+totalsize);
 
-  //extern uint64_t openmcl_low_address;
   // If ASLR support gets working, back-porting to x86-64 may be possible.
   #if defined(DARWIN) && defined(ARM64)
   static_space_start = static_space_active = (BytePtr)&openmcl_low_address;
@@ -588,14 +588,25 @@ create_reserved_area(natural totalsize)
   start += PURESPACE_RESERVE;
   
 #ifdef DEBUG_MEMORY
-  fprintf(stderr, 
-    "\ntotal_size:         0x%llx\n", totalsize);
-  fprintf(stderr, 
-    "static_space_start: 0x%llx\n"
-    "static_space_limit: 0x%llx (STATIC_RESERVE: 0x%llx)\n", 
+  fprintf(dbgout, 
+    "\ncreate_reserved_area():\n"
+    "  image_base:             0x%llx\n" 
+    "  total_size:             0x%llx\n", 
+    image_base, totalsize);
+  fprintf(dbgout, 
+    "  static_space_start:     0x%llx\n"
+    "  static_space_limit:     0x%llx (STATIC_RESERVE: 0x%llx)\n",
     static_space_start, static_space_limit, STATIC_RESERVE);
-  fprintf(stderr, 
-    "lastbyte:           0x%llx\n\n", lastbyte);
+  fprintf(dbgout, 
+    "  lastbyte:               0x%llx\n\n", lastbyte);
+#ifdef DARWIN
+  fprintf(dbgout,
+    "  End of text (code):     %p\n"
+    "  End of data:            %p\n"
+    "  End of bss:             %p\n\n", 
+    (void*)get_etext(), (void*)get_edata(), (void*)get_end());
+#endif
+
 #endif
   /*
     Allocate mark bits here.  They need to be 1/64 the size of the
@@ -620,17 +631,17 @@ create_reserved_area(natural totalsize)
   all_areas = reserved;
 
 #ifdef DEBUG_MEMORY
-  fprintf(stderr, 
-    "\npure_space:\n"
-    "  pure_space_start:     0x%llx\n"
-    "  pure_space_limit:     0x%llx (delta: %llu GiB)\n\n"
-    "reserved_region\n"
-    "  start:                0x%llx (delta: %llu GiB -- from pure_space_start)\n"
-    "  ...                   ...            (delta: ~%llu GiB)\n"
-    "  global_reloctab:      0x%llx (delta: -%llu GiB -- from end)\n"
-    "  global_refidx:        0x%llx (delta: %llu GiB)\n"
-    "  global_mark_ref_bits: 0x%llx (delta: %llu MiB)\n"
-    "  end:                  0x%llx (delta: %llu GiB)\n\n", 
+  fprintf(dbgout, 
+    "\n  pure_space:\n"
+    "    pure_space_start:     0x%llx\n"
+    "    pure_space_limit:     0x%llx (delta: %llu GiB)\n\n"
+    "  reserved_region\n"
+    "    start:                0x%llx (delta: %llu GiB -- from pure_space_start)\n"
+    "    ...                   ...            (delta: ~%llu GiB)\n"
+    "    global_reloctab:      0x%llx (delta: -%llu GiB -- from end)\n"
+    "    global_refidx:        0x%llx (delta: %llu GiB)\n"
+    "    global_mark_ref_bits: 0x%llx (delta: %llu MiB)\n"
+    "    end:                  0x%llx (delta: %llu GiB)\n\n", 
     pure_space_start, 
     pure_space_limit, (pure_space_limit - pure_space_start) >> 30, 
     start, (start - pure_space_start) >> 30,
@@ -813,11 +824,12 @@ allocate_dynamic_area(natural initsize)
   lisp_global(HEAP_END) = ptr_to_lispobj(a->high);
 
 #ifdef DEBUG_MEMORY
-  fprintf(stderr, 
-    "\nAREA_DYNAMIC:\n"
-    "  low:               0x%llx\n"
-    "  high:              0x%llx\n"
-    "  active:            0x%llx\n\n",
+  fprintf(dbgout, 
+    "\nallocate_dynamic_area():\n"
+    "  AREA_DYNAMIC:\n"
+    "    low:               0x%llx\n"
+    "    high:              0x%llx\n"
+    "    active:            0x%llx\n\n",
     a->low, a->high, a->active);
 #endif
   return a;
@@ -1617,7 +1629,9 @@ remap_spjump()
 void remap_spjump()
 {
   extern opcode spjump_start[], spjump_end[];
-  fprintf(stderr, "spjump_start: 0x%llx, spjump_end: 0x%llx\n", spjump_start, spjump_end);
+  fprintf(dbgout, 
+    "spjump_start:           0x%llx\n"
+    "spjump_end:             0x%llx\n\n", spjump_start, spjump_end);
 }
 #endif
 
