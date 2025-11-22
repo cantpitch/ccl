@@ -9,14 +9,7 @@
             "args": ["-I", "fake-darmcl64.image"], // use x86-64 image for dev
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Build Darwin ARM64 Kernel",
-            "preRunCommands": [
-                "process handle -p true -s false -n false SIGKILL SIGILL SIGSEGV SIGBUS SIGFPE SIGUSR1 SIGUSR2 SIGEMT",
-                "command alias arg_x expr print_lisp_object($x13)",
-                "command alias arg_y expr print_lisp_object($x14)",
-                "command alias arg_z expr print_lisp_object($x15)",
-                "command alias fn expr print_lisp_object($x16)",
-                "command alias lbt expr plbt_sp($sp)",
-            ]
+            "miDebuggerArgs": "-command ${workspaceFolder}/lisp-kernel/darwinarm64/lldbinit",
         },
         {
             "name": "Launch dx86cl64",
@@ -27,19 +20,14 @@
             "cwd": "${workspaceFolder}",
         },
         {
-            "name": "Launch x64 testrunner",
-            "type": "lldb",
-            "request": "launch",
-            "program": "${workspaceFolder}/lisp-kernel/darwinx8664/testrunner",
-            "cwd": "${workspaceFolder}",
-        },
-        {
             "name": "Launch lx86cl64",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/lx86cl64",
             "args": ["-I", "lx86cl64.image"],
             "cwd": "${workspaceFolder}",
+            "miDebuggerArgs": "-command ${workspaceFolder}/lisp-kernel/linuxx8664/.gdbinit",
+            "preLaunchTask": "Build Linux x86-64 Kernel",
         },
         {
             "name": "Launch lx86cl32",
@@ -80,6 +68,13 @@
             "args": ["-I", "wx86cl64.image"],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Build Windows x86-64 Lisp Kernel",
+        },
+        {
+            "name": "Launch x64 testrunner",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/lisp-kernel/darwinx8664/testrunner",
+            "cwd": "${workspaceFolder}",
         },
     ]
 }

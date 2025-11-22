@@ -1,0 +1,6 @@
+process handle -p true -s false -n false SIGKILL SIGILL SIGSEGV SIGBUS SIGFPE SIGUSR1 SIGUSR2 SIGEMT
+command alias arg_x expr print_lisp_object($x13)
+command alias arg_y expr print_lisp_object($x14)
+command alias arg_z expr print_lisp_object($x15)
+command alias fn expr print_lisp_object($x16)
+command alias lbt expr plbt_sp($sp)
