@@ -410,7 +410,7 @@ load_openmcl_image(int fd, openmcl_image_file_header *h /* out */)
     "\nload_openmcl_image():\n"
     "  image_base:             0x%llx\n"
     "  ACTUAL_IMAGE_BASE:      0x%llx\n"
-    "  bias:                   0x%llx\n\n", 
+    "  bias:                   0x%lld\n\n", 
     image_base, ACTUAL_IMAGE_BASE(h), bias);
 #endif
 #if (WORD_SIZE== 64)

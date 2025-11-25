@@ -93,6 +93,9 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
   }
 #else /* NOT WINDOWS */
   int flags = MAP_PRIVATE | MAP_ANON; // | MAP_NORESERVE;
+#ifdef DARWIN_ON_ARM64
+  flags |= MAP_JIT;
+#endif
 
 #if DEBUG_MEMORY
   fprintf(dbgout, "Reserving heap at 0x" LISP ", size 0x" LISP "\n", want, totalsize + heap_segment_size);
@@ -105,6 +108,8 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
 	       -1,
 	       0);
   if (start == MAP_FAILED) {
+    printf("Code: %d", errno);
+    perror("ReserveMemoryForHeap");
     return NULL;
   }
 
