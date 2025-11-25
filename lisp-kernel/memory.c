@@ -92,7 +92,8 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
     }
   }
 #else /* NOT WINDOWS */
-  int flags = MAP_PRIVATE | MAP_ANON; // | MAP_NORESERVE;
+
+  int flags = MAP_PRIVATE | MAP_ANON | MAP_NORESERVE;
 #ifdef DARWIN_ON_ARM64
   flags |= MAP_JIT;
 #endif
@@ -122,7 +123,7 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
       return NULL;
     }
   }
-#endif /* DARWIN_ON_ARM64 */
+#endif /* NOT DARWIN_ON_ARM64 */
 
   mprotect(start, totalsize, PROT_NONE);
 #endif /* NOT WINDOWS */
