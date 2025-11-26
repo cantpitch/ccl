@@ -9,7 +9,7 @@
             "args": ["-I", "darmcl64-16kb.image"], // use x86-64 image for dev
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Build Darwin ARM64 Kernel",
-            "miDebuggerArgs": "-command ${workspaceFolder}/lisp-kernel/darwinarm64/lldbinit",
+            "initCommands": ["command source ${workspaceFolder}/lisp-kernel/darwinarm64/lldbinit"],
         },
         {
             "name": "Launch dx86cl64",
@@ -18,6 +18,8 @@
             "program": "${workspaceFolder}/dx86cl64",
             "args": ["-I", "dx86cl64.image"],
             "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Build Darwin x86-64 Kernel",
+            "initCommands": ["command source ${workspaceFolder}/lisp-kernel/darwinx8664/lldbinit"],
         },
         {
             "name": "Launch lx86cl64",

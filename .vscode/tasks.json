@@ -35,6 +35,22 @@
         },
         {
             "type": "shell",
+            "label": "Build Darwin x86-64 Kernel",
+            "options": {
+                "cwd": "${workspaceFolder}/lisp-kernel/darwinx8664"
+            },
+            "command": "make",
+            "args": [
+                "-f",
+                "Makefile",
+                "all"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "type": "shell",
             "label": "Build Linux x86-64 Kernel",
             "options": {
                 "cwd": "${workspaceFolder}/lisp-kernel/linuxx8664"
