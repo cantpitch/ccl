@@ -41,9 +41,10 @@ proc SectionHeader {index} {
     }
 }
 
-proc Section {name size} {
+proc Section {name size page_size} {
     
-    set round_size [expr {$size + 0xFFF} & ~0xFFF]
+    set page_mask [expr $page_size - 1]
+    set round_size [expr {$size + $page_mask} & ~$page_mask]
     section "$name Data" {
         if {$size > 0} {
             bytes $round_size "Data"
@@ -71,14 +72,14 @@ section "Header" {
     uint32 -hex "Canonical Image Base 32"
     uint32 -hex "Actual Image Base 32"
     set sections [uint32]
-    entry "Sections" $sections
+    entry "Sections" $sections 4 [expr [pos] - 4]
     uint32 "ABI Version"
     set section_data_offset [int32]
-    entry "Section Data Offset High" $section_data_offset
+    entry "Section Data Offset High" $section_data_offset 4 [expr [pos] - 4]
     set section_data_offset_low [uint32]
-    entry "Section Data Offset Low" $section_data_offset_low
+    entry "Section Data Offset Low" $section_data_offset_low 4 [expr [pos] - 4]
     set section_data_offset [expr {$section_data_offset << 32} | $section_data_offset_low]
-    entry "(Section Data Offset)" $section_data_offset
+    entry "(Section Data Offset)" $section_data_offset 8 [expr [pos] - 8]
     
     set curr_pos [pos]
     set flags [uint32]
@@ -95,16 +96,17 @@ section "Header" {
         }
         entry "OS" $os 4 $curr_pos
         
-        switch [expr $flags & 0x18 >> 2] {
+        set cpuno [expr {$flags >> 3} & 0x3]
+        switch [expr {$flags >> 3} & 0x3] {
             0 {set cpu "PowerPC"}
             1 {set cpu "SPARC"}
             2 {set cpu "x86"}
-            3 {set cpu "Arm"}
+            3 {set cpu "ARM"}
             default {set cpu "Unknown"}
         }
         entry "CPU" $cpu 4 $curr_pos
 
-        set word_size [expr $flags & 0x40 >> 6]
+        set word_size [expr {$flags >> 6} & 0x1]
         switch $word_size {
             0 {set ws "32-bit"}
             1 {set ws "64-bit"}
@@ -124,7 +126,16 @@ for {set i 0} {$i < $sections} {incr i} {
 
 move $section_data_offset
 
+if {($cpu == "ARM") && ($ws == "64-bit") && ($os == "Darwin")} {
+    set page_size 0x4000
+} else {
+    set page_size 0x1000
+}
 
-for {set i 0} {$i < $sections} {incr i} {
-    Section $section_names($i) $section_sizes($i)
+if [catch {
+    for {set i 0} {$i < $sections} {incr i} {
+        Section $section_names($i) $section_sizes($i) $page_size
+    }
+}] {
+    puts $errorInfo
 }
