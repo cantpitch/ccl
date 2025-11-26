@@ -145,14 +145,14 @@ AllocateStaticSpaceASLR(natural totalsize)
   flags |= MAP_JIT;
 #endif
 
+#if DEBUG_MEMORY
+  fprintf(dbgout, "Reserving static space at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
+#endif
+
   start = mmap(NULL, totalsize, PROT_NONE, flags, -1, 0);
   if (start == MAP_FAILED) {
     return NULL;
   }
-
-#if DEBUG_MEMORY
-  fprintf(dbgout, "Reserving static space at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
-#endif
 
   return start;
 }

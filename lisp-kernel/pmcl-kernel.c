@@ -18,6 +18,7 @@
 #include "lisp_globals.h"
 #include "gc.h"
 #include "area.h"
+#include "cdebug.h"
 #include <stdlib.h>
 #include <string.h>
 #include "lisp-exceptions.h"
@@ -549,6 +550,8 @@ create_reserved_area(natural totalsize)
   area *reserved;
   Boolean fatal = false;
 
+  debug_header_print("create_reserved_area()");
+
   totalsize = align_to_heap_segment((void *)totalsize);
     
   if (totalsize < (PURESPACE_RESERVE + MIN_DYNAMIC_SIZE)) {
@@ -587,27 +590,18 @@ create_reserved_area(natural totalsize)
   pure_space_limit = start + PURESPACE_SIZE;
   start += PURESPACE_RESERVE;
   
-#ifdef DEBUG_MEMORY
-  fprintf(dbgout, 
-    "\ncreate_reserved_area():\n"
-    "  image_base:             0x%llx\n" 
-    "  total_size:             0x%llx\n", 
-    image_base, totalsize);
-  fprintf(dbgout, 
-    "  static_space_start:     0x%llx\n"
-    "  static_space_limit:     0x%llx (STATIC_RESERVE: 0x%llx)\n",
-    static_space_start, static_space_limit, STATIC_RESERVE);
-  fprintf(dbgout, 
-    "  lastbyte:               0x%llx\n\n", lastbyte);
 #ifdef DARWIN
-  fprintf(dbgout,
-    "  End of text (code):     %p\n"
-    "  End of data:            %p\n"
-    "  End of bss:             %p\n\n", 
-    (void*)get_etext(), (void*)get_edata(), (void*)get_end());
+  debug_section_print("lisp-kernel Sections");
+  debug_memory_printf("End of text (code)", "%p", (void *)get_etext());
+  debug_memory_printf("End of data", "%p", (void *)get_edata());
+  debug_memory_printf("End of bss", "%p", (void *)get_end());
 #endif
 
-#endif
+  debug_section_print("static space");
+  debug_memory_printf("static_space_start", "%p", (void *)static_space_start);
+  debug_memory_printf("static_space_limit", "%p", (void *)static_space_limit);
+  debug_memory_printf("STATIC_RESERVE", "0x%llx", STATIC_RESERVE);
+
   /*
     Allocate mark bits here.  They need to be 1/64 the size of the
      maximum useable area of the heap (+ 3 words for the EGC.)
@@ -630,27 +624,24 @@ create_reserved_area(natural totalsize)
   reserved->pred = reserved->succ = reserved;
   all_areas = reserved;
 
-#ifdef DEBUG_MEMORY
-  fprintf(dbgout, 
-    "\n  pure_space:\n"
-    "    pure_space_start:     0x%llx\n"
-    "    pure_space_limit:     0x%llx (delta: %llu GiB)\n\n"
-    "  reserved_region\n"
-    "    start:                0x%llx (delta: %llu GiB -- from pure_space_start)\n"
-    "    ...                   ...            (delta: ~%llu GiB)\n"
-    "    global_reloctab:      0x%llx (delta: -%llu GiB -- from end)\n"
-    "    global_refidx:        0x%llx (delta: %llu GiB)\n"
-    "    global_mark_ref_bits: 0x%llx (delta: %llu MiB)\n"
-    "    end:                  0x%llx (delta: %llu GiB)\n\n", 
-    pure_space_start, 
-    pure_space_limit, (pure_space_limit - pure_space_start) >> 30, 
-    start, (start - pure_space_start) >> 30,
-    ((BytePtr)global_reloctab - start) >> 30,
-    global_reloctab, (reserved_region_end - (BytePtr)global_reloctab) >> 30, 
-    global_refidx, (global_refidx - global_reloctab) >> 30, 
-    global_mark_ref_bits, (global_mark_ref_bits - global_refidx) >> 20, 
-    reserved_region_end, (reserved_region_end - (BytePtr)global_mark_ref_bits) >> 30);  
-#endif
+  debug_section_print("pure space");
+  debug_memory_printf("image_base", "%p", (void *)image_base);
+  debug_memory_printf("pure_space_start", "%p", pure_space_start);
+  debug_memory_printf("pure_space_limit", "%p", pure_space_limit);
+  debug_memory_printf("  (delta)", "%llu GiB", (pure_space_limit - pure_space_start) >> 30);
+  debug_memory_printf("pure space size", "%lld GiB", (start - pure_space_start) >> 30);
+  debug_section_print("reserved_region");
+  debug_memory_printf("start", "%p", start);
+  debug_memory_printf("global_reloctab", "%p", global_reloctab);
+  debug_memory_printf("  (delta)", "~%llu GiB", ((BytePtr)global_reloctab - start) >> 30);
+  debug_memory_printf("  (delta from end)", "-%llu GiB", (reserved_region_end - (BytePtr)global_reloctab) >> 30);
+  debug_memory_printf("global_refidx", "%p", global_refidx);
+  debug_memory_printf("  (delta)", "%llu GiB", (global_refidx - global_reloctab) >> 30);
+  debug_memory_printf("global_mark_ref_bits", "%p", global_mark_ref_bits);
+  debug_memory_printf("  (delta)", "%llu GiB", (global_mark_ref_bits - global_refidx) >> 20);
+  debug_memory_printf("reserved_region_end", "%p", reserved_region_end);
+  debug_memory_printf("  (delta)", "%llu GiB", (reserved_region_end - (BytePtr)global_mark_ref_bits) >> 30);
+  debug_memory_printf("reserved_region size", "%lld GiB", (reserved_region_end - start) >> 30);
 
 #ifdef X86
   {
@@ -806,6 +797,9 @@ allocate_dynamic_area(natural initsize)
   BytePtr start, end;
   area *a;
 
+  debug_header_print("allocate_dynamic_area()");
+  debug_section_print("AREA_DYNAMIC");
+
   start = allocate_from_reserved_area(totalsize);
   if (start == NULL) {
     fprintf(dbgout, "reserved area too small to load heap image\n");
@@ -823,15 +817,10 @@ allocate_dynamic_area(natural initsize)
   lisp_global(HEAP_START) = ptr_to_lispobj(a->low);
   lisp_global(HEAP_END) = ptr_to_lispobj(a->high);
 
-#ifdef DEBUG_MEMORY
-  fprintf(dbgout, 
-    "\nallocate_dynamic_area():\n"
-    "  AREA_DYNAMIC:\n"
-    "    low:               0x%llx\n"
-    "    high:              0x%llx\n"
-    "    active:            0x%llx\n\n",
-    a->low, a->high, a->active);
-#endif
+  debug_memory_printf("low", "%p", a->low);
+  debug_memory_printf("high", "%p", a->high);
+  debug_memory_printf("active", "%p", a->active);
+  
   return a;
  }
 

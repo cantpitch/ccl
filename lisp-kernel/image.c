@@ -19,6 +19,7 @@
 #include "area.h"
 #include "image.h"
 #include "gc.h"
+#include "cdebug.h"
 #include <errno.h>
 #include <unistd.h>
 #ifndef WINDOWS
@@ -216,9 +217,13 @@ load_image_section(int fd, openmcl_image_section_header *sect)
   area *a;
   int perms;
 
+  debug_header_print("load_image_section()");
+
   advance = mem_size;
   switch(sect->code) {
   case AREA_READONLY:
+    debug_section_print("AREA_READONLY");
+
     if (mem_size != 0) {
       if (!MapFile(pure_space_active,
                    pos,
@@ -231,19 +236,16 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     a = new_area(pure_space_active, pure_space_limit, AREA_READONLY);
     pure_space_active += mem_size;
     a->active = pure_space_active;
-    sect->area = a;      
-#ifdef DEBUG_MEMORY
-    fprintf(dbgout, 
-      "\nload_image_section():\n"
-      "  AREA_READONLY:\n"
-      "    low:               0x%llx\n"
-      "    high:              0x%llx\n"
-      "    active:            0x%llx\n\n",
-      a->low, a->high, a->active);
-#endif
+    sect->area = a;
+    
+    debug_memory_printf("low", "%p", a->low, NULL);
+    debug_memory_printf("high", "%p", a->high, NULL);
+    debug_memory_printf("active", "%p", a->active, NULL);
     break;
 
   case AREA_STATIC:
+    debug_section_print("AREA_STATIC");
+
 #ifndef DARWIN_ON_ARM64
     if (!MapFile(static_space_active,
                  pos,
@@ -259,15 +261,10 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     static_space_active += mem_size;
     a->active = static_space_active;
     sect->area = a;
-#ifdef DEBUG_MEMORY
-    fprintf(dbgout, 
-      "\nload_image_section():\n"
-      "  AREA_STATIC:\n"
-      "    low:                  0x%llx\n"
-      "    high:                 0x%llx\n"
-      "    active:               0x%llx\n\n",
-      a->low, a->high, a->active);
-#endif
+
+    debug_memory_printf("low", "%p", a->low, NULL);
+    debug_memory_printf("high", "%p", a->high, NULL);
+    debug_memory_printf("active", "%p", a->active, NULL);
     break;
 
   case AREA_DYNAMIC:
@@ -286,6 +283,8 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     break;
 
   case AREA_MANAGED_STATIC:
+    debug_section_print("AREA_MANAGED_STATIC");
+
     a = new_area(pure_space_limit, pure_space_limit+align_to_page(mem_size), AREA_MANAGED_STATIC);
     a->active = a->low+mem_size;
     if (mem_size) {
@@ -329,15 +328,11 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     a->ndnodes = area_dnode(a->active, a->low);
     managed_static_area = a;
     lisp_global(REF_BASE) = (LispObj) a->low;
-#ifdef DEBUG_MEMORY
-    fprintf(dbgout, 
-      "\nload_image_section():\n"
-      "  AREA_MANAGED_STATIC:\n"
-      "    low:                  0x%llx\n"
-      "    high:                 0x%llx\n"
-      "    active:               0x%llx\n\n",
-      a->low, a->high, a->active);
-#endif
+
+    debug_memory_printf("low", "%p", a->low, NULL);
+    debug_memory_printf("high", "%p", a->high, NULL);
+    debug_memory_printf("active", "%p", a->active, NULL);
+
     break;
 
     /* In many respects, the static_cons_area is part of the dynamic
@@ -348,6 +343,8 @@ load_image_section(int fd, openmcl_image_section_header *sect)
 
 
   case AREA_STATIC_CONS:
+    debug_section_print("AREA_STATIC_CONS");
+
     addr = (char *) lisp_global(HEAP_START);
     tenured_area = new_area(addr, addr, AREA_STATIC);
 
@@ -368,15 +365,11 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     /* not yet 
     lower_heap_start(a->low,tenured_area);
     */
-#ifdef DEBUG_MEMORY
-    fprintf(dbgout, 
-      "\nload_image_section():\n"
-      "  AREA_STATIC_CONS:\n"
-      "    low:                  0x%llx\n"
-      "    high:                 0x%llx\n"
-      "    active:               0x%llx\n\n",
-      a->low, a->high, a->active);
-#endif
+
+    debug_memory_printf("low", "%p", a->low, NULL);
+    debug_memory_printf("high", "%p", a->high, NULL);
+    debug_memory_printf("active", "%p", a->active, NULL);
+
     break;
 
   default:
@@ -405,14 +398,13 @@ load_openmcl_image(int fd, openmcl_image_file_header *h /* out */)
   int i, nsections = h->nsections;
   openmcl_image_section_header sections[nsections], *sect=sections;
   LispObj bias = image_base - ACTUAL_IMAGE_BASE(h);
-#ifdef DEBUG_MEMORY
-  fprintf(dbgout, 
-    "\nload_openmcl_image():\n"
-    "  image_base:             0x%llx\n"
-    "  ACTUAL_IMAGE_BASE:      0x%llx\n"
-    "  bias:                   %lld\n\n", 
-    image_base, ACTUAL_IMAGE_BASE(h), bias);
-#endif
+
+  debug_header_print("load_openmcl_image()");
+  debug_memory_printf("image_base", "%p", (void *)image_base, NULL);
+  debug_memory_printf("ACTUAL_IMAGE_BASE", "%p", (void *)ACTUAL_IMAGE_BASE(h), NULL);
+  debug_memory_printf("bias", "%lld", (void *)bias, NULL);
+  debug_memory_printf("bias", "0x%llx", (void *)bias, NULL);
+
 #if (WORD_SIZE== 64)
   signed_natural section_data_delta = 
     ((signed_natural)(h->section_data_offset_high) << 32L) | h->section_data_offset_low;
