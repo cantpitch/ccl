@@ -28,6 +28,9 @@
 #include <stdio.h>
 #include <limits.h>
 #include <time.h>
+#ifdef DARWIN_JIT
+#include <pthread.h>
+#endif
 
 
 #if defined(PPC64) || defined(X8632) || defined(ARM64)
@@ -215,7 +218,7 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     mem_size = sect->memory_size;
   char *addr;
   area *a;
-  int perms;
+  int protection;
 
   debug_header_print("load_image_section()");
 
@@ -225,11 +228,11 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     debug_section_print("AREA_READONLY");
 
     if (mem_size != 0) {
-      if (!MapFile(pure_space_active,
-                   pos,
-                   align_to_page(mem_size),
-                   MEMPROTECT_RX,
-                   fd)) {
+      protection = MEMPROTECT_RX;
+#ifdef DARWIN_JIT
+      protection |= PROT_WRITE;
+#endif
+      if (!LoadFile(pure_space_active, pos, align_to_page(mem_size), protection, fd)) {
         return;
       }
     }
@@ -246,17 +249,10 @@ load_image_section(int fd, openmcl_image_section_header *sect)
   case AREA_STATIC:
     debug_section_print("AREA_STATIC");
 
-#ifndef DARWIN_ON_ARM64
-    if (!MapFile(static_space_active,
-                 pos,
-                 align_to_page(mem_size),
-                 MEMPROTECT_RWX,
-                 fd)) {
+    if (!LoadFile(static_space_active, pos, align_to_page(mem_size), MEMPROTECT_RWX, fd)) {
       return;
     }
-#else /* DARWIN_ON_ARM64 ASLR */
-    /* Allocate a STATIC space and */
-#endif
+
     a = new_area(static_space_active, static_space_limit, AREA_STATIC);
     static_space_active += mem_size;
     a->active = static_space_active;
@@ -269,12 +265,8 @@ load_image_section(int fd, openmcl_image_section_header *sect)
 
   case AREA_DYNAMIC:
     a = allocate_dynamic_area(mem_size);
-    perms = MEMPROTECT_RWX;
-    if (!MapFile(a->low,
-                 pos,
-                 align_to_page(mem_size),
-                 perms,
-                 fd)) {
+    protection = MEMPROTECT_RWX;
+    if (!LoadFile(a->low, pos, align_to_page(mem_size), protection, fd)) {
       return;
     }
 
@@ -290,30 +282,22 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     if (mem_size) {
       natural
         refbits_size = align_to_page(((mem_size>>dnode_shift)+7)>>3);
-      perms = MEMPROTECT_RWX;
+      protection = MEMPROTECT_RWX;
 
-      if (!MapFile(a->low,
-                   pos,
-                   align_to_page(mem_size),
-                   perms,
-                   fd)) {
+      if (!LoadFile(a->low, pos, align_to_page(mem_size), protection, fd)) {
         return;
       }
-      if (!CommitMemory(global_mark_ref_bits,refbits_size)) {
+      if (!COMMIT_MEMORY_RW(global_mark_ref_bits,refbits_size)) {
         return;
       }
       /* Need to save/restore persistent refbits. */
-      if (!MapFile(managed_static_refbits,
-                   align_to_page(pos+mem_size),
-                   refbits_size,
-                   MEMPROTECT_RW,
-                   fd)) {
+      if (!LoadFile(managed_static_refbits, align_to_page(pos+mem_size), refbits_size, MEMPROTECT_RW, fd)) {
         return;
       }
       /* Should change image format and store this in the image */
       {
         natural ndnodes = area_dnode(a->active, a->low), i;
-        if (!CommitMemory(managed_static_refidx,(((ndnodes +255)>>8)+7)>>3)) {
+        if (!COMMIT_MEMORY_RW(managed_static_refidx,(((ndnodes +255)>>8)+7)>>3)) {
           return;
         }
         for (i=0; i < ndnodes; i++) {
@@ -327,8 +311,9 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     sect->area = a;
     a->ndnodes = area_dnode(a->active, a->low);
     managed_static_area = a;
+    JIT_WRITE_UNPROTECT;
     lisp_global(REF_BASE) = (LispObj) a->low;
-
+    JIT_WRITE_PROTECT;
     debug_memory_printf("low", "%p", a->low, NULL);
     debug_memory_printf("high", "%p", a->high, NULL);
     debug_memory_printf("active", "%p", a->active, NULL);
@@ -350,11 +335,11 @@ load_image_section(int fd, openmcl_image_section_header *sect)
 
     a = new_area(addr-align_to_page(mem_size), addr, AREA_STATIC_CONS);
     if (mem_size) {
-      perms = MEMPROTECT_RWX;
+      protection = MEMPROTECT_RWX;
       if (!MapFile(a->low,
                    pos,
                    align_to_page(mem_size),
-                   perms,
+                   protection,
                    fd)) {
         return;
       }

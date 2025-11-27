@@ -50,6 +50,21 @@
 
 #endif
 
+#ifdef DARWIN_JIT
+#define JIT_WRITE_PROTECT (pthread_jit_write_protect_np(1))
+#define JIT_WRITE_UNPROTECT (pthread_jit_write_protect_np(0))
+
+#define COMMIT_MEMORY_JIT CommitMemoryJIT
+#define COMMIT_MEMORY_RW CommitMemoryRW
+#else
+#define JIT_WRITE_PROTECT
+#define JIT_WRITE_UNPROTECT
+
+#define COMMIT_MEMORY_JIT CommitMemory
+#define COMMIT_MEMORY_RW CommitMemory
+#endif
+
+
 LogicalAddress
 ReserveMemoryForHeap(LogicalAddress want, natural totalsize);
 LogicalAddress
@@ -57,14 +72,22 @@ ReserveMemory(natural totalsize);
 LogicalAddress
 AllocateStaticSpaceASLR(natural totalsize);
 
-int
-CommitMemory (LogicalAddress start, natural len);
 
-void
-UnCommitMemory (LogicalAddress start, natural len);
+
+#ifdef DARWIN_JIT
+int CommitMemoryJIT(LogicalAddress start, natural len);
+int CommitMemoryRW(LogicalAddress start, natural len);
+#else
+int CommitMemory (LogicalAddress start, natural len);
+#endif
+
+void UnCommitMemory (LogicalAddress start, natural len);
+
 
 LogicalAddress
 MapMemory(LogicalAddress addr, natural nbytes, int protection);
+int
+ReMapMemory(LogicalAddress addr, natural nbytes, int protection);
 
 LogicalAddress
 MapMemoryForStack(natural nbytes);
@@ -80,6 +103,10 @@ UnProtectMemory(LogicalAddress, natural);
 
 int
 MapFile(LogicalAddress addr, natural pos, natural nbytes, int permissions, int fd);
+
+int 
+LoadFile(LogicalAddress addr, natural pos, natural nbytes, int permissions, int fd);
+
 void allocation_failure(Boolean pointerp, natural size);
 
 void protect_watched_areas(void);

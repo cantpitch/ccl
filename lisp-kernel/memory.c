@@ -94,7 +94,7 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
 #else /* NOT WINDOWS */
 
   int flags = MAP_PRIVATE | MAP_ANON | MAP_NORESERVE;
-#ifdef DARWIN_ON_ARM64
+#ifdef DARWIN_JIT
   flags |= MAP_JIT;
 #endif
 
@@ -115,7 +115,7 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
   }
 
   /* On MacOS ARM64, due to ASLR, we take whatever we get. */
-#ifndef DARWIN_ON_ARM64
+#ifndef DARWIN_JIT
   if (start != want) {
     munmap(start, totalsize+heap_segment_size);
     start = (void *)((((natural)start)+heap_segment_size-1) & ~(heap_segment_size-1));
@@ -123,7 +123,7 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
       return NULL;
     }
   }
-#endif /* NOT DARWIN_ON_ARM64 */
+#endif /* NOT DARWIN_JIT */
 
   mprotect(start, totalsize, PROT_NONE);
 #endif /* NOT WINDOWS */
@@ -140,25 +140,26 @@ AllocateStaticSpaceASLR(natural totalsize)
 {
   LogicalAddress start;
 
-  int flags = MAP_PRIVATE | MAP_ANON | MAP_NORESERVE;
-#ifdef DARWIN_ON_ARM64
+  int flags = MAP_PRIVATE | MAP_ANON;
+#ifdef DARWIN_JIT
   flags |= MAP_JIT;
 #endif
 
-#if DEBUG_MEMORY
-  fprintf(dbgout, "Reserving static space at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
-#endif
-
-  start = mmap(NULL, totalsize, PROT_NONE, flags, -1, 0);
+  start = mmap(NULL, totalsize, MEMPROTECT_RWX, flags, -1, 0);
   if (start == MAP_FAILED) {
     return NULL;
   }
 
+#if DEBUG_MEMORY
+  fprintf(dbgout, "Reserved static space at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
+#endif
+
   return start;
 }
 
+#ifndef DARWIN_JIT
 int
-CommitMemory (LogicalAddress start, natural len) 
+CommitMemory(LogicalAddress start, natural len) 
 {
 #if DEBUG_MEMORY
   fprintf(dbgout, "Committing memory at 0x" LISP ", size 0x" LISP "\n", start, len);
@@ -182,24 +183,46 @@ CommitMemory (LogicalAddress start, natural len)
     return false;
   }
   return true;
-#else
+#else /* !WINDOWS */
+
   int i;
   void *addr;
+  int flags = MAP_PRIVATE | MAP_ANON | MAP_FIXED;
 
   for (i = 0; i < 3; i++) {
-    addr = mmap(start, len, MEMPROTECT_RWX, MAP_PRIVATE|MAP_ANON|MAP_FIXED, -1, 0);
+    addr = mmap(start, len, MEMPROTECT_RWX, flags, -1, 0);
     if (addr == start) {
       return true;
     } else {
-      mmap(addr, len, MEMPROTECT_NONE, MAP_PRIVATE|MAP_ANON|MAP_FIXED, -1, 0);
+      mmap(addr, len, MEMPROTECT_NONE, flags, -1, 0);
     }
   }
   return false;
+
+#endif /* !WINDOWS */
+}
+#else /* DARWIN_JIT */
+
+int CommitMemoryJIT(LogicalAddress start, natural len) 
+{
+#if DEBUG_MEMORY
+  fprintf(dbgout, "Committing executable memory at 0x" LISP ", size 0x" LISP "\n", start, len);
 #endif
+  return ReMapMemory(start, len, MEMPROTECT_RWX);
 }
 
+int CommitMemoryRW(LogicalAddress start, natural len) 
+{
+#if DEBUG_MEMORY
+  fprintf(dbgout, "Committing read/write memory at 0x" LISP ", size 0x" LISP "\n", start, len);
+#endif
+  return ReMapMemory(start, len, MEMPROTECT_RW);
+}
+#endif /* DARWING_JIT */
+
+
 void
-UnCommitMemory (LogicalAddress start, natural len) {
+UnCommitMemory(LogicalAddress start, natural len) {
 #if DEBUG_MEMORY
   fprintf(dbgout, "Uncommitting memory at 0x" LISP ", size 0x" LISP "\n", start, len);
 #endif
@@ -231,20 +254,28 @@ MapMemory(LogicalAddress addr, natural nbytes, int protection)
 #if DEBUG_MEMORY
   fprintf(dbgout, "Mapping memory at 0x" LISP ", size 0x" LISP "\n", addr, nbytes);
 #endif
+
 #ifdef WINDOWS
   p = VirtualAlloc(addr, nbytes, MEM_RESERVE|MEM_COMMIT, MEMPROTECT_RWX);
   if (p == NULL) {
     wperror("MapMemory");
   }
   return p;
-#else
+#else /* !WINDOWS */
   {
-    int flags = MAP_PRIVATE|MAP_ANON;
+    int flags = MAP_PRIVATE | MAP_ANON;
 
+
+
+#ifndef DARWIN_JIT
     if (addr > 0) flags |= MAP_FIXED;
+#else /* DARWIN_JIT */
+    if (protection & PROT_EXEC) flags |= MAP_JIT;
+#endif /* DARWIN_JIT */
+
     return mmap(addr, nbytes, protection, flags, -1, 0);
   }
-#endif
+#endif /* !WINDOWS */
 }
 
 LogicalAddress
@@ -275,6 +306,25 @@ UnMapMemory(LogicalAddress addr, natural nbytes)
 #else
   return munmap(addr, nbytes);
 #endif
+}
+
+/* This is necessary because MAP_JIT on Darwin can't be changed with an mprotect
+   call, so you have to unmap and map a section if you want to switch pages from
+   writable to executable and vice versa.
+ */
+int
+ReMapMemory(LogicalAddress addr, natural nbytes, int protection)
+{
+  void *new_addr;
+
+  if (UnMapMemory(addr, nbytes) < 0) perror("ReMapMemory UnMapMemory");
+  new_addr = MapMemory(addr, nbytes, protection);
+  if (new_addr != addr) {
+    perror("ReMapMemory MapMemory");
+    fprintf(stderr, "mmap moved 0x" LISP " => 0x" LISP ", size 0x" LISP " with protection 0x" LISP "\n", addr, new_addr, nbytes, protection);
+    return false;
+  }
+  return true;
 }
 
 int
@@ -361,7 +411,10 @@ MapFile(LogicalAddress addr, natural pos, natural nbytes, int permissions, int f
   size_t opos;
 
   opos = LSEEK(fd, 0, SEEK_CUR);
-  CommitMemory(addr, nbytes);
+  if (permissions & PROT_EXEC)
+    COMMIT_MEMORY_JIT(addr, nbytes);
+  else
+    COMMIT_MEMORY_RW(addr, nbytes);
   LSEEK(fd, pos, SEEK_SET);
 
   while (total < nbytes) {
@@ -377,12 +430,70 @@ MapFile(LogicalAddress addr, natural pos, natural nbytes, int permissions, int f
   return true;
 #endif
 #else /* else !WINDOWS */
+
 #ifdef DEBUG_MEMORY
   fprintf(dbgout, "attempting mmap -- 0x%llx-0x%llx, perm: 0x%x, MAP_PRIVATE|MAP_FIXED, fd?: %s, pos: %u\n", 
     addr, addr + nbytes, permissions, fd ? "yes" : "no", pos);
 #endif /* DEBUG_MEMORY */
+
   return mmap(addr, nbytes, permissions, MAP_PRIVATE|MAP_FIXED, fd, pos) != MAP_FAILED;
 #endif /* ifdef WINDOWS */
+}
+
+
+
+#ifdef DARWIN_JIT
+/*
+ We can't memory-map a file into a region marked both writable and executable on
+ Darwin with JIT support.  So we read the file in manually.  This is less efficient, but
+ necessary.
+ */
+int LoadFileJIT(LogicalAddress addr, natural pos, natural nbytes, int fd)
+{
+    ssize_t count;
+    ssize_t buffer_size = 0x4000;
+    char *buffer = malloc(buffer_size);
+    int result = FALSE;
+
+    LSEEK(fd, pos, SEEK_SET);
+
+    while (nbytes > 0) {
+        count = read(fd, buffer, buffer_size);
+
+        if (count < 0) {
+          perror("LoadFileJIT > read");
+          goto cleanup;
+        }
+
+        memcpy(addr, buffer, count);
+        addr += count;
+        nbytes -= count;
+    }
+    result = TRUE;
+cleanup:
+    free(buffer);
+    return result;
+}
+#endif /* DARWIN_JIT */
+
+int 
+LoadFile(LogicalAddress addr, natural pos, natural nbytes, int protections, int fd)
+{
+#ifndef DARWIN_JIT
+    return MapFile(addr, pos, nbytes, protections, fd);
+#else /* DARWIN_JIT ASLR */
+    /* writeable, executable, and mmapable from a file are mutually exclusive
+       on darwin_jit.
+       here we assume the memory for the kernel has been mapped in before, so we
+       want to just remap for jit as necessary.
+     */
+    int is_executable = (protections & PROT_EXEC) != 0;
+    if (!ReMapMemory(addr, nbytes, protections)) return FALSE;
+    if (is_executable) JIT_WRITE_UNPROTECT;
+    if (!LoadFileJIT(addr, pos, nbytes, fd)) return FALSE;
+    if (is_executable) JIT_WRITE_PROTECT;
+    return TRUE;
+#endif
 }
 
 void

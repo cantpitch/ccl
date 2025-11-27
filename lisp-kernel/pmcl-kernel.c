@@ -471,7 +471,7 @@ Boolean
 commit_pages(void *start, size_t len)
 {
   if (len != 0) {
-    if (!CommitMemory(start, len)) {
+    if (!COMMIT_MEMORY_JIT(start, len)) {
       return false;
     }
     if (!touch_all_pages(start, len)) {
@@ -511,7 +511,7 @@ extend_readonly_area(natural more)
     }
     new_start = (BytePtr)(align_to_page(a->active));
     new_end = (BytePtr)(align_to_page(a->active+more));
-    if (!CommitMemory(new_start, new_end-new_start)) {
+    if (!COMMIT_MEMORY_JIT(new_start, new_end-new_start)) {
       return NULL;
     }
     return a;
@@ -579,7 +579,7 @@ create_reserved_area(natural totalsize)
   lastbyte = (BytePtr) (start+totalsize);
 
   // If ASLR support gets working, back-porting to x86-64 may be possible.
-  #if DARWIN_ON_ARM64
+  #if DARWIN_JIT
   static_space_start = static_space_active = AllocateStaticSpaceASLR(STATIC_RESERVE);
   #else
   static_space_start = static_space_active = (BytePtr)STATIC_BASE_ADDRESS;
@@ -615,7 +615,7 @@ create_reserved_area(natural totalsize)
   end  = (BytePtr) ((natural)((((natural)end) - ((refbits_size+255) >> 8)) & ~4095));
   global_refidx = (bitvector)end;
   /* Don't really want to commit so much so soon */
-  CommitMemory((BytePtr)global_refidx,(BytePtr)global_mark_ref_bits-(BytePtr)global_refidx);
+  COMMIT_MEMORY_RW((BytePtr)global_refidx,(BytePtr)global_mark_ref_bits-(BytePtr)global_refidx);
     
   end = (BytePtr) ((natural)((((natural)end) - ((totalsize+63) >> 6)) & ~4095));
   global_reloctab = (LispObj *) end;
@@ -643,9 +643,10 @@ create_reserved_area(natural totalsize)
   debug_memory_printf("  (delta)", "%llu GiB", (reserved_region_end - (BytePtr)global_mark_ref_bits) >> 30);
   debug_memory_printf("reserved_region size", "%lld GiB", (reserved_region_end - start) >> 30);
 
-#ifdef X86
+#if defined(X86) || defined(ARM64)
   {
-    managed_static_refbits = ReserveMemory((((MANAGED_STATIC_SIZE>>dnode_shift)+7)>>3));
+    natural managed_static_refbits_size = ((MANAGED_STATIC_SIZE>>dnode_shift)+7)>>3;
+    managed_static_refbits = ReserveMemory(managed_static_refbits_size);
     if (managed_static_refbits == NULL) {
 #ifdef WINDOWS
       wperror("allocate refbits for managed static area");
@@ -654,7 +655,11 @@ create_reserved_area(natural totalsize)
 #endif
       exit(1);
     }
-    managed_static_refidx = ReserveMemory(((((MANAGED_STATIC_SIZE>>dnode_shift)+255)>>8)+7)>>3);
+    debug_memory_printf("managed_static_refbits", "%p", managed_static_refbits);
+    debug_memory_printf("managed_static_refbits_size", "0x%lx", managed_static_refbits_size);
+
+    natural managed_static_refidx_size = ((((MANAGED_STATIC_SIZE>>dnode_shift)+255)>>8)+7)>>3;
+    managed_static_refidx = ReserveMemory(managed_static_refidx_size);
     if (managed_static_refidx == NULL) {
 #ifdef WINDOWS
       wperror("allocate refidx for managed static area");
@@ -662,9 +667,11 @@ create_reserved_area(natural totalsize)
       perror("allocate refidx for managed static area");
 #endif
       exit(1);
-    }      
+    }
+    debug_memory_printf("managed_static_refidx", "%p", managed_static_refidx);
+    debug_memory_printf("managed_static_refidx_size", "0x%lx", managed_static_refidx_size);
   }
-#endif
+#endif /* X86 || ARM64 */
   return reserved;
 }
 
@@ -703,7 +710,7 @@ map_initial_reloctab(BytePtr low, BytePtr high)
   reloctab_size = (sizeof(LispObj)*(((ndnodes+((1<<bitmap_shift)-1))>>bitmap_shift)+1));
   
   reloctab_limit = (BytePtr)align_to_page(((natural)global_reloctab)+reloctab_size);
-  CommitMemory(global_reloctab,reloctab_limit-(BytePtr)global_reloctab);
+  COMMIT_MEMORY_RW(global_reloctab,reloctab_limit-(BytePtr)global_reloctab);
 }
 
 void
@@ -730,7 +737,7 @@ map_initial_markbits(BytePtr low, BytePtr high)
   relocatable_mark_ref_bits = dynamic_mark_ref_bits;
   n = align_to_page(markbits_size);
   markbits_limit = ((BytePtr)dynamic_mark_ref_bits)+n;
-  CommitMemory(dynamic_mark_ref_bits,n);
+  COMMIT_MEMORY_RW(dynamic_mark_ref_bits,n);
 }
     
 void
@@ -744,7 +751,7 @@ lower_heap_start(BytePtr new_low, area *a)
 
     BytePtr old_markbits = (BytePtr)dynamic_mark_ref_bits,
       new_markbits = old_markbits-n;
-    CommitMemory(new_markbits,n);
+    COMMIT_MEMORY_RW(new_markbits,n);
     dynamic_mark_ref_bits = (bitvector)new_markbits;
     if (a) {
       if (a->refbits) {
@@ -776,14 +783,14 @@ ensure_gc_structures_writable()
 
   if (new_reloctab_limit > reloctab_limit) {
     n = new_reloctab_limit - reloctab_limit;
-    CommitMemory(reloctab_limit, n);
+    COMMIT_MEMORY_RW(reloctab_limit, n);
     UnProtectMemory(reloctab_limit, n);
     reloctab_limit = new_reloctab_limit;
   }
   
   if (new_markbits_limit > markbits_limit) {
     n = new_markbits_limit-markbits_limit;
-    CommitMemory(markbits_limit, n);
+    COMMIT_MEMORY_RW(markbits_limit, n);
     UnProtectMemory(markbits_limit, n);
     markbits_limit = new_markbits_limit;
   }
@@ -809,14 +816,15 @@ allocate_dynamic_area(natural initsize)
   a = new_area(start, end, AREA_DYNAMIC);
   a->active = start+initsize;
   add_area_holding_area_lock(a);
-  CommitMemory(start, end-start);
+  COMMIT_MEMORY_JIT(start, end-start);
   a->softprot = NULL;
   a->hardprot = NULL;
   map_initial_reloctab(a->low, a->high);
   map_initial_markbits(a->low, a->high);
+  JIT_WRITE_UNPROTECT;
   lisp_global(HEAP_START) = ptr_to_lispobj(a->low);
   lisp_global(HEAP_END) = ptr_to_lispobj(a->high);
-
+  JIT_WRITE_PROTECT;
   debug_memory_printf("low", "%p", a->low);
   debug_memory_printf("high", "%p", a->high);
   debug_memory_printf("active", "%p", a->active);
@@ -2608,7 +2616,7 @@ allocate_static_conses(natural n)
   natural i;
   LispObj prev;
 
-  CommitMemory(new_low,old_low-new_low);
+  COMMIT_MEMORY_JIT(new_low,old_low-new_low);
 
   static_cons_area->low = new_low;
   lower_heap_start(new_low, tenured_area);

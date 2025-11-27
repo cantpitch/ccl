@@ -134,8 +134,11 @@ extern LispObj lisp_nil;
 #endif
 
 #ifdef ARM64
-#define lisp_global(g) (((LispObj *) (nil_value-fulltag_misc-dnode_size))[(g)])
-#define nrs_symbol(s) (((lispsymbol *) (nil_value-fulltag_misc+dnode_size))[(s)])
+/* static_space_start is dynamic on Darwin due to ASLR. For now we are using 
+   the x86-64 image adjusted for 16kb pages, so the offset is only one 4k page to
+   globals. In the final result this will like be at 8k since Darwin has 16k pages. */
+#define lisp_global(g) ((((LispObj *) (static_space_start+0x1000-dnode_size))[(g)]))
+#define nrs_symbol(s) (((lispsymbol *) (static_space_start+0x1000+dnode_size))[(s)])
 #endif
 
 #define nrs_T 				(nrs_symbol(0))		/* t */
