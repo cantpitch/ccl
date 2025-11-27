@@ -174,7 +174,7 @@ extern void *tcr_area_lock;
 #define MANAGED_STATIC_SIZE ((natural) ((PURESPACE_RESERVE-PURESPACE_SIZE)/2))
 
 // ASLR disallows static addresses
-#ifndef DARWIN_ON_ARM64
+#ifndef DARWIN_JIT
 #define SPJUMP_TARGET_ADDRESS (STATIC_BASE_ADDRESS+0x3000)
 #else
 #define SPJUMP_TARGET_ADDRESS (static_space_start+0x3000)

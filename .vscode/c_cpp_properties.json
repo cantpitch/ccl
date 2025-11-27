@@ -11,7 +11,7 @@
             "defines": [
                 "ARM64",
                 "DARWIN",
-                "DARWIN_ON_ARM64",
+                "DARWIN_JIT",
                 "DEBUG_MEMORY"
             ],
             "compilerPath": "/usr/bin/clang",
