@@ -56,3 +56,4 @@ lisp-kernel/*-vmmap*.txt
 lisp-kernel/darwinarm64/temp.s
 lisp-kernel/darwinarm64/m4test.m4
 **/image-parser/image-parser
+lisp-kernel/00devdocs/~$memory-layout-x86-64.xlsx
