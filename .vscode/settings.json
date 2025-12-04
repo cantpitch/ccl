@@ -12,7 +12,10 @@
         "stdio.h": "c",
         "lisp-exceptions.h": "c",
         "lisptypes.h": "c",
-        "lispdcmd.h": "c"
+        "lispdcmd.h": "c",
+        "threads.h": "c",
+        "bits.h": "c",
+        "area.h": "c"
     },
     "chatgpt.openOnStartup": false
 }
