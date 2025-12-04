@@ -135,6 +135,7 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
   return start;
 }
 
+#ifdef ASLR
 LogicalAddress
 AllocateStaticSpaceASLR(natural totalsize)
 {
@@ -156,6 +157,7 @@ AllocateStaticSpaceASLR(natural totalsize)
 
   return start;
 }
+#endif /* ASLR */
 
 #ifndef DARWIN_JIT
 int
@@ -411,10 +413,15 @@ MapFile(LogicalAddress addr, natural pos, natural nbytes, int permissions, int f
   size_t opos;
 
   opos = LSEEK(fd, 0, SEEK_CUR);
+#ifdef WINDOWS
+  COMMIT_MEMORY_RW(addr, nbytes);
+#else /* !WINDOWS */
   if (permissions & PROT_EXEC)
     COMMIT_MEMORY_JIT(addr, nbytes);
   else
     COMMIT_MEMORY_RW(addr, nbytes);
+#endif /* !WINDOWS */
+
   LSEEK(fd, pos, SEEK_SET);
 
   while (total < nbytes) {
