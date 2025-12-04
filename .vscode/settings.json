@@ -13,5 +13,6 @@
         "lisp-exceptions.h": "c",
         "lisptypes.h": "c",
         "lispdcmd.h": "c"
-    }
+    },
+    "chatgpt.openOnStartup": false
 }
