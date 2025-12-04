@@ -336,11 +336,7 @@ load_image_section(int fd, openmcl_image_section_header *sect)
     a = new_area(addr-align_to_page(mem_size), addr, AREA_STATIC_CONS);
     if (mem_size) {
       protection = MEMPROTECT_RWX;
-      if (!MapFile(a->low,
-                   pos,
-                   align_to_page(mem_size),
-                   protection,
-                   fd)) {
+      if (!LoadFile(a->low, pos, align_to_page(mem_size), protection, fd)) {
         return;
       }
     }
@@ -433,6 +429,9 @@ load_openmcl_image(int fd, openmcl_image_file_header *h /* out */)
 #ifdef ARM
         image_nil = (LispObj)(a->low) + (1024*4) + fulltag_nil;
 #endif 
+#ifdef ARM64
+        image_nil = ((LispObj)(a->low) + 0x1060) | fulltag_misc;
+#endif
         set_nil(image_nil);
 
         if (bias) {

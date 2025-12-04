@@ -704,12 +704,12 @@ map_initial_reloctab(BytePtr low, BytePtr high)
 {
   natural ndnodes, reloctab_size;
 
-  low_relocatable_address = low; /* will never change */
-  high_relocatable_address = high;
-  ndnodes = area_dnode(high,low);
-  reloctab_size = (sizeof(LispObj)*(((ndnodes+((1<<bitmap_shift)-1))>>bitmap_shift)+1));
+  low_relocatable_address = low; /* will never change */ // 0x302000000000
+  high_relocatable_address = high;                       // 0x302000480000
+  ndnodes = area_dnode(high,low);                        //        0x48000  
+  reloctab_size = (sizeof(LispObj)*(((ndnodes+((1<<bitmap_shift)-1))>>bitmap_shift)+1)); // 0x9008
   
-  reloctab_limit = (BytePtr)align_to_page(((natural)global_reloctab)+reloctab_size);
+  reloctab_limit = (BytePtr)align_to_page(((natural)global_reloctab)+reloctab_size); // 0x307bfe009008
   COMMIT_MEMORY_RW(global_reloctab,reloctab_limit-(BytePtr)global_reloctab);
 }
 
@@ -717,10 +717,10 @@ void
 map_initial_markbits(BytePtr low, BytePtr high)
 {
   natural
-    prefix_dnodes = area_dnode(low, pure_space_limit),
-    ndnodes = area_dnode(high, low),
-    prefix_size = (prefix_dnodes+7)>>3,
-    markbits_size = (3*sizeof(LispObj))+((ndnodes+7)>>3),
+    prefix_dnodes = area_dnode(low, pure_space_limit),    // 0x1FC000000
+    ndnodes = area_dnode(high, low),                      //    0x480000
+    prefix_size = (prefix_dnodes+7)>>3,                   //  0x3F800000
+    markbits_size = (3*sizeof(LispObj))+((ndnodes+7)>>3), //     0x90024
     prefix_index_bits,
     n;
   low_markable_address = low;
@@ -729,14 +729,14 @@ map_initial_markbits(BytePtr low, BytePtr high)
   if (prefix_dnodes & 255) {
     fprintf(dbgout, "warning: prefix_dnodes not a multiple of 256\n");
   }
-  prefix_index_bits = prefix_dnodes>>8;
+  prefix_index_bits = prefix_dnodes>>8;                   // 0x1FC0000
   if (prefix_index_bits & (WORD_SIZE-1)) {
     fprintf(dbgout, "warning: prefix_index_bits not a multiple of %d\n", WORD_SIZE);
   }
-  dynamic_refidx = (bitvector)(((BytePtr)global_refidx)+(prefix_index_bits>>3));
+  dynamic_refidx = (bitvector)(((BytePtr)global_refidx)+(prefix_index_bits>>3)); // 0x307dfe3f8000
   relocatable_mark_ref_bits = dynamic_mark_ref_bits;
-  n = align_to_page(markbits_size);
-  markbits_limit = ((BytePtr)dynamic_mark_ref_bits)+n;
+  n = align_to_page(markbits_size);                       // 0x91000
+  markbits_limit = ((BytePtr)dynamic_mark_ref_bits)+n;    
   COMMIT_MEMORY_RW(dynamic_mark_ref_bits,n);
 }
     
