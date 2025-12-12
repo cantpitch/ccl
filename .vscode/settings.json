@@ -15,7 +15,8 @@
         "lispdcmd.h": "c",
         "threads.h": "c",
         "bits.h": "c",
-        "area.h": "c"
+        "area.h": "c",
+        "gc.h": "c"
     },
     "chatgpt.openOnStartup": false
 }

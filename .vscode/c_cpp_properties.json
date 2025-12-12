@@ -20,6 +20,25 @@
             "intelliSenseMode": "macos-clang-arm64"
         },
         {
+            "name": "Darwin-x64",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [
+                "${workspaceFolder}/lisp-kernel/platform-darwinx8664.h"
+            ],
+            "defines": [
+                "X86",
+                "X8664",
+                "DARWIN",
+                "DEBUG_MEMORY"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "macos-clang-x64"
+        },
+        {
             "name": "Linux-x64",
             "includePath": [
                 "${workspaceFolder}/**"
