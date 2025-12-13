@@ -877,25 +877,27 @@ untenure_from_area(area *from)
 {
   if ((lisp_global(OLDEST_EPHEMERAL) != 0)) {
     area *a = active_dynamic_area, *child;
-    BytePtr curlow = from->low;
-    natural new_tenured_dnodes = area_dnode(curlow, tenured_area->low);
     
-    for (child = from; child != a; child = child->younger) {
-      child->low = from->low;
-
-     child->active = child->high = curlow;
-     child->ndnodes = area_dnode(child->high, child->low);
+    /* Make everything from this generation and younger into the dynamic area, 
+       zeroing out the generations in the process. */
+    for (child = from; child != active_dynamic_area; child = child->younger) {
+      child->low = child->active = child->high = from->low;
+      child->ndnodes = 0;
     }
     
-    a->low = curlow;
-    a->ndnodes = area_dnode(a->high, curlow);
+    /* Expand the dynamic area to include all of the older generations that were
+       zeroed out. */
+    active_dynamic_area->low = from->low;
+    active_dynamic_area->ndnodes = area_dnode(active_dynamic_area->high, from->low);
     
-    a->markbits = (tenured_area->refbits) + ((new_tenured_dnodes+(nbits_in_word-1))>>bitmap_shift);
+    natural new_tenured_dnodes = area_dnode(from->low, tenured_area->low);
+    active_dynamic_area->markbits = (tenured_area->refbits) 
+      + ((new_tenured_dnodes + (nbits_in_word - 1)) >> bitmap_shift);
+
     if (from == tenured_area) {
       /* Everything's in the dynamic area */
       lisp_global(OLDEST_EPHEMERAL) = 0;
       lisp_global(OLDSPACE_DNODE_COUNT) = 0;
-
     }
   }
 }
