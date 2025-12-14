@@ -99,7 +99,7 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
 #endif
 
 #if DEBUG_MEMORY
-  fprintf(dbgout, "Reserving heap at 0x" LISP ", size 0x" LISP "\n", want, totalsize + heap_segment_size);
+  fprintf(dbgout, "              Reserving heap at 0x" LISP ", size 0x" LISP "\n", want, totalsize + heap_segment_size);
 #endif
 
   start = mmap((void *)want,
@@ -129,7 +129,7 @@ ReserveMemoryForHeap(LogicalAddress want, natural totalsize)
 #endif /* NOT WINDOWS */
 
 #if DEBUG_MEMORY
-  fprintf(dbgout, "Reserving heap at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
+  fprintf(dbgout, "               Reserved heap at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
 #endif
 
   return start;
@@ -152,7 +152,7 @@ AllocateStaticSpaceASLR(natural totalsize)
   }
 
 #if DEBUG_MEMORY
-  fprintf(dbgout, "Reserved static space at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
+  fprintf(dbgout, "       Reserved static space at 0x" LISP ", size 0x" LISP "\n", start, totalsize);
 #endif
 
   return start;
@@ -254,7 +254,7 @@ MapMemory(LogicalAddress addr, natural nbytes, int protection)
 {
   LogicalAddress p;
 #if DEBUG_MEMORY
-  fprintf(dbgout, "Mapping memory at 0x" LISP ", size 0x" LISP "\n", addr, nbytes);
+  fprintf(dbgout, "              Mapping memory at 0x" LISP ", size 0x" LISP "\n", addr, nbytes);
 #endif
 
 #ifdef WINDOWS
@@ -301,7 +301,7 @@ int
 UnMapMemory(LogicalAddress addr, natural nbytes)
 {
 #if DEBUG_MEMORY
-  fprintf(dbgout, "Unmapping memory at 0x" LISP ", size 0x" LISP "\n", addr, nbytes);
+  fprintf(dbgout, "            Unmapping memory at 0x" LISP ", size 0x" LISP "\n", addr, nbytes);
 #endif
 #ifdef WINDOWS
   return !VirtualFree(addr, 0, MEM_RELEASE);
@@ -876,7 +876,7 @@ void
 untenure_from_area(area *from)
 {
   if ((lisp_global(OLDEST_EPHEMERAL) != 0)) {
-    area *a = active_dynamic_area, *child;
+    area *child;
     
     /* Make everything from this generation and younger into the dynamic area, 
        zeroing out the generations in the process. */

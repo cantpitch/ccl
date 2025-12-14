@@ -52,6 +52,128 @@ proc Section {name size page_size} {
     }
 }
 
+proc Global {name} {
+    uint64 -hex $name
+}
+proc Symbol {name} {
+    section "$name" {
+        uint64 -hex "header"
+        uint64 -hex "pname"
+        uint64 -hex "vcell"
+        uint64 -hex "fcell"
+        uint64 -hex "package predicate"
+        uint64 -hex "flags"
+        uint64 -hex "plist"
+        uint64 -hex "binding index"
+    }
+}
+
+proc StaticSection {name size page_size} {
+    
+    set page_mask [expr $page_size - 1]
+    set round_size [expr {$size + $page_mask} & ~$page_mask]
+    section "$name Data" {
+        bytes 0xE58 "Data"
+
+        section -collapsed "Globals" {
+            Global "MANAGED_STATIC_REFIDX"
+            Global "EPHEMERAL_REFIDX"
+            Global "MANAGED_STATIC_DNODES"
+            Global "MANAGED_STATIC_REFBITS"
+            Global "WEAKVLL"
+            Global "INITIAL_TCR"
+            Global "IMAGE_NAME"
+            Global "WEAK_GC_METHOD"
+            Global "UNWIND_RESUME"
+            Global "BATCH_FLAG"
+            Global "HOST_PLATFORM"
+            Global "ARGV"
+            Global "REF_BASE"
+            Global "TENURED_AREA"
+            Global "OLDEST_EPHEMERAL"
+            Global "LISP_EXIT_HOOK"
+            Global "STATIC_CONS_AREA"
+            Global "DOUBLE_FLOAT_ONE"
+            Global "SHORT_FLOAT_ZERO"
+            Global "OBJC_2_END_CATCH"
+            Global "FREE_STATIC_CONSES"
+            Global "IN_GC"
+            Global "LEXPR_RETURN1V"
+            Global "LEXPR_RETURN"
+            Global "ALL_AREAS"
+            Global "KERNEL_PATH"
+            Global "OBJC_2_BEGIN_CATCH"
+            Global "STACK_SIZE"
+            Global "STATICALLY_LINKED"
+            Global "HEAP_END"
+            Global "HEAP_START"
+            Global "GCABLE_POINTERS"
+            Global "GC_NUM"
+            Global "FWDNUM"
+            Global "FLOAT_ABI"
+            Global "OLDSPACE_DNODE_COUNT"
+            Global "REFBITS"
+            Global "GC_INHIBIT_COUNT"
+            Global "INTFLAG"
+            Global "DEFAULT_ALLOCATION_QUANTUM"
+            Global "STATIC_CONSES"
+            Global "EXCEPTION_LOCK"
+            Global "TCR_AREA_LOCK"
+            Global "TCR_KEY"
+            Global "RET1VALN"
+            Global "SUBPRIMS_BASE"
+            Global "SAVER13"
+            Global "SAVETOC"
+            Global "OBJC_2_PERSONALITY"
+            Global "KERNEL_IMPORTS"
+            Global "INTERRUPT_SIGNAL"
+            Global "TCR_COUNT"
+            Global "GET_TCR"
+        }
+
+        bytes 0x20 "nil"
+
+        section "Nil-Relative Symbols" {
+            Symbol "t"
+            Symbol "nil"
+            Symbol "%err-disp"
+            Symbol "cmain"
+            Symbol "eval"
+            Symbol "apply-evaluated-function"
+            Symbol "error"
+            Symbol "%defun"
+            Symbol "%defvar"
+            Symbol "%defconstant"
+            Symbol "%macro"
+            Symbol "%kernel-restart"
+            Symbol "*package*"
+            Symbol "*total-bytes-freed*"
+            Symbol ":allow-other-keys"
+            Symbol "%toplevel-catch%"
+            Symbol "%toplevel-function%"
+            Symbol "%pascal-functions%"
+            Symbol "restore-lisp-pointers"
+            Symbol "*total-gc-microseconds*"
+            Symbol "%builtin-functions%"
+            Symbol "%unbound-function%"
+            Symbol "%init-misc%"
+            Symbol "%macro-code%"
+            Symbol "%closure-code%"
+            Symbol "%new-gcable-ptr"
+            Symbol "*gc-event-status-bits*"
+            Symbol "*post-gc-hook*"
+            Symbol "%handlers%"
+            Symbol "%all-packages%"
+            Symbol "*keyword-package*"
+            Symbol "%os-init-function%"
+            Symbol "%foreign-thread-control"
+        }
+        if {$size > 0} {
+            bytes [expr $round_size - (0x1020 + (33 * 64))] "Data"
+        }
+    }
+}
+
 section "Footer" {
     set magic_loc [expr [len] - 16]
     goto $magic_loc
@@ -134,7 +256,11 @@ if {($cpu == "ARM") && ($ws == "64-bit") && ($os == "Darwin")} {
 
 if [catch {
     for {set i 0} {$i < $sections} {incr i} {
-        Section $section_names($i) $section_sizes($i) $page_size
+        if {$section_names($i) == "AREA_STATIC"} {
+            StaticSection $section_names($i) $section_sizes($i) $page_size
+        } else {
+            Section $section_names($i) $section_sizes($i) $page_size
+        }
     }
 }] {
     puts $errorInfo
