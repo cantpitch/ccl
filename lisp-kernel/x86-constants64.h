@@ -323,8 +323,8 @@ typedef struct tcr {
   ExceptionInformation* gc_context;
   void* termination_semaphore;
   signed_natural unwinding;
-  natural tlb_limit;
-  LispObj* tlb_pointer;
+  natural tlb_limit; /* thread-local binding limit */
+  LispObj* tlb_pointer; /* thread-local binding array pointer */
   natural shutdown_count;
   LispObj* next_tsp;
   void *safe_ref_address;
