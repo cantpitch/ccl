@@ -2264,7 +2264,7 @@ set_nil(LispObj r)
 #ifdef ARM64
 void flush_cache_lines(void *start, size_t nbytes)
 {
-  __clear_cache(start, (start + nbytes));
+  __builtin__clear_cache(start, (start + nbytes));
 }
 #endif
 
